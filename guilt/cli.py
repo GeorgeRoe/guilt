@@ -4,6 +4,9 @@ import shutil
 import httpx
 import asyncio
 import argparse
+from pathlib import Path
+import shutil
+from guilt.constants import LOGO, CENTERED_TAGLINE
 
 async def get_ip_info():
   async with httpx.AsyncClient() as client:
@@ -42,12 +45,13 @@ def plot_co2_forecast_limited(forecast_data, aspect_ratio=6):
 
   plt.clf()
   plt.plot_size(width, height)
-  plt.theme('clear')
+  plt.theme('pro')
   plt.plot(x, values, marker='braille', label="CO₂ Intensity (gCO₂/kWh)")
   plt.title("UK Carbon Intensity Forecast")
   plt.xlabel("Time (hours since start)")
   plt.ylabel("gCO₂/kWh")
   plt.xticks(x[::4], labels[::4])
+  plt.plot(x, x, marker='braille', label='test')
   plt.show()
 
 def main():
@@ -57,13 +61,48 @@ def main():
 
   subparsers = parser.add_subparsers(dest="command", required=True)
 
+  setup_parser = subparsers.add_parser("setup")
+
+  teardown_parser = subparsers.add_parser("teardown")
+
   forecast_parser = subparsers.add_parser("forecast")
 
   config_parser = subparsers.add_parser("config")
 
   args = parser.parse_args()
 
-  if args.command == "forecast":
+  guilt_dir = Path.home() / ".guilt"
+  config_path = guilt_dir / "config.json"
+
+  if args.command == "setup":
+    if guilt_dir.exists():
+      print("Error: GUILT has already been installed!")
+      return
+
+    print("\n\033[91m" + LOGO + "\n" * 2 + CENTERED_TAGLINE)
+    print("\033[0m")
+
+    print(f"Creating the {guilt_dir} directory")
+    guilt_dir.mkdir(parents=True)
+
+  elif args.command == "teardown":
+    if not guilt_dir.exists():
+      print("Error: GUILT has not been installed!")
+      return
+
+    print("\n\033[91mFeeling too guily?\033[0m\n")
+    
+    print(f"This command will permanently delete the following directory: {guilt_dir}")
+    response = input("Confirm by typing the following: 'I am guilty': ")
+
+    if response != "I am guilty":
+      print("Glad to see youre not guilty, the polar bears will thank you.")
+      return
+    else:
+      shutil.rmtree(guilt_dir)
+      print(f"{guilt_dir} was removed!")
+      print("\nWaving goodbye from GUILT software.")
+  elif args.command == "forecast":
     ip_data = asyncio.run(get_ip_info())
     postal = ip_data['postal']
 
