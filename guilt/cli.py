@@ -3,6 +3,7 @@ import plotext as plt
 import shutil
 import httpx
 import asyncio
+import argparse
 
 async def get_ip_info():
   async with httpx.AsyncClient() as client:
@@ -50,19 +51,34 @@ def plot_co2_forecast_limited(forecast_data, aspect_ratio=6):
   plt.show()
 
 def main():
-  ip_data = asyncio.run(get_ip_info())
-  postal = ip_data['postal']
+  parser = argparse.ArgumentParser(
+    description="GUILT: Green Usage Impact Logging Tool"
+  )
 
-  start = datetime.now(UTC)
-  end = start + timedelta(hours=48)
+  subparsers = parser.add_subparsers(dest="command", required=True)
 
-  forecast_data = asyncio.run(get_forecast(start, end, postal))['data']
+  forecast_parser = subparsers.add_parser("forecast")
 
-  forecast_results = sorted(forecast_data['data'], key=lambda x: x['from'])
+  config_parser = subparsers.add_parser("config")
 
-  plot_co2_forecast_limited(forecast_results)
+  args = parser.parse_args()
 
-  best = sorted(forecast_results, key=lambda x: x['intensity']['forecast'])[:5]
-  for entry in best:
-    time = datetime.strptime(entry['from'], "%Y-%m-%dT%H:%MZ")
-    print(f"{time.strftime('%a %d %b %H:%M')} → {entry['intensity']['forecast']} gCO₂/kWh")
+  if args.command == "forecast":
+    ip_data = asyncio.run(get_ip_info())
+    postal = ip_data['postal']
+
+    start = datetime.now(UTC)
+    end = start + timedelta(hours=48)
+
+    forecast_data = asyncio.run(get_forecast(start, end, postal))['data']
+
+    forecast_results = sorted(forecast_data['data'], key=lambda x: x['from'])
+
+    plot_co2_forecast_limited(forecast_results)
+
+    best = sorted(forecast_results, key=lambda x: x['intensity']['forecast'])[:5]
+    for entry in best:
+      time = datetime.strptime(entry['from'], "%Y-%m-%dT%H:%MZ")
+      print(f"{time.strftime('%a %d %b %H:%M')} → {entry['intensity']['forecast']} gCO₂/kWh")
+  elif args.command == "config":
+    print("CONFIG! WIP")
