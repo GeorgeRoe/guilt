@@ -1,0 +1,10 @@
+README.md
+pyproject.toml
+guilt/__init__.py
+guilt/cli.py
+guilt.egg-info/PKG-INFO
+guilt.egg-info/SOURCES.txt
+guilt.egg-info/dependency_links.txt
+guilt.egg-info/entry_points.txt
+guilt.egg-info/requires.txt
+guilt.egg-info/top_level.txt

@@ -1,0 +1,8 @@
+Metadata-Version: 2.4
+Name: guilt
+Version: 0.1.0
+Summary: GUILT: Green Usage Impact Logging Tool
+Author-email: George Roe <george.roe@stfc.ac.uk>
+Requires-Python: >=3.8
+Requires-Dist: httpx
+Requires-Dist: plotext
