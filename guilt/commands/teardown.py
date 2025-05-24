@@ -5,7 +5,7 @@ def teardown_cmd():
   guilt_dir = Path.home() / ".guilt"
 
   if not guilt_dir.exists():
-    print("Error: GUILT has not been installed!")
+    print("Error: GUILT has not been setup!")
     return
 
   print("\n\033[91mFeeling too guily?\033[0m\n")

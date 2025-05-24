@@ -5,7 +5,7 @@ def setup_cmd():
   guilt_dir = Path.home() / ".guilt"
 
   if guilt_dir.exists():
-    print("Error: GUILT has already been installed!")
+    print("Error: GUILT has already been setup!")
     return
 
   print("\n\033[91m" + LOGO + "\n" * 2 + CENTERED_TAGLINE)
