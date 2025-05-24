@@ -23,7 +23,7 @@ def forecast_cmd():
   width = terminal_size.columns
   height = max(5, int(width / 6))
 
-  nth_tick = 4
+  nth_tick = 2
 
   plt.clf()
   plt.plot_size(width, height)
