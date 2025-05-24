@@ -8,7 +8,7 @@ def forecast_cmd():
   ip_info = IpInfo()
 
   start = datetime.now(UTC)
-  end = start + timedelta(hours=24)
+  end = start + timedelta(hours=12)
 
   forecast = CarbonDioxideForecast(start, end, ip_info.postal)
 
@@ -29,7 +29,7 @@ def forecast_cmd():
   plt.plot_size(width, height)
   plt.theme('pro')
   plt.plot(x, values, marker='braille', label="CO₂ Intensity (gCO₂/kWh)")
-  plt.title("UK Carbon Intensity Forecast")
+  plt.title(f"{ip_info.postal} Carbon Intensity Forecast")
   plt.xlabel("Time (hours since start)")
   plt.ylabel("gCO₂/kWh")
   plt.xticks(x[::nth_tick], labels[::nth_tick])
