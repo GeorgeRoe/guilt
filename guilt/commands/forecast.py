@@ -17,13 +17,13 @@ def forecast_cmd():
 
   start_time = times_dt[0]
   x = [(t - start_time).total_seconds() / 3600 for t in times_dt]
-  labels = [t.strftime('%d %H:%M') for t in times_dt]
+  labels = [t.strftime('%H:%M') for t in times_dt]
 
   terminal_size = shutil.get_terminal_size()
   width = terminal_size.columns
   height = max(5, int(width / 6))
 
-  nth_tick = 6
+  nth_tick = 4
 
   plt.clf()
   plt.plot_size(width, height)
