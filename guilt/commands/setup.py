@@ -1,7 +1,7 @@
 from pathlib import Path
 from guilt.constants import LOGO, CENTERED_TAGLINE
 
-def setup_cmd():
+def setup_cmd(_):
   guilt_dir = Path.home() / ".guilt"
 
   if guilt_dir.exists():

@@ -1,2 +1,2 @@
-def config_cmd():
+def config_cmd(_):
   print("Config is a WIP")

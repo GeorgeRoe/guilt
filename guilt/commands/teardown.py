@@ -1,7 +1,7 @@
 from pathlib import Path
 import shutil
 
-def teardown_cmd():
+def teardown_cmd(_):
   guilt_dir = Path.home() / ".guilt"
 
   if not guilt_dir.exists():

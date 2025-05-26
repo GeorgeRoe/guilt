@@ -1,5 +1,5 @@
 import argparse
-from guilt.commands import setup_cmd, teardown_cmd, forecast_cmd, config_cmd
+from guilt.commands import setup_cmd, teardown_cmd, forecast_cmd, config_cmd, batch_cmd
 
 def main():
   parser = argparse.ArgumentParser(
@@ -20,5 +20,9 @@ def main():
   config_parser = subparsers.add_parser("config")
   config_parser.set_defaults(function=config_cmd)
 
+  batch_parser = subparsers.add_parser("batch")
+  batch_parser.add_argument("input", help="Input file or argument for batch command")
+  batch_parser.set_defaults(function=batch_cmd)
+
   args = parser.parse_args()
-  args.function()
+  args.function(args)

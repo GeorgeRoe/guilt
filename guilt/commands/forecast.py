@@ -1,13 +1,13 @@
-from datetime import datetime, timedelta, UTC
+from datetime import datetime, timedelta, timezone
 import plotext as plt
 import shutil
 from guilt.ip_info import IpInfo
 from guilt.carbon_dioxide_forecast import CarbonDioxideForecast
 
-def forecast_cmd():
+def forecast_cmd(_):
   ip_info = IpInfo()
 
-  start = datetime.now(UTC)
+  start = datetime.now(timezone.utc)
   end = start + timedelta(hours=12)
 
   forecast = CarbonDioxideForecast(start, end, ip_info.postal)
