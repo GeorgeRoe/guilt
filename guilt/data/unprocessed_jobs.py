@@ -6,7 +6,7 @@ PATH = Path.home() / ".guilt" / "unprocessed_jobs.json"
 
 class UnprocessedJob:
   def __init__(self, job_id: int, cpu_profile: CpuProfile):
-    self.job_id = job_id
+    self.job_id = int(job_id)
     self.cpu_profile = cpu_profile
 
   def __repr__(self):
