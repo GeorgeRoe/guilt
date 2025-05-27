@@ -68,4 +68,4 @@ def process_cmd(_):
         kwh += overlap_kwh
         emissions += overlap_kwh * entry.intensity.forecast
     
-    print(f"{job.job_id} -> kwh: {kwh:.4e}, emissions: {format_grams(emissions)} of CO2")
+    print(f"{job.job_id} -> energy usage: {kwh:.2e} kWh, emissions: {format_grams(emissions)} of CO2")
