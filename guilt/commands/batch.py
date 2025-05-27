@@ -53,3 +53,4 @@ def batch_cmd(args):
     job_id,
     cpu_profile
   ))
+  unprocessed_jobs_data.save()

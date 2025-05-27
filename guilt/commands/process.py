@@ -1,4 +1,5 @@
 from guilt.data.unprocessed_jobs import UnprocessedJobsData
+from guilt.data.processed_jobs import ProcessedJobsData, ProcessedJob
 from guilt.ip_info import IpInfo
 from guilt.carbon_dioxide_forecast import CarbonDioxideForecast
 from guilt.utility.format_grams import format_grams
@@ -21,8 +22,11 @@ def plot_generation_mix(mix_dict):
   plt.simple_bar(sources, values, title = "Generation Mix", width = width)
   plt.show()
 
-def process_cmd(_):  
-  jobs =  UnprocessedJobsData().jobs.values()
+def process_cmd(_):
+  unprocessed_jobs_data = UnprocessedJobsData()
+  processed_jobs_data = ProcessedJobsData()
+  
+  jobs = unprocessed_jobs_data.jobs.values()
   
   job_ids = [job.job_id for job in jobs]
   
@@ -94,3 +98,26 @@ def process_cmd(_):
     
     print(f"{job.job_id} -> energy usage: {kwh:.2e} kWh, emissions: {format_grams(emissions)} of CO2")
     plot_generation_mix(average_mix)
+    
+    #  def __init__(self, start: datetime, end: datetime, job_id: int, cpu_profile: CpuProfile, energy: float, emissions: float, generation_mix: dict):
+    processed_job = ProcessedJob(
+      start_time,
+      end_time,
+      job.job_id,
+      job.cpu_profile,
+      kwh,
+      emissions,
+      average_mix
+    )
+    
+    if not processed_jobs_data.add_job(processed_job):
+      print("Failed to add processed jobs")
+      continue
+    
+  for job_id in job_ids:
+    if not unprocessed_jobs_data.remove_job(job_id):
+      print(f"Unable to remove job with id '{job_id}'")
+      return
+        
+  unprocessed_jobs_data.save()
+  processed_jobs_data.save()

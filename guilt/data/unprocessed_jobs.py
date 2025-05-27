@@ -47,7 +47,12 @@ class UnprocessedJobsData:
     
     self.jobs[job.job_id] = job
     
-    self.save()
+  def remove_job(self, job_id: str) -> bool:
+    if str(job_id) in self.jobs:
+      del self.jobs[str(job_id)]
+      return True
+    
+    return False
 
   def save(self):    
     data = {
