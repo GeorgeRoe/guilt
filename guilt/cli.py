@@ -18,6 +18,16 @@ def main():
   forecast_parser.set_defaults(function=forecast_cmd)
 
   config_parser = subparsers.add_parser("config")
+  config_parser.add_argument(
+      "action",
+      help="What to do with the config",
+      choices=["add", "remove", "update", "show"]
+  )
+  config_parser.add_argument(
+      "type",
+      help="Type of config to modify",
+      choices=["cpu_profile"]
+  )
   config_parser.set_defaults(function=config_cmd)
 
   batch_parser = subparsers.add_parser("batch")
