@@ -40,6 +40,17 @@ class CpuProfile:
       self.cores == other.cores
     )
 
+  @classmethod
+  def from_dict(cls, data: dict):
+    return cls(data.get("name"), data.get("tdp"), data.get("cores"))
+
+  def to_dict(self) -> dict:
+    return {
+      "name": self.name,
+      "tdp": self.tdp,
+      "cores": self.cores
+    }
+
 class CpuProfilesConfig:
   def __init__(self):
     data = DEFAULT_DATA
@@ -50,7 +61,11 @@ class CpuProfilesConfig:
 
     self.profiles = {}
     for name, specs in data.get("profiles").items():
-      self.profiles[name] = CpuProfile(name, specs.get("tdp"), specs.get("cores"))
+      data = {
+        "name": name,
+        **specs
+      }
+      self.profiles[name] = CpuProfile.from_dict(data)
 
     self.default = self.profiles.get(data.get("default"))
 
@@ -86,10 +101,10 @@ class CpuProfilesConfig:
   def save(self):
     data = {
       "default": self.default.name,
-      "profiles": { profile.name: {
-        "tdp": profile.tdp,
-        "cores": profile.cores
-      } for profile in self.profiles.values()}
+      "profiles": {
+        {k:v for k, v in profile.to_dict().items() if k != "name"} 
+        for profile in self.profiles.values()
+      }
     }
 
     PATH.parent.mkdir(parents=True, exist_ok=True)
