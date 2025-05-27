@@ -5,6 +5,21 @@ from guilt.utility.format_grams import format_grams
 import subprocess
 import json
 from datetime import datetime, timedelta, timezone
+import plotext as plt
+import shutil
+
+def plot_generation_mix(mix_dict):
+  filtered = {k: v for k, v in mix_dict.items() if v != 0}
+  
+  sources = list(filtered.keys())
+  values = [filtered.get(source) for source in sources]
+  
+  terminal_size = shutil.get_terminal_size()
+  width = terminal_size.columns - 1
+
+  plt.clf()
+  plt.simple_bar(sources, values, title = "Generation Mix", width = width)
+  plt.show()
 
 def process_cmd(_):  
   jobs =  UnprocessedJobsData().jobs.values()
@@ -55,6 +70,9 @@ def process_cmd(_):
     emissions = 0.0 # kg of CO2
     kwh = 0.0
     
+    total_mix = {}
+    total_mix_seconds = 0.0
+    
     for entry in forecast.entries:
       entry_start = datetime.fromisoformat(entry.from_time.replace("Z", "+00:00"))
       entry_end = datetime.fromisoformat(entry.to_time.replace("Z", "+00:00"))
@@ -67,5 +85,12 @@ def process_cmd(_):
         overlap_kwh = (wattage * overlap_hours) / 1000
         kwh += overlap_kwh
         emissions += overlap_kwh * entry.intensity.forecast
+        
+        for source, percent in entry.generationmix.items():
+          total_mix[source] = total_mix.get(source, 0) + percent * overlap_duration
+        total_mix_seconds += overlap_duration
+    
+    average_mix = {k: v / total_mix_seconds for k, v in total_mix.items()}
     
     print(f"{job.job_id} -> energy usage: {kwh:.2e} kWh, emissions: {format_grams(emissions)} of CO2")
+    plot_generation_mix(average_mix)
