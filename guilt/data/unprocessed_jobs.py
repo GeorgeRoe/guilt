@@ -40,8 +40,6 @@ class UnprocessedJobsData:
         **unprocessed_job
       }
       self.jobs[job_id] = UnprocessedJob.from_dict(data)
-
-    print(self.jobs)
     
   def add_job(self, job: UnprocessedJob) -> bool:
     if job.job_id in self.jobs:
