@@ -10,19 +10,6 @@ import plotext as plt
 import shutil
 from guilt.log import logger
 
-def plot_generation_mix(mix_dict):
-  filtered = {k: v for k, v in mix_dict.items() if v != 0}
-  
-  sources = list(filtered.keys())
-  values = [filtered.get(source) for source in sources]
-  
-  terminal_size = shutil.get_terminal_size()
-  width = terminal_size.columns - 1
-
-  plt.clf()
-  plt.simple_bar(sources, values, title = "Generation Mix", width = width)
-  plt.show()
-
 def process_cmd(_):
   unprocessed_jobs_data = UnprocessedJobsData()
   processed_jobs_data = ProcessedJobsData()
@@ -51,20 +38,15 @@ def process_cmd(_):
   for job in jobs:
     job_sacct = sacct_data.get(job.job_id)
     
-    start_time = datetime.fromtimestamp(job_sacct.get("time").get("start"))
-    end_time = datetime.fromtimestamp(job_sacct.get("time").get("end"))
-    
-    start_time = start_time.replace(tzinfo=timezone.utc)
-    end_time = end_time.replace(tzinfo=timezone.utc)
+    start_time = datetime.fromtimestamp(job_sacct.get("time").get("start")).replace(tzinfo=timezone.utc)
+    end_time = datetime.fromtimestamp(job_sacct.get("time").get("end")).replace(tzinfo=timezone.utc)
     
     logger.debug(f"Collected job start and end time: {start_time} -> {end_time}")
-
-    duration = (end_time - start_time).total_seconds() / 3600
         
     cpu_tres = next((item for item in job_sacct.get("tres").get("allocated") if item.get("type") == "cpu"), None)
     if cpu_tres is None:
-      logger.error(f"Failed to read CPU allocation for job with id '{job.job_id}'")
-      return
+      logger.warning(f"Failed to read CPU allocation for job with id '{job.job_id}', skipping this job")
+      continue
     
     allocated_cpu = cpu_tres.get("count")
     
@@ -102,7 +84,6 @@ def process_cmd(_):
     average_mix = {k: v / total_mix_seconds for k, v in total_mix.items()}
     
     print(f"{job.job_id} -> energy usage: {kwh:.2e} kWh, emissions: {format_grams(emissions)} of CO2")
-    plot_generation_mix(average_mix)
 
     processed_job = ProcessedJob(
       start_time,

@@ -1,4 +1,4 @@
-from guilt.commands import setup_cmd, teardown_cmd, forecast_cmd, config_cmd, batch_cmd, process_cmd, report_cmd
+from guilt.commands import setup_cmd, teardown_cmd, forecast_cmd, config_cmd, batch_cmd, process_cmd, report_cmd, backfill_cmd
 from guilt.log import logger
 import argparse
 import logging
@@ -55,6 +55,9 @@ def main():
   
   report_parser = subparsers.add_parser("report")
   report_parser.set_defaults(function=report_cmd)
+  
+  backfill_parser = subparsers.add_parser("backfill")
+  backfill_parser.set_defaults(function=backfill_cmd)
 
   args = parser.parse_args()
   
