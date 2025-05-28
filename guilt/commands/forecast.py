@@ -3,12 +3,15 @@ import plotext as plt
 import shutil
 from guilt.ip_info import IpInfo
 from guilt.carbon_dioxide_forecast import CarbonDioxideForecast
+from guilt.log import logger
 
 def forecast_cmd(_):
   ip_info = IpInfo()
 
   start = datetime.now(timezone.utc)
   end = start + timedelta(hours=12)
+  
+  logger.debug(f"Time range: {start} -> {end}")
 
   forecast = CarbonDioxideForecast(start, end, ip_info.postal)
 

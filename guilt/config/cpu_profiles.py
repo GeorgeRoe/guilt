@@ -1,5 +1,6 @@
 from pathlib import Path
 import json
+from guilt.log import logger
 
 DEFAULT_DATA = {
   "default": "AMD EPYC 9654",
@@ -42,6 +43,7 @@ class CpuProfile:
 
   @classmethod
   def from_dict(cls, data: dict):
+    logger.debug(f"Deserializing CpuProfile: {data}")
     return cls(data.get("name"), data.get("tdp"), data.get("cores"))
 
   def to_dict(self) -> dict:
@@ -56,8 +58,15 @@ class CpuProfilesConfig:
     data = DEFAULT_DATA
 
     if PATH.exists():
-      with PATH.open("r") as file:
-        data = json.load(file)
+      try:
+        with PATH.open("r") as file:
+          data = json.load(file)
+        logger.info(f"Loaded CPU profiles from {PATH}")
+      except Exception as e:
+        logger.error(f"Failed to load CPU profiles from {PATH}: {e}")
+        data = DEFAULT_DATA
+    else:
+      logger.info("No CPU profile config found, using default")
 
     self.profiles = {}
     for name, specs in data.get("profiles").items():
@@ -68,16 +77,20 @@ class CpuProfilesConfig:
       self.profiles[name] = CpuProfile.from_dict(profile_data)
       
     self.default = self.profiles.get(data.get("default"))
+    logger.debug(f"Default CPU profile: {self.default}")
 
   def get_profile(self, name: str):
+    logger.debug(f"Fetching CPU profile: {name}")
     return self.profiles.get(name)
 
   def add_profile(self, profile: CpuProfile) -> bool:
     if not self.profiles.get(profile.name) is None:
+      logger.warning(f"Profile '{profile.name}' already exists, not adding")
       return False
 
     self.profiles[profile.name] = profile
 
+    logger.info(f"Added new CPU profile: {profile}")
     self.save()
 
     return True
@@ -85,17 +98,21 @@ class CpuProfilesConfig:
   def remove_profile(self, profile: CpuProfile) -> bool:
     if profile == self.profiles.get(profile.name):
       self.profiles.pop(profile.name)
+      logger.info(f"Removed CPU profile: {profile.name}")
       self.save()
       return True
 
+    logger.warning(f"Attempted to remove non-matching or nonexistent profile: {profile.name}")
     return False
 
   def update_profile(self, profile: CpuProfile) -> bool:
     if not self.profiles.get(profile.name) is None:
       self.profiles[profile.name] = profile
+      logger.info(f"Updated CPU profile: {profile.name}")
       self.save()
       return True
 
+    logger.warning(f"Attempted to update nonexistent profile: {profile.name}")
     return False
 
   def save(self):
@@ -108,6 +125,10 @@ class CpuProfilesConfig:
     }
 
     PATH.parent.mkdir(parents=True, exist_ok=True)
-
-    with PATH.open("w") as file:
-      json.dump(data, file, indent=2)
+    
+    try:
+      with PATH.open("w") as file:
+        json.dump(data, file, indent=2)
+      logger.info(f"Saved CPU profiles to {PATH}")
+    except Exception as e:
+      logger.error(f"Failed to save CPU profiles to {PATH}: {e}")

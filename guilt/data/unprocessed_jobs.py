@@ -1,6 +1,7 @@
 from guilt.config.cpu_profiles import CpuProfile
 from pathlib import Path
 import json
+from guilt.log import logger
 
 PATH = Path.home() / ".guilt" / "unprocessed_jobs.json"
 
@@ -17,6 +18,7 @@ class UnprocessedJob:
     
   @classmethod
   def from_dict(cls, data: dict):
+    logger.debug(f"Deserializing ProcessedJob: {data}")
     return cls(data.get("job_id"), CpuProfile.from_dict(data.get("cpu_profile")))
   
   def to_dict(self) -> dict:
@@ -30,8 +32,15 @@ class UnprocessedJobsData:
     data = {}
     
     if PATH.exists():
-      with PATH.open("r") as file:
-        data = json.load(file)
+      try:
+        with PATH.open("r") as file:
+          data = json.load(file)
+        logger.info(f"Loaded {len(data)} unprocessed jobs from {PATH}")
+      except Exception as e:
+        logger.error(f"Failed to load unprocessed jobs from {PATH}: {e}")
+        data = {}
+    else:
+      logger.warning("No unprocessed jobs file found, starting with empty dataset")
 
     self.jobs = {}
     for job_id, unprocessed_job in data.items():
@@ -43,15 +52,20 @@ class UnprocessedJobsData:
     
   def add_job(self, job: UnprocessedJob) -> bool:
     if job.job_id in self.jobs:
+      logger.warning(f"Job ID {job.job_id} already exists in unprocessed jobs")
       return False
     
     self.jobs[job.job_id] = job
+    logger.info(f"Added unprocessed job ID {job.job_id}")
+    return True
     
   def remove_job(self, job_id: str) -> bool:
     if str(job_id) in self.jobs:
       del self.jobs[str(job_id)]
+      logger.info(f"Removed unprocessed job ID {job_id}")
       return True
     
+    logger.warning(f"Job ID {job_id} doesn't exist in unprocessed jobs")
     return False
 
   def save(self):    
@@ -62,5 +76,9 @@ class UnprocessedJobsData:
     
     PATH.parent.mkdir(parents=True, exist_ok=True)
 
-    with PATH.open("w") as file:
-      json.dump(data, file, indent=2)
+    try:
+      with PATH.open("w") as file:
+        json.dump(data, file, indent=2)
+      logger.info(f"Saved {len(data)} unprocessed jobs to {PATH}")
+    except Exception as e:
+      logger.error(f"Failed to save unprocessed jobs to {PATH}: {e}")

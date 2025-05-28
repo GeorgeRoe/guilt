@@ -8,6 +8,7 @@ import json
 from datetime import datetime, timedelta, timezone
 import plotext as plt
 import shutil
+from guilt.log import logger
 
 def plot_generation_mix(mix_dict):
   filtered = {k: v for k, v in mix_dict.items() if v != 0}
@@ -31,11 +32,15 @@ def process_cmd(_):
   job_ids = [job.job_id for job in jobs]
   
   command = ["sacct", "--jobs", ",".join([str(job_id) for job_id in job_ids]), "--json"]
-  result = subprocess.run(command, capture_output=True, text=True)
+  logger.info(f"Running command: {' '.join(command)}")
+  try:
+    result = subprocess.run(command, capture_output=True, text=True)
+  except Exception as e:
+    logger.error(f"Error running command '{' '.join(command)}': {e}")
+    return
   
   if result.returncode != 0:
-    print(f"The command '{' '.join(command)}' encountered an error:")
-    print(result.stderr)
+    logger.error(f"Command failed with code {result.returncode}: {result.stderr.strip()}")
     return
   
   raw_sacct_data = json.loads(result.stdout.strip())
@@ -46,19 +51,19 @@ def process_cmd(_):
   for job in jobs:
     job_sacct = sacct_data.get(job.job_id)
     
-    #print(json.dumps(job_sacct)) #, indent=2))
-    
     start_time = datetime.fromtimestamp(job_sacct.get("time").get("start"))
     end_time = datetime.fromtimestamp(job_sacct.get("time").get("end"))
     
     start_time = start_time.replace(tzinfo=timezone.utc)
     end_time = end_time.replace(tzinfo=timezone.utc)
+    
+    logger.debug(f"Collected job start and end time: {start_time} -> {end_time}")
 
     duration = (end_time - start_time).total_seconds() / 3600
         
     cpu_tres = next((item for item in job_sacct.get("tres").get("allocated") if item.get("type") == "cpu"), None)
     if cpu_tres is None:
-      print(f"Failed to read CPU allocation for job with id '{job.job_id}'")
+      logger.error(f"Failed to read CPU allocation for job with id '{job.job_id}'")
       return
     
     allocated_cpu = cpu_tres.get("count")
@@ -98,8 +103,7 @@ def process_cmd(_):
     
     print(f"{job.job_id} -> energy usage: {kwh:.2e} kWh, emissions: {format_grams(emissions)} of CO2")
     plot_generation_mix(average_mix)
-    
-    #  def __init__(self, start: datetime, end: datetime, job_id: int, cpu_profile: CpuProfile, energy: float, emissions: float, generation_mix: dict):
+
     processed_job = ProcessedJob(
       start_time,
       end_time,
@@ -111,12 +115,12 @@ def process_cmd(_):
     )
     
     if not processed_jobs_data.add_job(processed_job):
-      print("Failed to add processed jobs")
+      logger.error("Failed to add processed jobs")
       continue
     
   for job_id in job_ids:
     if not unprocessed_jobs_data.remove_job(job_id):
-      print(f"Unable to remove job with id '{job_id}'")
+      logger.error(f"Unable to remove job with id '{job_id}'")
       return
         
   unprocessed_jobs_data.save()

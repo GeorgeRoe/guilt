@@ -2,6 +2,7 @@ from datetime import datetime
 from guilt.config.cpu_profiles import CpuProfile
 from pathlib import Path
 import json
+from guilt.log import logger
 
 PATH = Path.home() / ".guilt" / "processed_jobs.json"
 
@@ -17,6 +18,7 @@ class ProcessedJob:
     
   @classmethod
   def from_dict(cls, data: dict):
+    logger.debug(f"Deserializing ProcessedJob: {data}")
     return cls(
       datetime.fromisoformat(data.get("start")),
       datetime.fromisoformat(data.get("end")),
@@ -54,8 +56,15 @@ class ProcessedJobsData:
     data = {}
     
     if PATH.exists():
-      with PATH.open("r") as file:
-        data = json.load(file)
+      try:
+        with PATH.open("r") as file:
+          data = json.load(file)
+        logger.info(f"Loaded {len(data)} processed jobs from {PATH}")
+      except Exception as e:
+        logger.error(f"Failed to load processed jobs from {PATH}: {e}")
+        data = {}
+    else:
+      logger.warning("No processed jobs file found, starting with empty dataset")
 
     self.jobs = {}
     for job_id, processed_job in data.items():
@@ -67,9 +76,11 @@ class ProcessedJobsData:
 
   def add_job(self, job: ProcessedJob) -> bool:
     if job.job_id in self.jobs:
+      logger.warning(f"Job ID {job.job_id} already exists in processed jobs")
       return False
     
     self.jobs[job.job_id] = job
+    logger.info(f"Added processed job ID {job.job_id}")
     return True
 
   def save(self):    
@@ -80,6 +91,10 @@ class ProcessedJobsData:
     
     PATH.parent.mkdir(parents=True, exist_ok=True)
 
-    with PATH.open("w") as file:
-      json.dump(data, file, indent=2)
+    try:
+      with PATH.open("w") as file:
+        json.dump(data, file, indent=2)
+      logger.info(f"Saved {len(data)} processed jobs to {PATH}")
+    except Exception as e:
+      logger.error(f"Failed to save processed jobs to {PATH}: {e}")
     

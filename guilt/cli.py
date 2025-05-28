@@ -1,9 +1,25 @@
-import argparse
 from guilt.commands import setup_cmd, teardown_cmd, forecast_cmd, config_cmd, batch_cmd, process_cmd, report_cmd
+from guilt.log import logger
+import argparse
+import logging
+
+level_map = {
+  "debug": logging.DEBUG,
+  "info": logging.INFO,
+  "warning": logging.WARNING,
+  "error": logging.ERROR
+}
 
 def main():
   parser = argparse.ArgumentParser(
     description="GUILT: Green Usage Impact Logging Tool"
+  )
+  
+  parser.add_argument(
+    "--log-level",
+    choices=level_map.keys(),
+    default="warning",
+    help="Set the logging level (default: warning)"
   )
 
   subparsers = parser.add_subparsers(dest="command", required=True)
@@ -41,4 +57,13 @@ def main():
   report_parser.set_defaults(function=report_cmd)
 
   args = parser.parse_args()
+  
+  level = level_map.get(args.log_level, logging.WARNING)
+    
+  logging.basicConfig(
+    level=level,
+    format="%(levelname)s [%(name)s]: %(message)s"
+  )
+  logger.setLevel(level)
+  
   args.function(args)

@@ -2,21 +2,25 @@ from pathlib import Path
 import subprocess
 from guilt.config.cpu_profiles import CpuProfilesConfig
 from guilt.data.unprocessed_jobs import UnprocessedJobsData, UnprocessedJob
+from guilt.log import logger
 
 DIRECTIVE_START = "#GUILT --"
 
 def batch_cmd(args):
   path = Path(args.input)
+  logger.info(f"Processing batch input file: {path}")
 
   content = None
   try:
     with path.open("r") as file:
       content = file.read().splitlines()
-  except:
-    pass
+    logger.debug(f"Read {len(content)} lines from {path}")
+  except Exception as e:
+    logger.error(f"Failed to read file '{path}': {e}")
+    return
 
   if content == None:
-    print("Error reading file.")
+    logger.error(f"Failed to read file '{path}'")
     return
 
   directives = {}
@@ -26,27 +30,32 @@ def batch_cmd(args):
     elif line.startswith(DIRECTIVE_START):
       directive = line.replace(DIRECTIVE_START, "").split("=")
       directives[directive[0]] = directive[1] if len(directive) == 2 else True
+  logger.debug(f"Parsed directives: {directives}")
 
   picked_cpu_profile_name = directives.get("cpu-profile")
   if picked_cpu_profile_name is None:
-    print("No CPU profile given.")
+    logger.error("No CPU profile directive found in batch file")
     return
 
   cpu_profile = CpuProfilesConfig().get_profile(picked_cpu_profile_name)
   if cpu_profile is None:
-    print(f"CPU Profile '{picked_cpu_profile_name}' doesn't exist")
+    logger.error(f"CPU Profile '{picked_cpu_profile_name}' doesn't exist")
+    return
   
   command = ["sbatch", "--parsable", args.input]
-  result = subprocess.run(command, capture_output=True, text=True)
+  logger.info(f"Running command: {' '.join(command)}")
+  try:
+    result = subprocess.run(command, capture_output=True, text=True)
+  except Exception as e:
+    logger.error(f"Error running command '{' '.join(command)}': {e}")
+    return
   
   if result.returncode != 0:
-    print(f"The command '{' '.join(command)}' encountered an error:")
-    print(result.stderr)
+    logger.error(f"Command failed with code {result.returncode}: {result.stderr.strip()}")
     return
   
   job_id = result.stdout.strip()
-  
-  print(f"Submitted job! (ID = {job_id})")
+  logger.info(f"Job submitted with ID {job_id}")
   
   unprocessed_jobs_data = UnprocessedJobsData()
   unprocessed_jobs_data.add_job(UnprocessedJob(
@@ -54,3 +63,4 @@ def batch_cmd(args):
     cpu_profile
   ))
   unprocessed_jobs_data.save()
+  logger.debug(f"Saved new unprocessed job with ID {job_id}")
