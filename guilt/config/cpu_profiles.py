@@ -61,12 +61,12 @@ class CpuProfilesConfig:
 
     self.profiles = {}
     for name, specs in data.get("profiles").items():
-      data = {
+      profile_data = {
         "name": name,
         **specs
       }
-      self.profiles[name] = CpuProfile.from_dict(data)
-
+      self.profiles[name] = CpuProfile.from_dict(profile_data)
+      
     self.default = self.profiles.get(data.get("default"))
 
   def get_profile(self, name: str):
@@ -102,7 +102,7 @@ class CpuProfilesConfig:
     data = {
       "default": self.default.name,
       "profiles": {
-        {k:v for k, v in profile.to_dict().items() if k != "name"} 
+        profile.name: {k:v for k, v in profile.to_dict().items() if k != "name"} 
         for profile in self.profiles.values()
       }
     }

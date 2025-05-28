@@ -35,11 +35,11 @@ class UnprocessedJobsData:
 
     self.jobs = {}
     for job_id, unprocessed_job in data.items():
-      data = {
+      job_data = {
         "job_id": job_id,
         **unprocessed_job
       }
-      self.jobs[job_id] = UnprocessedJob.from_dict(data)
+      self.jobs[job_id] = UnprocessedJob.from_dict(job_data)
     
   def add_job(self, job: UnprocessedJob) -> bool:
     if job.job_id in self.jobs:

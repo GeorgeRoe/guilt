@@ -59,11 +59,11 @@ class ProcessedJobsData:
 
     self.jobs = {}
     for job_id, processed_job in data.items():
-      data = {
+      job_data = {
         "job_id": job_id,
         **processed_job
       }
-      self.jobs[job_id] = ProcessedJob.from_dict(data)
+      self.jobs[job_id] = ProcessedJob.from_dict(job_data)
 
   def add_job(self, job: ProcessedJob) -> bool:
     if job.job_id in self.jobs:
