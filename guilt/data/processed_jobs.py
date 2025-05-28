@@ -37,6 +37,17 @@ class ProcessedJob:
       "emissions": self.emissions,
       "generation_mix": self.generation_mix
     }
+  
+  def __repr__(self):
+    return (
+        f"ProcessedJob(start={self.start}, "
+        f"end={self.end}, "
+        f"job_id={self.job_id}, "
+        f"cpu_profile={self.cpu_profile}, "
+        f"energy={self.energy} kWh, "
+        f"emissions={self.emissions} grams, "
+        f"generation_mix={self.generation_mix})"
+    )
 
 class ProcessedJobsData:
   def __init__(self):
