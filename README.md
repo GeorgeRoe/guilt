@@ -106,3 +106,11 @@ The `backfill` command uses data from `sacct` to estimate your historical usage 
 ```sh
 guilt backfill
 ```
+
+### Friends
+
+The `friends` command uses data from `getent passwd` to find other people using GUILT on the machine.
+
+```sh
+guilt friends
+```
