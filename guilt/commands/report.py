@@ -40,13 +40,20 @@ def print_report(jobs: List[ProcessedJob]):
   plt.simple_bar(sources, values, title = "Generation Mix", width = columns - 1)
   plt.show()
 
-def report_cmd(_):
+def report_cmd(args):
   processed_jobs_data = ProcessedJobsData()
+  
+  group_by_key_format = {
+    "day": "%Y-%m-%d",
+    "week": "%G-%V",
+    "month": "%Y-%m",
+    "year": "%Y"
+  }
   
   time_splits = {}
   
   for job in processed_jobs_data.jobs.values():
-    key = f"{job.start.year}-{job.start.month}"
+    key = job.start.strftime(group_by_key_format.get(args.group_by))
     
     if key in time_splits:
       time_splits.get(key).append(job)
@@ -57,10 +64,21 @@ def report_cmd(_):
   
   print("=" * columns)
 
-  for date_str, jobs in time_splits.items():
-    date = datetime.strptime(date_str, "%Y-%m")
+  group_by_title_format = {
+    "day": "%A %-d %B %Y",
+    "week": "Week %V (%B), %G  ",
+    "month": "%B %Y",
+    "year": "%Y"
+  }
 
-    print(f"{date.strftime('%B %Y')}")
+  for date_str, jobs in time_splits.items():
+    if args.group_by == "week":
+      year, week = map(int, date_str.split("-"))
+      date = datetime.fromisocalendar(year, week, 1)
+    else:
+      date = datetime.strptime(date_str, group_by_key_format.get(args.group_by))
+
+    print(f"{date.strftime(group_by_title_format.get(args.group_by))}")
     print("-" * columns)
 
     print_report(jobs)

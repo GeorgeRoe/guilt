@@ -54,6 +54,12 @@ def main():
   process_parser.set_defaults(function=process_cmd)
   
   report_parser = subparsers.add_parser("report")
+  report_parser.add_argument(
+    "--group-by",
+    help="How the report should be grouped by",
+    choices=["day", "week", "month", "year"],
+    default="month"
+  )
   report_parser.set_defaults(function=report_cmd)
   
   backfill_parser = subparsers.add_parser("backfill")
