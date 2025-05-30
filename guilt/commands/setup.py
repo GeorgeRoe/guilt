@@ -14,7 +14,7 @@ def setup_cmd(_):
   print("\n\033[91m" + LOGO + "\n" * 2 + CENTERED_TAGLINE)
   print("\033[0m")
 
-  CpuProfilesConfig().save()
+  CpuProfilesConfig.get_default().save()
   ProcessedJobsData().save()
   UnprocessedJobsData().save()
   

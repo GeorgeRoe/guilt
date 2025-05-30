@@ -26,7 +26,7 @@ def backfill_cmd(_):
   job_ids = [job.get("job_id") for job in json.loads(result.stdout.strip()).get("jobs")]
   
   unprocessed_jobs_data = UnprocessedJobsData()
-  cpu_profiles_config = CpuProfilesConfig()
+  cpu_profiles_config = CpuProfilesConfig.from_file()
   
   for job_id in job_ids:
     unprocessed_jobs_data.add_job(UnprocessedJob(

@@ -1,16 +1,7 @@
 from pathlib import Path
 import json
 from guilt.log import logger
-
-DEFAULT_DATA = {
-  "default": "AMD EPYC 9654",
-  "profiles": {
-    "AMD EPYC 9654": {
-      "tdp": 360,
-      "cores": 96
-    }
-  }
-}
+from typing import Dict
 
 PATH = Path.home() / ".guilt" / "cpu_profiles.json"
 
@@ -54,30 +45,62 @@ class CpuProfile:
     }
 
 class CpuProfilesConfig:
-  def __init__(self):
-    data = DEFAULT_DATA
+  def __init__(self, default: CpuProfile, profiles: Dict[str, CpuProfile]):
+    self.default = default
+    self.profiles = profiles
 
-    if PATH.exists():
-      try:
-        with PATH.open("r") as file:
-          data = json.load(file)
-        logger.info(f"Loaded CPU profiles from {PATH}")
-      except Exception as e:
-        logger.error(f"Failed to load CPU profiles from {PATH}: {e}")
-        data = DEFAULT_DATA
-    else:
-      logger.info("No CPU profile config found, using default")
-
-    self.profiles = {}
+  def to_dict(self):
+    return {
+      "default": self.default.name,
+      "profiles": {
+        profile.name: {k:v for k, v in profile.to_dict().items() if k != "name"} 
+        for profile in self.profiles.values()
+      }
+    }
+    
+  @classmethod
+  def get_default(cls):
+    default_profile = CpuProfile("AMD EPYC 9654", 360, 96)
+    
+    profiles = [
+      default_profile,
+      CpuProfile("AMD EPYC 7502", 180, 32),
+      CpuProfile("AMD EPYC 7742", 225, 64),
+      CpuProfile("AMD EPYC 7543P", 225, 32)
+    ]
+    
+    return cls(default_profile, {profile.name: profile for profile in profiles})
+    
+  @classmethod
+  def from_dict(cls, data: dict):
+    profiles = {}
     for name, specs in data.get("profiles").items():
       profile_data = {
         "name": name,
         **specs
       }
-      self.profiles[name] = CpuProfile.from_dict(profile_data)
+      profiles[name] = CpuProfile.from_dict(profile_data)
       
-    self.default = self.profiles.get(data.get("default"))
-    logger.debug(f"Default CPU profile: {self.default}")
+    default = profiles.get(data.get("default"))
+    logger.debug(f"Default CPU profile: {default}")
+    
+    return cls(default, profiles)
+
+  @classmethod
+  def from_file(cls, path: Path = PATH):
+    data = None
+
+    if path.exists():
+      try:
+        with path.open("r") as file:
+          data = json.load(file)
+        logger.info(f"Loaded CPU profiles from {path}")
+      except Exception as e:
+        logger.error(f"Failed to load CPU profiles from {path}: {e}")
+    else:
+      logger.info("No CPU profile config found, using default")
+      
+    return cls.get_default() if data is None else cls.from_dict(data)    
 
   def get_profile(self, name: str):
     logger.debug(f"Fetching CPU profile: {name}")
@@ -116,19 +139,11 @@ class CpuProfilesConfig:
     return False
 
   def save(self):
-    data = {
-      "default": self.default.name,
-      "profiles": {
-        profile.name: {k:v for k, v in profile.to_dict().items() if k != "name"} 
-        for profile in self.profiles.values()
-      }
-    }
-
     PATH.parent.mkdir(parents=True, exist_ok=True)
     
     try:
       with PATH.open("w") as file:
-        json.dump(data, file, indent=2)
+        json.dump(self.to_dict(), file, indent=2)
       logger.info(f"Saved CPU profiles to {PATH}")
     except Exception as e:
       logger.error(f"Failed to save CPU profiles to {PATH}: {e}")

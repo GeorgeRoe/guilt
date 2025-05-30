@@ -2,7 +2,7 @@ from guilt.config.cpu_profiles import CpuProfilesConfig, CpuProfile
 
 def config_cmd(args):
   if args.type == "cpu_profile":
-    cpu_profiles_config = CpuProfilesConfig()
+    cpu_profiles_config = CpuProfilesConfig.from_file()
 
     if args.action == "add":
       print("Add a new CPU profile")

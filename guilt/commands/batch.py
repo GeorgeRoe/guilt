@@ -37,7 +37,7 @@ def batch_cmd(args):
     logger.error("No CPU profile directive found in batch file")
     return
 
-  cpu_profile = CpuProfilesConfig().get_profile(picked_cpu_profile_name)
+  cpu_profile = CpuProfilesConfig.from_file().get_profile(picked_cpu_profile_name)
   if cpu_profile is None:
     logger.error(f"CPU Profile '{picked_cpu_profile_name}' doesn't exist")
     return
