@@ -1,4 +1,4 @@
-from guilt.commands import setup_cmd, teardown_cmd, forecast_cmd, config_cmd, batch_cmd, process_cmd, report_cmd, backfill_cmd
+from guilt.commands import setup_cmd, teardown_cmd, forecast_cmd, config_cmd, batch_cmd, process_cmd, report_cmd, backfill_cmd, friends_cmd
 from guilt.log import logger
 import argparse
 import logging
@@ -18,8 +18,8 @@ def main():
   parser.add_argument(
     "--log-level",
     choices=level_map.keys(),
-    default="warning",
-    help="Set the logging level (default: warning)"
+    default="error",
+    help="Set the logging level (default: error)"
   )
 
   subparsers = parser.add_subparsers(dest="command", required=True)
@@ -64,6 +64,9 @@ def main():
   
   backfill_parser = subparsers.add_parser("backfill")
   backfill_parser.set_defaults(function=backfill_cmd)
+  
+  friends_parser = subparsers.add_parser("friends")
+  friends_parser.set_defaults(function=friends_cmd)
 
   args = parser.parse_args()
   
