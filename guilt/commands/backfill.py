@@ -11,7 +11,7 @@ def backfill_cmd(_):
     logger.error("Couldn't get user environment variable")
     return
   
-  command = ["sacct", "-S", "1970-01-01", "-u", user,  "--json"]
+  command = ["sacct", "-S", "1970-01-01", "-u", user, "--json"]
   logger.info(f"Running command: {' '.join(command)}")
   try:
     result = subprocess.run(command, capture_output=True, text=True)
