@@ -4,7 +4,7 @@ from guilt.data.processed_jobs import ProcessedJobsData
 from guilt.data.unprocessed_jobs import UnprocessedJobsData
 from guilt.config.cpu_profiles import CpuProfilesConfig
 
-def setup_cmd(_):
+def execute(_):
   guilt_dir = Path.home() / ".guilt"
 
   if guilt_dir.exists():
@@ -19,3 +19,7 @@ def setup_cmd(_):
   UnprocessedJobsData().save()
   
   print("GUILT is now setup!")
+  
+def register_subparser(subparsers):
+  subparser = subparsers.add_parser("setup")
+  subparser.set_defaults(function=execute)

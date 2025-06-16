@@ -20,7 +20,7 @@ class User:
         f"home_directory='{self.home_directory}')"
     )    
 
-def friends_cmd(_):
+def execute(_):
   command = ["getent", "passwd"]
   logger.info(f"Running command: {' '.join(command)}")
   try:
@@ -47,3 +47,8 @@ def friends_cmd(_):
   
   print("Here are the other people using GUILT on this system:")
   [print(f"{friend.username} -> {friend.info}") for friend in friends]
+  
+  
+def register_subparser(subparsers):
+  subparser = subparsers.add_parser("friends")
+  subparser.set_defaults(function=execute)

@@ -5,7 +5,7 @@ from guilt.ip_info import IpInfo
 from guilt.carbon_dioxide_forecast import CarbonDioxideForecast
 from guilt.log import logger
 
-def forecast_cmd(_):
+def execute(_):
   ip_info = IpInfo()
 
   start = datetime.now(timezone.utc)
@@ -44,3 +44,7 @@ def forecast_cmd(_):
   for entry in best:
     time = datetime.strptime(entry.from_time, "%Y-%m-%dT%H:%MZ")
     print(f"{time.strftime('%a %d %b %H:%M')} → {entry.intensity.forecast} gCO₂/kWh")
+
+def register_subparser(subparsers):
+  subparser = subparsers.add_parser("forecast")
+  subparser.set_defaults(function=execute)

@@ -5,7 +5,7 @@ import json
 import subprocess
 import os
 
-def backfill_cmd(_):
+def execute(_):
   user = os.getenv("USER", None)
   if user is None:
     logger.error("Couldn't get user environment variable")
@@ -35,3 +35,7 @@ def backfill_cmd(_):
     ))
     
   unprocessed_jobs_data.save()
+  
+def register_subparser(subparsers):
+  subparser = subparsers.add_parser("backfill")
+  subparser.set_defaults(function=execute)

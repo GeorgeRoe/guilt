@@ -2,7 +2,7 @@ from pathlib import Path
 import shutil
 from guilt.log import logger
 
-def teardown_cmd(_):
+def execute(_):
   guilt_dir = Path.home() / ".guilt"
 
   if not guilt_dir.exists():
@@ -22,3 +22,7 @@ def teardown_cmd(_):
     shutil.rmtree(guilt_dir)
     print(f"{guilt_dir} was removed!")
     print("\nWaving goodbye from GUILT software.")
+    
+def register_subparser(subparsers):
+  subparser = subparsers.add_parser("teardown")
+  subparser.set_defaults(function=execute)

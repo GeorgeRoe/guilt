@@ -40,7 +40,7 @@ def print_report(jobs: List[ProcessedJob]):
   plt.simple_bar(sources, values, title = "Generation Mix", width = columns - 1)
   plt.show()
 
-def report_cmd(args):
+def execute(args):
   processed_jobs_data = ProcessedJobsData()
   
   group_by_key_format = {
@@ -91,3 +91,13 @@ def report_cmd(args):
   print_report(processed_jobs_data.jobs.values())
   
   print("=" * columns)
+  
+def register_subparser(subparsers):
+  subparser = subparsers.add_parser("report")
+  subparser.add_argument(
+    "--group-by",
+    help="How the report should be grouped by",
+    choices=["day", "week", "month", "year"],
+    default="month"
+  )
+  subparser.set_defaults(function=execute)

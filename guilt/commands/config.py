@@ -1,6 +1,6 @@
 from guilt.config.cpu_profiles import CpuProfilesConfig, CpuProfile
 
-def config_cmd(args):
+def execute(args):
   if args.type == "cpu_profile":
     cpu_profiles_config = CpuProfilesConfig.from_file()
 
@@ -39,3 +39,17 @@ def config_cmd(args):
       print("CPU Profiles:")
       for profile in cpu_profiles_config.profiles.values():
         print(f"{profile.name} -> TDP: {profile.tdp} | cores: {profile.cores}")
+        
+def register_subparser(subparsers):
+  subparser = subparsers.add_parser("config")
+  subparser.add_argument(
+    "action",
+    help="What to do with the config",
+    choices=["add", "remove", "update", "show"]
+  )
+  subparser.add_argument(
+    "type",
+    help="Type of config to modify",
+    choices=["cpu_profile"]
+  )
+  subparser.set_defaults(function=execute)

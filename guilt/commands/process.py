@@ -6,11 +6,9 @@ from guilt.utility.format_grams import format_grams
 import subprocess
 import json
 from datetime import datetime, timedelta, timezone
-import plotext as plt
-import shutil
 from guilt.log import logger
 
-def process_cmd(_):
+def execute(_):
   unprocessed_jobs_data = UnprocessedJobsData()
   processed_jobs_data = ProcessedJobsData()
   
@@ -106,3 +104,7 @@ def process_cmd(_):
         
   unprocessed_jobs_data.save()
   processed_jobs_data.save()
+
+def register_subparser(subparsers):
+  subparser = subparsers.add_parser("process")
+  subparser.set_defaults(function=execute)

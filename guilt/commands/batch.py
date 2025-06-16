@@ -6,7 +6,7 @@ from guilt.log import logger
 
 DIRECTIVE_START = "#GUILT --"
 
-def batch_cmd(args):
+def execute(args):
   path = Path(args.input)
   logger.info(f"Processing batch input file: {path}")
 
@@ -64,3 +64,8 @@ def batch_cmd(args):
   ))
   unprocessed_jobs_data.save()
   logger.debug(f"Saved new unprocessed job with ID {job_id}")
+
+def register_subparser(subparsers):
+  subparser = subparsers.add_parser("batch")
+  subparser.add_argument("input", help="Input file or argument for batch command")
+  subparser.set_defaults(function=execute)
