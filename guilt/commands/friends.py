@@ -1,8 +1,9 @@
 from guilt.log import logger
 from pathlib import Path
 from guilt.services.get_entries import GetEntriesService
+from argparse import _SubParsersAction, Namespace
 
-def execute(_):
+def execute(args: Namespace):
  
   users = []
   try:
@@ -28,6 +29,6 @@ def execute(_):
   print("Here are the other people using GUILT on this system:")
   [print(f"{friend.username} -> {friend.info}") for friend in friends]
   
-def register_subparser(subparsers):
+def register_subparser(subparsers: _SubParsersAction):
   subparser = subparsers.add_parser("friends")
   subparser.set_defaults(function=execute)

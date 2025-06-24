@@ -3,10 +3,11 @@ import subprocess
 from guilt.config.cpu_profiles import CpuProfilesConfig
 from guilt.data.unprocessed_jobs import UnprocessedJobsData, UnprocessedJob
 from guilt.log import logger
+from argparse import _SubParsersAction, Namespace
 
 DIRECTIVE_START = "#GUILT --"
 
-def execute(args):
+def execute(args: Namespace):
   path = Path(args.input)
   logger.info(f"Processing batch input file: {path}")
 
@@ -32,7 +33,7 @@ def execute(args):
       directives[directive[0]] = directive[1] if len(directive) == 2 else True
   logger.debug(f"Parsed directives: {directives}")
 
-  picked_cpu_profile_name = directives.get("cpu-profile")
+  picked_cpu_profile_name = directives.get("cpu-profile", None)
   if picked_cpu_profile_name is None:
     logger.error("No CPU profile directive found in batch file")
     return
@@ -65,7 +66,7 @@ def execute(args):
   unprocessed_jobs_data.save()
   logger.debug(f"Saved new unprocessed job with ID {job_id}")
 
-def register_subparser(subparsers):
+def register_subparser(subparsers: _SubParsersAction):
   subparser = subparsers.add_parser("batch")
   subparser.add_argument("input", help="Input file or argument for batch command")
   subparser.set_defaults(function=execute)

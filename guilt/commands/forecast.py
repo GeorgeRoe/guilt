@@ -4,8 +4,9 @@ import shutil
 from guilt.services.ip_info import IpInfoService
 from guilt.carbon_dioxide_forecast import CarbonDioxideForecast
 from guilt.log import logger
+from argparse import _SubParsersAction, Namespace
 
-def execute(_):
+def execute(args: Namespace):
   ip_info = IpInfoService.fetchData()
 
   start = datetime.now(timezone.utc)
@@ -45,6 +46,6 @@ def execute(_):
     time = datetime.strptime(entry.from_time, "%Y-%m-%dT%H:%MZ")
     print(f"{time.strftime('%a %d %b %H:%M')} → {entry.intensity.forecast} gCO₂/kWh")
 
-def register_subparser(subparsers):
+def register_subparser(subparsers: _SubParsersAction):
   subparser = subparsers.add_parser("forecast")
   subparser.set_defaults(function=execute)

@@ -5,6 +5,7 @@ from guilt.utility.format_duration import format_duration
 from datetime import datetime
 import shutil
 import plotext as plt
+from argparse import _SubParsersAction, Namespace
 
 def print_report(jobs: List[ProcessedJob]):
   total_emissions = sum([job.emissions for job in jobs])
@@ -40,7 +41,7 @@ def print_report(jobs: List[ProcessedJob]):
   plt.simple_bar(sources, values, title = "Generation Mix", width = columns - 1)
   plt.show()
 
-def execute(args):
+def execute(args: Namespace):
   processed_jobs_data = ProcessedJobsData()
   
   group_by_key_format = {
@@ -92,7 +93,7 @@ def execute(args):
   
   print("=" * columns)
   
-def register_subparser(subparsers):
+def register_subparser(subparsers: _SubParsersAction):
   subparser = subparsers.add_parser("report")
   subparser.add_argument(
     "--group-by",

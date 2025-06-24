@@ -6,8 +6,9 @@ from guilt.utility.format_grams import format_grams
 from datetime import datetime, timedelta
 from guilt.log import logger
 from guilt.services.slurm_accounting import SlurmAccountingService
+from argparse import _SubParsersAction, Namespace
 
-def execute(_):
+def execute(args: Namespace):
   unprocessed_jobs_data = UnprocessedJobsData()
   processed_jobs_data = ProcessedJobsData()
   
@@ -91,6 +92,6 @@ def execute(_):
   unprocessed_jobs_data.save()
   processed_jobs_data.save()
 
-def register_subparser(subparsers):
+def register_subparser(subparsers: _SubParsersAction):
   subparser = subparsers.add_parser("process")
   subparser.set_defaults(function=execute)

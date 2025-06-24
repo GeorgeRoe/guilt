@@ -1,6 +1,7 @@
 from guilt.config.cpu_profiles import CpuProfilesConfig, CpuProfile
+from argparse import _SubParsersAction, Namespace
 
-def execute(args):
+def execute(args: Namespace):
   if args.type == "cpu_profile":
     cpu_profiles_config = CpuProfilesConfig.from_file()
 
@@ -40,7 +41,7 @@ def execute(args):
       for profile in cpu_profiles_config.profiles.values():
         print(f"{profile.name} -> TDP: {profile.tdp} | cores: {profile.cores}")
         
-def register_subparser(subparsers):
+def register_subparser(subparsers: _SubParsersAction):
   subparser = subparsers.add_parser("config")
   subparser.add_argument(
     "action",
