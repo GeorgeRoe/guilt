@@ -1,12 +1,12 @@
 from datetime import datetime, timedelta, timezone
 import plotext as plt
 import shutil
-from guilt.ip_info import IpInfo
+from guilt.services.ip_info import IpInfoService
 from guilt.carbon_dioxide_forecast import CarbonDioxideForecast
 from guilt.log import logger
 
 def execute(_):
-  ip_info = IpInfo()
+  ip_info = IpInfoService.fetchData()
 
   start = datetime.now(timezone.utc)
   end = start + timedelta(hours=12)

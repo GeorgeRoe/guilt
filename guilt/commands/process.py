@@ -1,6 +1,6 @@
 from guilt.data.unprocessed_jobs import UnprocessedJobsData
 from guilt.data.processed_jobs import ProcessedJobsData, ProcessedJob
-from guilt.ip_info import IpInfo
+from guilt.services.ip_info import IpInfoService
 from guilt.carbon_dioxide_forecast import CarbonDioxideForecast
 from guilt.utility.format_grams import format_grams
 from datetime import datetime, timedelta
@@ -12,7 +12,6 @@ def execute(_):
   processed_jobs_data = ProcessedJobsData()
   
   sacct_results = []
-  
   try:
     sacct_results = SlurmAccountingService.getJobs(list(unprocessed_jobs_data.jobs.keys()))
   except Exception as e:
@@ -23,14 +22,18 @@ def execute(_):
     print("No Jobs to process")
     return
   
-  ip_info = IpInfo()
+  ip_info = IpInfoService.fetchData()
   
-  for result in sacct_results:   
+  for result in sacct_results:
     if not "cpu" in result.resources:
       logger.warning("Skipping job due to lack of CPU resource usage information")
       continue
     
     unprocessed_job = unprocessed_jobs_data.jobs.get(str(result.job_id))
+
+    if unprocessed_job is None:
+      logger.error(f"Unprocessed job with ID '{result.job_id}' could not be found")
+      return
     
     wattage = result.resources.get("cpu") * unprocessed_job.cpu_profile.tdp_per_core
     
