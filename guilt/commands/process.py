@@ -3,56 +3,40 @@ from guilt.data.processed_jobs import ProcessedJobsData, ProcessedJob
 from guilt.ip_info import IpInfo
 from guilt.carbon_dioxide_forecast import CarbonDioxideForecast
 from guilt.utility.format_grams import format_grams
-import subprocess
-import json
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from guilt.log import logger
+from guilt.services.slurm_accounting import SlurmAccountingService
 
 def execute(_):
   unprocessed_jobs_data = UnprocessedJobsData()
   processed_jobs_data = ProcessedJobsData()
   
-  jobs = unprocessed_jobs_data.jobs.values()
+  sacct_results = []
   
-  job_ids = [job.job_id for job in jobs]
-  
-  command = ["sacct", "--jobs", ",".join([str(job_id) for job_id in job_ids]), "--json"]
-  logger.info(f"Running command: {' '.join(command)}")
   try:
-    result = subprocess.run(command, capture_output=True, text=True)
+    sacct_results = SlurmAccountingService.getJobs(list(unprocessed_jobs_data.jobs.keys()))
   except Exception as e:
-    logger.error(f"Error running command '{' '.join(command)}': {e}")
+    logger.error(f"Error getting jobs: {e}")
     return
   
-  if result.returncode != 0:
-    logger.error(f"Command failed with code {result.returncode}: {result.stderr.strip()}")
+  if len(sacct_results) == 0:
+    print("No Jobs to process")
     return
-  
-  raw_sacct_data = json.loads(result.stdout.strip())
-  sacct_data = {item.get("job_id"): item for item in raw_sacct_data.get("jobs")}
   
   ip_info = IpInfo()
   
-  for job in jobs:
-    job_sacct = sacct_data.get(job.job_id)
-    
-    start_time = datetime.fromtimestamp(job_sacct.get("time").get("start")).replace(tzinfo=timezone.utc)
-    end_time = datetime.fromtimestamp(job_sacct.get("time").get("end")).replace(tzinfo=timezone.utc)
-    
-    logger.debug(f"Collected job start and end time: {start_time} -> {end_time}")
-        
-    cpu_tres = next((item for item in job_sacct.get("tres").get("allocated") if item.get("type") == "cpu"), None)
-    if cpu_tres is None:
-      logger.warning(f"Failed to read CPU allocation for job with id '{job.job_id}', skipping this job")
+  for result in sacct_results:   
+    if not "cpu" in result.resources:
+      logger.warning("Skipping job due to lack of CPU resource usage information")
       continue
     
-    allocated_cpu = cpu_tres.get("count")
+    unprocessed_job = unprocessed_jobs_data.jobs.get(str(result.job_id))
     
-    wattage = allocated_cpu * job.cpu_profile.tdp_per_core
+    wattage = result.resources.get("cpu") * unprocessed_job.cpu_profile.tdp_per_core
     
     buffer = timedelta(minutes=30)
-    forecast_start = start_time - buffer
-    forecast_end = end_time + buffer
+    forecast_start = result.start_time - buffer
+    forecast_end = result.end_time + buffer
 
     forecast = CarbonDioxideForecast(forecast_start, forecast_end, ip_info.postal)
     
@@ -65,8 +49,8 @@ def execute(_):
     for entry in forecast.entries:
       entry_start = datetime.fromisoformat(entry.from_time.replace("Z", "+00:00"))
       entry_end = datetime.fromisoformat(entry.to_time.replace("Z", "+00:00"))
-      overlap_start = max(start_time, entry_start)
-      overlap_end = min(end_time, entry_end)
+      overlap_start = max(result.start_time, entry_start)
+      overlap_end = min(result.end_time, entry_end)
       overlap_duration = (overlap_end - overlap_start).total_seconds()
       
       if overlap_duration > 0:
@@ -81,25 +65,24 @@ def execute(_):
     
     average_mix = {k: v / total_mix_seconds for k, v in total_mix.items()}
     
-    print(f"{job.job_id} -> energy usage: {kwh:.2e} kWh, emissions: {format_grams(emissions)} of CO2")
+    print(f"{result.job_id} -> energy usage: {kwh:.2e} kWh, emissions: {format_grams(emissions)} of CO2")
 
     processed_job = ProcessedJob(
-      start_time,
-      end_time,
-      job.job_id,
-      job.cpu_profile,
+      result.start_time,
+      result.end_time,
+      result.job_id,
+      unprocessed_job.cpu_profile,
       kwh,
       emissions,
       average_mix
     )
     
     if not processed_jobs_data.add_job(processed_job):
-      logger.error("Failed to add processed jobs")
-      continue
+      logger.error("Failed to add processed job")
+      return
     
-  for job_id in job_ids:
-    if not unprocessed_jobs_data.remove_job(job_id):
-      logger.error(f"Unable to remove job with id '{job_id}'")
+    if not unprocessed_jobs_data.remove_job(result.job_id):
+      logger.error("Failed to remove unprocessed job")
       return
         
   unprocessed_jobs_data.save()
