@@ -1,21 +1,22 @@
 from pathlib import Path
 import json
 from guilt.log import logger
-from typing import Dict
+from typing import Any
+from guilt.utility.safe_get import safe_get_string, safe_get_int, safe_get_dict
 
 PATH = Path.home() / ".guilt" / "cpu_profiles.json"
 
 class CpuProfile:
-  def __init__(self, name: str, tdp: int, cores: int):
+  def __init__(self, name: str, tdp: int, cores: int) -> None:
     self.name = name
     self.tdp = tdp
     self.cores = cores
   
   @property
-  def tdp_per_core(self):
+  def tdp_per_core(self) -> float:
     return self.tdp / self.cores
 
-  def __repr__(self):
+  def __repr__(self) -> str:
     return (
         f"CpuProfile(name='{self.name}', "
         f"tdp={self.tdp}, "
@@ -23,7 +24,7 @@ class CpuProfile:
         f"tdp_per_core={self.tdp_per_core:.2f})"
     )
 
-  def __eq__(self, other):
+  def __eq__(self, other: object) -> bool:
     if not isinstance(other, CpuProfile):
       return NotImplemented
     return (
@@ -33,11 +34,14 @@ class CpuProfile:
     )
 
   @classmethod
-  def from_dict(cls, data: dict):
+  def from_dict(cls, data: dict[str, Any]) -> "CpuProfile":
     logger.debug(f"Deserializing CpuProfile: {data}")
-    return cls(data.get("name"), data.get("tdp"), data.get("cores"))
+    name = safe_get_string(data, "name")
+    tdp = safe_get_int(data, "tdp")
+    cores = safe_get_int(data, "cores")
+    return cls(name, tdp, cores)
 
-  def to_dict(self) -> dict:
+  def to_dict(self) -> dict[str, Any]:
     return {
       "name": self.name,
       "tdp": self.tdp,
@@ -45,11 +49,11 @@ class CpuProfile:
     }
 
 class CpuProfilesConfig:
-  def __init__(self, default: CpuProfile, profiles: Dict[str, CpuProfile]):
+  def __init__(self, default: CpuProfile, profiles: dict[str, CpuProfile]) -> None:
     self.default = default
     self.profiles = profiles
 
-  def to_dict(self):
+  def to_dict(self) -> dict[str, Any]:
     return {
       "default": self.default.name,
       "profiles": {
@@ -59,7 +63,7 @@ class CpuProfilesConfig:
     }
     
   @classmethod
-  def get_default(cls):
+  def get_default(cls) -> "CpuProfilesConfig":
     default_profile = CpuProfile("AMD EPYC 9654", 360, 96)
     
     profiles = [
@@ -72,16 +76,23 @@ class CpuProfilesConfig:
     return cls(default_profile, {profile.name: profile for profile in profiles})
     
   @classmethod
-  def from_dict(cls, data: dict):
-    profiles = {}
-    for name, specs in data.get("profiles").items():
-      profile_data = {
+  def from_dict(cls, data: dict[str, Any]) -> "CpuProfilesConfig":
+    profiles: dict[str, CpuProfile] = {}
+    
+    stored_profiles = safe_get_dict(data, "profiles")
+    
+    for name, specs in stored_profiles.items():
+      profile_data: dict[str, Any] = {
         "name": name,
         **specs
       }
       profiles[name] = CpuProfile.from_dict(profile_data)
       
-    default = profiles.get(data.get("default"))
+    default = profiles.get(safe_get_string(data, "default"))
+    
+    if default is None:
+      raise ValueError("Default CPU should point to an existing cpu profile.")
+    
     logger.debug(f"Default CPU profile: {default}")
     
     return cls(default, profiles)
@@ -138,7 +149,7 @@ class CpuProfilesConfig:
     logger.warning(f"Attempted to update nonexistent profile: {profile.name}")
     return False
 
-  def save(self):
+  def save(self) -> None:
     PATH.parent.mkdir(parents=True, exist_ok=True)
     
     try:
