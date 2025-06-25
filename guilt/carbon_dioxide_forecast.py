@@ -1,6 +1,7 @@
 import asyncio
 import httpx
 from guilt.log import logger
+from typing import Dict
 
 class Intensity:
   def __init__(self, forecast: int, index: str):
@@ -11,7 +12,7 @@ class Intensity:
     return f"Intensity(forecast={self.forecast}, index={self.index!r})"
 
 class DataEntry:
-  def __init__(self, from_time: str, to_time: str, intensity: Intensity, generationmix: dict):
+  def __init__(self, from_time: str, to_time: str, intensity: Intensity, generationmix: Dict[str, float]):
     self.from_time = from_time
     self.to_time = to_time
     self.intensity = intensity

@@ -1,4 +1,4 @@
-def format_duration(seconds):
+def format_duration(seconds: float) -> str:
   seconds = int(seconds)
   periods = [
     ('day', 86400),
@@ -7,7 +7,7 @@ def format_duration(seconds):
     ('second', 1),
   ]
 
-  parts = []
+  parts: list[str] = []
   for name, count in periods:
     value = seconds // count
     if value:
