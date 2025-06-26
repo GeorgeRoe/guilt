@@ -2,54 +2,76 @@ from guilt.config.cpu_profiles import CpuProfile
 from pathlib import Path
 import json
 from guilt.log import logger
+from typing import Any
+from guilt.utility.safe_get import safe_get_string, safe_get_dict
 
 PATH = Path.home() / ".guilt" / "unprocessed_jobs.json"
 
 class UnprocessedJob:
-  def __init__(self, job_id: int, cpu_profile: CpuProfile):
-    self.job_id = int(job_id)
+  def __init__(self, job_id: str, cpu_profile: CpuProfile) -> None:
+    self.job_id = job_id
     self.cpu_profile = cpu_profile
 
-  def __repr__(self):
+  def __repr__(self) -> str:
     return (
         f"UnprocessedJob(job_id={self.job_id}, "
         f"cpu_profile={self.cpu_profile})"
     )
     
   @classmethod
-  def from_dict(cls, data: dict):
+  def from_dict(cls, data: dict[str, Any]) -> "UnprocessedJob":
     logger.debug(f"Deserializing ProcessedJob: {data}")
-    return cls(data.get("job_id"), CpuProfile.from_dict(data.get("cpu_profile")))
+    
+    job_id = safe_get_string(data, "job_id")
+    cpu_profile = CpuProfile.from_dict(safe_get_dict(data, "cpu_profile"))
+    
+    return cls(job_id, cpu_profile)
   
-  def to_dict(self) -> dict:
+  def to_dict(self) -> dict[str, Any]:
     return {
       "job_id": self.job_id,
       "cpu_profile": self.cpu_profile.to_dict()
     }
 
 class UnprocessedJobsData:
-  def __init__(self):
-    data = {}
+  def __init__(self, jobs: dict[str, UnprocessedJob]) -> None:
+    self.jobs = jobs
     
-    if PATH.exists():
+  def to_dict(self) -> dict[str, Any]:
+    return {
+      job.job_id: {k: v for k, v in job.to_dict().items() if k != "job_id"}
+      for job in self.jobs.values()
+    }
+    
+  @classmethod
+  def get_default(cls) -> "UnprocessedJobsData":
+    return cls({})
+  
+  @classmethod
+  def from_dict(cls, data: dict[str, Any]) -> "UnprocessedJobsData":
+    jobs: dict[str, UnprocessedJob] = {}
+    
+    for job_id, unprocessed_job in data.items():
+      jobs[job_id] = UnprocessedJob.from_dict({ "job_id": job_id, **unprocessed_job })
+
+    return cls(jobs)
+  
+  @classmethod
+  def from_file(cls, path: Path = PATH) -> "UnprocessedJobsData":
+    data = None
+    
+    if path.exists():
       try:
-        with PATH.open("r") as file:
+        with path.open("r") as file:
           data = json.load(file)
-        logger.info(f"Loaded {len(data)} unprocessed jobs from {PATH}")
+        logger.info(f"Loaded {len(data)} unprocessed jobs from {path}")
       except Exception as e:
-        logger.error(f"Failed to load unprocessed jobs from {PATH}: {e}")
-        data = {}
+        logger.error(f"Failed to load unprocessed jobs from {path}: {e}")
     else:
       logger.warning("No unprocessed jobs file found, starting with empty dataset")
 
-    self.jobs = {}
-    for job_id, unprocessed_job in data.items():
-      job_data = {
-        "job_id": job_id,
-        **unprocessed_job
-      }
-      self.jobs[job_id] = UnprocessedJob.from_dict(job_data)
-    
+    return cls.get_default() if data is None else cls.from_dict(data)
+
   def add_job(self, job: UnprocessedJob) -> bool:
     if job.job_id in self.jobs:
       logger.warning(f"Job ID {job.job_id} already exists in unprocessed jobs")
@@ -68,13 +90,10 @@ class UnprocessedJobsData:
     logger.warning(f"Job ID {job_id} doesn't exist in unprocessed jobs")
     return False
 
-  def save(self):    
-    data = {
-      job.job_id: {k: v for k, v in job.to_dict().items() if k != "job_id"}
-      for job in self.jobs.values()
-    }
-    
+  def save(self) -> None:
     PATH.parent.mkdir(parents=True, exist_ok=True)
+    
+    data = self.to_dict()
 
     try:
       with PATH.open("w") as file:
