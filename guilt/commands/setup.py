@@ -16,8 +16,8 @@ def execute(args: Namespace):
   print("\033[0m")
 
   CpuProfilesConfig.get_default().save()
-  ProcessedJobsData().save()
-  UnprocessedJobsData().save()
+  ProcessedJobsData.get_default().save()
+  UnprocessedJobsData.get_default().save()
   
   print("GUILT is now setup!")
   

@@ -4,10 +4,12 @@ from guilt.config.cpu_profiles import CpuProfilesConfig
 from guilt.data.unprocessed_jobs import UnprocessedJobsData, UnprocessedJob
 from guilt.log import logger
 from argparse import _SubParsersAction, Namespace
+from guilt.utility.safe_get import safe_get_string
+from typing import Union
 
 DIRECTIVE_START = "#GUILT --"
 
-def execute(args: Namespace):
+def execute(args: Namespace):    
   path = Path(args.input)
   logger.info(f"Processing batch input file: {path}")
 
@@ -20,11 +22,7 @@ def execute(args: Namespace):
     logger.error(f"Failed to read file '{path}': {e}")
     return
 
-  if content == None:
-    logger.error(f"Failed to read file '{path}'")
-    return
-
-  directives = {}
+  directives: dict[str, Union[str, bool]] = {}
   for line in content:
     if not (line.startswith("#") or line == ""):
       break
@@ -33,8 +31,9 @@ def execute(args: Namespace):
       directives[directive[0]] = directive[1] if len(directive) == 2 else True
   logger.debug(f"Parsed directives: {directives}")
 
-  picked_cpu_profile_name = directives.get("cpu-profile", None)
-  if picked_cpu_profile_name is None:
+  try:
+    picked_cpu_profile_name = safe_get_string(directives, "cpu-profile")
+  except:
     logger.error("No CPU profile directive found in batch file")
     return
 
@@ -43,7 +42,7 @@ def execute(args: Namespace):
     logger.error(f"CPU Profile '{picked_cpu_profile_name}' doesn't exist")
     return
   
-  command = ["sbatch", "--parsable", args.input]
+  command = ["sbatch", "--parsable", str(args.input)]
   logger.info(f"Running command: {' '.join(command)}")
   try:
     result = subprocess.run(command, capture_output=True, text=True)
@@ -58,7 +57,7 @@ def execute(args: Namespace):
   job_id = result.stdout.strip()
   logger.info(f"Job submitted with ID {job_id}")
   
-  unprocessed_jobs_data = UnprocessedJobsData()
+  unprocessed_jobs_data = UnprocessedJobsData.from_file()
   unprocessed_jobs_data.add_job(UnprocessedJob(
     job_id,
     cpu_profile

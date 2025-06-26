@@ -1,5 +1,4 @@
 from guilt.data.processed_jobs import ProcessedJobsData, ProcessedJob
-from typing import List
 from guilt.utility.format_grams import format_grams
 from guilt.utility.format_duration import format_duration
 from datetime import datetime
@@ -7,10 +6,10 @@ import shutil
 import plotext as plt
 from argparse import _SubParsersAction, Namespace
 
-def print_report(jobs: List[ProcessedJob]):
+def print_report(jobs: list[ProcessedJob]):
   total_emissions = sum([job.emissions for job in jobs])
 
-  generation_mix = {}
+  generation_mix: dict[str, float] = {}
   total_duration = 0
 
   for job in jobs:
@@ -42,22 +41,22 @@ def print_report(jobs: List[ProcessedJob]):
   plt.show()
 
 def execute(args: Namespace):
-  processed_jobs_data = ProcessedJobsData()
+  processed_jobs_data = ProcessedJobsData.from_file()
   
-  group_by_key_format = {
+  group_by_key_format: dict[str, str] = {
     "day": "%Y-%m-%d",
     "week": "%G-%V",
     "month": "%Y-%m",
     "year": "%Y"
   }
   
-  time_splits = {}
-  
+  time_splits: dict[str, list[ProcessedJob]] = {}
   for job in processed_jobs_data.jobs.values():
-    key = job.start.strftime(group_by_key_format.get(args.group_by))
+    key = job.start.strftime(str(group_by_key_format.get(args.group_by)))
     
     if key in time_splits:
-      time_splits.get(key).append(job)
+      splits_for_key = time_splits.get(key)
+      if not splits_for_key is None: splits_for_key.append(job)
     else:
       time_splits[key] = [job]
   
@@ -77,9 +76,9 @@ def execute(args: Namespace):
       year, week = map(int, date_str.split("-"))
       date = datetime.fromisocalendar(year, week, 1)
     else:
-      date = datetime.strptime(date_str, group_by_key_format.get(args.group_by))
+      date = datetime.strptime(date_str, str(group_by_key_format.get(args.group_by)))
 
-    print(f"{date.strftime(group_by_title_format.get(args.group_by))}")
+    print(f"{date.strftime(str(group_by_title_format.get(args.group_by)))}")
     print("-" * columns)
 
     print_report(jobs)
@@ -89,7 +88,7 @@ def execute(args: Namespace):
   print("All Time")
   print("-" * columns)
   
-  print_report(processed_jobs_data.jobs.values())
+  print_report(list(processed_jobs_data.jobs.values()))
   
   print("=" * columns)
   

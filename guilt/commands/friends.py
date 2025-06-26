@@ -1,6 +1,6 @@
 from guilt.log import logger
 from pathlib import Path
-from guilt.services.get_entries import GetEntriesService
+from guilt.services.get_entries import GetEntriesService, GetEntriesPasswdResult
 from argparse import _SubParsersAction, Namespace
 
 def execute(args: Namespace):
@@ -12,7 +12,7 @@ def execute(args: Namespace):
     logger.error(f"Error getting users: {e}")
     return
 
-  friends = []
+  friends: list[GetEntriesPasswdResult] = []
   for user in users:
     path = Path(user.home_directory) / ".guilt"
     

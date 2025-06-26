@@ -21,13 +21,13 @@ def execute(args: Namespace):
       if profile:
         cpu_profiles_config.remove_profile(profile)
       else:
-        print(f"Profile '{profile.name}' doesn't exist")
+        print(f"Profile '{name}' doesn't exist")
     elif args.action == "update":
       print("Update a CPU profile")
       name = input("name: ")
       profile = cpu_profiles_config.get_profile(name)
       if profile is None:
-        print(f"Profile '{profile.name}' doesn't exist")
+        print(f"Profile '{name}' doesn't exist")
         return
       tdp = int(input(f"tdp (default={profile.tdp}): ")) or profile.tdp
       cores = int(input("cores: "))

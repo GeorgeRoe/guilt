@@ -13,12 +13,12 @@ def execute(args: Namespace):
   
   jobs = SlurmAccountingService.getAllJobsForUser(user)
   
-  unprocessed_jobs_data = UnprocessedJobsData()
+  unprocessed_jobs_data = UnprocessedJobsData.from_file()
   cpu_profiles_config = CpuProfilesConfig.from_file()
   
   for job in jobs:
     unprocessed_jobs_data.add_job(UnprocessedJob(
-      int(job.job_id),
+      job.job_id,
       cpu_profiles_config.default
     ))
     

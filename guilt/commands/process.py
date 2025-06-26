@@ -7,10 +7,11 @@ from datetime import datetime, timedelta
 from guilt.log import logger
 from guilt.services.slurm_accounting import SlurmAccountingService
 from argparse import _SubParsersAction, Namespace
+from guilt.utility.safe_get import safe_get_float
 
 def execute(args: Namespace):
-  unprocessed_jobs_data = UnprocessedJobsData()
-  processed_jobs_data = ProcessedJobsData()
+  unprocessed_jobs_data = UnprocessedJobsData.from_file()
+  processed_jobs_data = ProcessedJobsData.from_file()
   
   sacct_results = []
   try:
@@ -36,7 +37,13 @@ def execute(args: Namespace):
       logger.error(f"Unprocessed job with ID '{result.job_id}' could not be found")
       return
     
-    wattage = result.resources.get("cpu") * unprocessed_job.cpu_profile.tdp_per_core
+    try:
+      cpu_utilisation = safe_get_float(result.resources, "cpu")
+    except:
+      logger.error("Unprocessed job did not contain CPU utilisation.")
+      return
+    
+    wattage = cpu_utilisation * unprocessed_job.cpu_profile.tdp_per_core
     
     buffer = timedelta(minutes=30)
     forecast_start = result.start_time - buffer
