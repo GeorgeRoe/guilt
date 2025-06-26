@@ -6,7 +6,7 @@ from guilt.utility.format_grams import format_grams
 from datetime import datetime, timedelta
 from guilt.log import logger
 from guilt.services.slurm_accounting import SlurmAccountingService
-from argparse import _SubParsersAction, Namespace
+from argparse import _SubParsersAction, ArgumentParser, Namespace # type: ignore
 from guilt.utility.safe_get import safe_get_float
 
 def execute(args: Namespace):
@@ -99,6 +99,6 @@ def execute(args: Namespace):
   unprocessed_jobs_data.save()
   processed_jobs_data.save()
 
-def register_subparser(subparsers: _SubParsersAction):
+def register_subparser(subparsers: _SubParsersAction[ArgumentParser]):
   subparser = subparsers.add_parser("process")
   subparser.set_defaults(function=execute)

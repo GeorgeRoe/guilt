@@ -3,7 +3,7 @@ import subprocess
 from guilt.config.cpu_profiles import CpuProfilesConfig
 from guilt.data.unprocessed_jobs import UnprocessedJobsData, UnprocessedJob
 from guilt.log import logger
-from argparse import _SubParsersAction, Namespace
+from argparse import _SubParsersAction, ArgumentParser, Namespace # type: ignore
 from guilt.utility.safe_get import safe_get_string
 from typing import Union
 
@@ -65,7 +65,7 @@ def execute(args: Namespace):
   unprocessed_jobs_data.save()
   logger.debug(f"Saved new unprocessed job with ID {job_id}")
 
-def register_subparser(subparsers: _SubParsersAction):
+def register_subparser(subparsers: _SubParsersAction[ArgumentParser]):
   subparser = subparsers.add_parser("batch")
   subparser.add_argument("input", help="Input file or argument for batch command")
   subparser.set_defaults(function=execute)
