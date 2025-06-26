@@ -55,7 +55,7 @@ class ProcessedJob:
     )
 
 class ProcessedJobsData:
-  def __init__(self, jobs: dict[str, ProcessedJob]):
+  def __init__(self, jobs: dict[str, ProcessedJob]) -> None:
     self.jobs = jobs
     
   def to_dict(self) -> dict[str, Any]:

@@ -2,7 +2,7 @@ import subprocess
 from guilt.log import logger
 import json
 from datetime import datetime, timezone
-from guilt.utility.safe_get import safe_get_string, safe_get_datetime, safe_get_float, safe_get_dict, safe_get_list
+from guilt.utility.safe_get import safe_get_string, safe_get_float, safe_get_dict, safe_get_list
 from typing import Any, cast, Union
 
 CommandParameters = dict[str, Union[str, int, float, list[str], list[int], list[float]]]
@@ -19,9 +19,9 @@ class SlurmAccountingResult:
     job_id = safe_get_string(data, "job_id")
         
     time = safe_get_dict(data, "time")
-    
-    start = safe_get_datetime(time, "start").replace(tzinfo=timezone.utc)
-    end = safe_get_datetime(time, "end").replace(tzinfo=timezone.utc)
+
+    start = datetime.fromtimestamp(safe_get_float(time, "start")).replace(tzinfo=timezone.utc)
+    end = datetime.fromtimestamp(safe_get_float(time, "end")).replace(tzinfo=timezone.utc)
     
     resources = data.get("tres")
     if resources is None:

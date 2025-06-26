@@ -33,6 +33,3 @@ def safe_get_float(data: dict[str, Any], key: str) -> float:
 
 def safe_get_int(data: dict[str, Any], key: str) -> int:
   return int(safe_get_string(data, key))
-
-def safe_get_datetime(data: dict[str, Any], key: str) -> datetime:
-  return datetime.fromtimestamp(safe_get_float(data, key))
