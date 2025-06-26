@@ -98,7 +98,7 @@ class CpuProfilesConfig:
     return cls(default, profiles)
 
   @classmethod
-  def from_file(cls, path: Path = PATH):
+  def from_file(cls, path: Path = PATH) -> "CpuProfilesConfig":
     data = None
 
     if path.exists():
