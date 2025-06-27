@@ -52,7 +52,6 @@ class IpInfoService:
       response = await client.get("http://ipinfo.io")
 
       if response.status_code == 200:
-        print(response.json())
         return response.json()
       else:
         raise Exception(f"Error {response.status_code}: {response.text}")
