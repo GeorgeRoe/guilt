@@ -1,7 +1,8 @@
 from pathlib import Path
 import shutil
 from guilt.log import logger
-from argparse import _SubParsersAction, ArgumentParser, Namespace # type: ignore
+from argparse import Namespace
+from guilt.utility.subparser_adder import SubparserAdder
 
 def execute(args: Namespace):
   guilt_dir = Path.home() / ".guilt"
@@ -24,6 +25,6 @@ def execute(args: Namespace):
     print(f"{guilt_dir} was removed!")
     print("\nWaving goodbye from GUILT software.")
     
-def register_subparser(subparsers: _SubParsersAction[ArgumentParser]):
+def register_subparser(subparsers: SubparserAdder):
   subparser = subparsers.add_parser("teardown")
   subparser.set_defaults(function=execute)

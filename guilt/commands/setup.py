@@ -3,7 +3,8 @@ from guilt.constants import LOGO, CENTERED_TAGLINE
 from guilt.data.processed_jobs import ProcessedJobsData
 from guilt.data.unprocessed_jobs import UnprocessedJobsData
 from guilt.config.cpu_profiles import CpuProfilesConfig
-from argparse import _SubParsersAction, ArgumentParser, Namespace # type: ignore
+from argparse import Namespace
+from guilt.utility.subparser_adder import SubparserAdder
 
 def execute(args: Namespace):
   guilt_dir = Path.home() / ".guilt"
@@ -20,7 +21,7 @@ def execute(args: Namespace):
   UnprocessedJobsData.get_default().save()
   
   print("GUILT is now setup!")
-  
-def register_subparser(subparsers: _SubParsersAction[ArgumentParser]):
+
+def register_subparser(subparsers: SubparserAdder):
   subparser = subparsers.add_parser("setup")
   subparser.set_defaults(function=execute)

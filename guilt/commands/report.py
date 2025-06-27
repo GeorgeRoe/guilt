@@ -4,7 +4,8 @@ from guilt.utility.format_duration import format_duration
 from datetime import datetime
 import shutil
 import plotext as plt
-from argparse import _SubParsersAction, ArgumentParser, Namespace # type: ignore
+from argparse import Namespace
+from guilt.utility.subparser_adder import SubparserAdder
 
 def print_report(jobs: list[ProcessedJob]):
   total_emissions = sum([job.emissions for job in jobs])
@@ -92,7 +93,7 @@ def execute(args: Namespace):
   
   print("=" * columns)
   
-def register_subparser(subparsers: _SubParsersAction[ArgumentParser]):
+def register_subparser(subparsers: SubparserAdder):
   subparser = subparsers.add_parser("report")
   subparser.add_argument(
     "--group-by",

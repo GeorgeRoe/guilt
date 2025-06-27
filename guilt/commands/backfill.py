@@ -3,7 +3,8 @@ from guilt.config.cpu_profiles import CpuProfilesConfig
 from guilt.log import logger
 import os
 from guilt.services.slurm_accounting import SlurmAccountingService
-from argparse import _SubParsersAction, ArgumentParser, Namespace # type: ignore
+from argparse import Namespace
+from guilt.utility.subparser_adder import SubparserAdder
 
 def execute(args: Namespace):
   user = os.getenv("USER", None)
@@ -24,6 +25,6 @@ def execute(args: Namespace):
     
   unprocessed_jobs_data.save()
   
-def register_subparser(subparsers: _SubParsersAction[ArgumentParser]):
+def register_subparser(subparsers: SubparserAdder):
   subparser = subparsers.add_parser("backfill")
   subparser.set_defaults(function=execute)
