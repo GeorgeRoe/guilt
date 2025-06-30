@@ -1,38 +1,14 @@
+from dataclasses import dataclass
+
+@dataclass
 class IpInfoResult:
-  def __init__(
-    self,
-    ip: str,
-    hostname: str,
-    city: str,
-    region: str,
-    country: str,
-    latitude: float,
-    longitude: float,
-    organisation: str,
-    postal: str,
-    timezone: str
-  ):
-    self.ip = ip
-    self.hostname = hostname
-    self.city = city
-    self.region = region
-    self.country = country
-    self.latitude = latitude
-    self.longitude = longitude
-    self.organisation = organisation
-    self.postal = postal
-    self.timezone = timezone
-    
-  def __repr__(self) -> str:
-    return (
-      f"IpInfoResult(ip={self.ip}, "
-      f"hostname={self.hostname}, "
-      f"city={self.city}, "
-      f"region={self.region}, "
-      f"country={self.country}, "
-      f"latitude={self.latitude}, "
-      f"longitude={self.longitude}, "
-      f"organisation={self.organisation}, "
-      f"postal={self.postal}, "
-      f"timezone={self.timezone})"
-    )
+  ip: str
+  hostname: str
+  city: str
+  region: str
+  country: str
+  latitude: float
+  longitude: float
+  organisation: str
+  postal: str
+  timezone: str
