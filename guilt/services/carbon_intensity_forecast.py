@@ -4,7 +4,7 @@ import httpx
 import asyncio
 from guilt.log import logger
 from guilt.utility.safe_get import safe_get_dict
-from guilt.models.carbon_intensity.forecast_result import CarbonIntensityForecastResult
+from guilt.models.carbon_intensity_forecast_result import CarbonIntensityForecastResult
 from guilt.mappers.carbon_intensity_forecast_result import MapToCarbonIntensityForecastResult
 
 class CarbonIntensityForecastService:

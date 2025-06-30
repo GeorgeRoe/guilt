@@ -1,7 +1,7 @@
 from typing import Any, cast
 from guilt.utility.safe_get import safe_get_int, safe_get_string, safe_get_list
-from guilt.models.carbon_intensity.forecast_result import CarbonIntensityForecastResult
-from guilt.models.carbon_intensity.time_segment import CarbonIntensityTimeSegment
+from guilt.models.carbon_intensity_forecast_result import CarbonIntensityForecastResult
+from guilt.models.carbon_intensity_time_segment import CarbonIntensityTimeSegment
 from guilt.mappers.carbon_intensity_time_segment import MapToCarbonIntensityTimeSegment
 
 class MapToCarbonIntensityForecastResult:

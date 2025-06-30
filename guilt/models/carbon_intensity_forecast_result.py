@@ -1,4 +1,4 @@
-from guilt.models.carbon_intensity.time_segment import CarbonIntensityTimeSegment
+from guilt.models.carbon_intensity_time_segment import CarbonIntensityTimeSegment
 
 class CarbonIntensityForecastResult:
   def __init__(

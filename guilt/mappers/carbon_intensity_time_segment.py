@@ -1,7 +1,7 @@
 from typing import Any, cast
 from datetime import datetime
 from guilt.utility.safe_get import safe_get_string, safe_get_dict, safe_get_float, safe_get_list
-from guilt.models.carbon_intensity.time_segment import CarbonIntensityTimeSegment
+from guilt.models.carbon_intensity_time_segment import CarbonIntensityTimeSegment
 
 class MapToCarbonIntensityTimeSegment:
   @classmethod
