@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 import plotext as plt
 import shutil
 from guilt.services.ip_info import IpInfoService
-from guilt.carbon_dioxide_forecast import CarbonDioxideForecast
+from guilt.services.carbon_intensity_forecast import CarbonIntensityForecastService
 from guilt.log import logger
 from argparse import Namespace
 from guilt.utility.subparser_adder import SubparserAdder
@@ -15,10 +15,10 @@ def execute(args: Namespace):
   
   logger.debug(f"Time range: {start} -> {end}")
 
-  forecast = CarbonDioxideForecast(start, end, ip_info.postal)
+  forecast = CarbonIntensityForecastService.fetch_data(start, end, ip_info.postal)
 
-  times_dt = [datetime.strptime(entry.from_time, "%Y-%m-%dT%H:%MZ") for entry in forecast.entries]
-  values = [entry.intensity.forecast for entry in forecast.entries]
+  times_dt = [segment.from_time for segment in forecast.segments]
+  values = [segment.intensity for segment in forecast.segments]
 
   start_time = times_dt[0]
   x = [(t - start_time).total_seconds() / 3600 for t in times_dt]
@@ -42,10 +42,9 @@ def execute(args: Namespace):
 
   print("\nBest Times:")
 
-  best = sorted(forecast.entries, key=lambda x: x.intensity.forecast)[:5]
-  for entry in best:
-    time = datetime.strptime(entry.from_time, "%Y-%m-%dT%H:%MZ")
-    print(f"{time.strftime('%a %d %b %H:%M')} → {entry.intensity.forecast} gCO₂/kWh")
+  best = sorted(forecast.segments, key=lambda segment: segment.intensity)[:5]
+  for segment in best:
+    print(f"{segment.from_time.strftime('%a %d %b %H:%M')} → {segment.intensity} gCO₂/kWh")
 
 def register_subparser(subparsers: SubparserAdder):
   subparser = subparsers.add_parser("forecast")

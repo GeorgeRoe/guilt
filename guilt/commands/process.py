@@ -1,11 +1,11 @@
 from guilt.data.unprocessed_jobs import UnprocessedJobsData
 from guilt.data.processed_jobs import ProcessedJobsData, ProcessedJob
 from guilt.services.ip_info import IpInfoService
-from guilt.carbon_dioxide_forecast import CarbonDioxideForecast
 from guilt.utility.format_grams import format_grams
 from datetime import datetime, timedelta
 from guilt.log import logger
 from guilt.services.slurm_accounting import SlurmAccountingService
+from guilt.services.carbon_intensity_forecast import CarbonIntensityForecastService
 from argparse import Namespace
 from guilt.utility.subparser_adder import SubparserAdder
 from guilt.utility.safe_get import safe_get_float
@@ -50,28 +50,26 @@ def execute(args: Namespace):
     forecast_start = result.start_time - buffer
     forecast_end = result.end_time + buffer
 
-    forecast = CarbonDioxideForecast(forecast_start, forecast_end, ip_info.postal)
+    forecast = CarbonIntensityForecastService.fetch_data(forecast_start, forecast_end, ip_info.postal)
     
     emissions = 0.0 # kg of CO2
     kwh = 0.0
     
-    total_mix = {}
+    total_mix: dict[str, float] = {}
     total_mix_seconds = 0.0
     
-    for entry in forecast.entries:
-      entry_start = datetime.fromisoformat(entry.from_time.replace("Z", "+00:00"))
-      entry_end = datetime.fromisoformat(entry.to_time.replace("Z", "+00:00"))
-      overlap_start = max(result.start_time, entry_start)
-      overlap_end = min(result.end_time, entry_end)
+    for segment in forecast.segments:
+      overlap_start = max(result.start_time, segment.from_time)
+      overlap_end = min(result.end_time, segment.to_time)
       overlap_duration = (overlap_end - overlap_start).total_seconds()
       
       if overlap_duration > 0:
         overlap_hours = overlap_duration / 3600
         overlap_kwh = (wattage * overlap_hours) / 1000
         kwh += overlap_kwh
-        emissions += overlap_kwh * entry.intensity.forecast
+        emissions += overlap_kwh * segment.intensity
         
-        for source, percent in entry.generationmix.items():
+        for source, percent in segment.generation_mix.items():
           total_mix[source] = total_mix.get(source, 0) + percent * overlap_duration
         total_mix_seconds += overlap_duration
     
