@@ -5,7 +5,7 @@ import os
 from guilt.services.slurm_accounting import SlurmAccountingService
 from argparse import Namespace
 from guilt.utility.subparser_adder import SubparserAdder
-from guilt.mappers.slurm_accounting_result import FromSlurmAccountingResult
+from guilt.mappers.unprocessed_job import MapToUnprocessedJob
 
 def execute(args: Namespace):
   user = os.getenv("USER", None)
@@ -17,7 +17,7 @@ def execute(args: Namespace):
   cpu_profiles_config = CpuProfilesConfig.from_file()
   
   for result in SlurmAccountingService.getAllJobsForUser(user):
-    unprocessed_job = FromSlurmAccountingResult.to_unprocessed_job(result, cpu_profiles_config.default)
+    unprocessed_job = MapToUnprocessedJob.from_slurm_accounting_result(result, cpu_profiles_config.default)
     unprocessed_jobs_data.add_job(unprocessed_job)
     
   unprocessed_jobs_data.save()
