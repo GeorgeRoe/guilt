@@ -2,7 +2,7 @@ from guilt.data.unprocessed_jobs import UnprocessedJobsData
 from guilt.data.processed_jobs import ProcessedJobsData, ProcessedJob
 from guilt.services.ip_info import IpInfoService
 from guilt.utility.format_grams import format_grams
-from datetime import datetime, timedelta
+from datetime import timedelta
 from guilt.log import logger
 from guilt.services.slurm_accounting import SlurmAccountingService
 from guilt.services.carbon_intensity_forecast import CarbonIntensityForecastService
