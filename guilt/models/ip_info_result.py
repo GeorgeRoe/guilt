@@ -22,3 +22,17 @@ class IpInfoResult:
     self.organisation = organisation
     self.postal = postal
     self.timezone = timezone
+    
+  def __repr__(self) -> str:
+    return (
+      f"IpInfoResult(ip={self.ip}, "
+      f"hostname={self.hostname}, "
+      f"city={self.city}, "
+      f"region={self.region}, "
+      f"country={self.country}, "
+      f"latitude={self.latitude}, "
+      f"longitude={self.longitude}, "
+      f"organisation={self.organisation}, "
+      f"postal={self.postal}, "
+      f"timezone={self.timezone})"
+    )
