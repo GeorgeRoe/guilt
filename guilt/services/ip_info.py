@@ -1,23 +1,14 @@
 import httpx
 import asyncio
 from guilt.utility.safe_get import safe_get_string
+from guilt.models.ip_info_result import IpInfoResult
 from typing import Any
 
-class IpInfoResult:
-  def __init__(self, ip: str, hostname: str, city: str, region: str, country: str, latitude: float, longitude: float, organisation: str, postal: str, timezone: str):
-    self.ip = ip
-    self.hostname = hostname
-    self.city = city
-    self.region = region
-    self.country = country
-    self.latitude = latitude
-    self.longitude = longitude
-    self.organisation = organisation
-    self.postal = postal
-    self.timezone = timezone
-  
+class IpInfoService:
   @classmethod
-  def fromDict(cls, data: dict[str, Any]):
+  def fetchData(cls) -> IpInfoResult:
+    data = asyncio.run(cls.request())
+    
     ip = safe_get_string(data, "ip")
     hostname = safe_get_string(data, "hostname")
     city = safe_get_string(data, "city")
@@ -28,7 +19,7 @@ class IpInfoResult:
     postal = safe_get_string(data, "postal")
     timezone = safe_get_string(data, "timezone")
     
-    return cls(
+    return IpInfoResult(
       ip,
       hostname,
       city,
@@ -40,11 +31,6 @@ class IpInfoResult:
       postal,
       timezone
     )
-
-class IpInfoService:
-  @classmethod
-  def fetchData(cls) -> IpInfoResult:
-    return IpInfoResult.fromDict(asyncio.run(cls.request()))
 
   @classmethod
   async def request(cls) -> dict[str, Any]:
