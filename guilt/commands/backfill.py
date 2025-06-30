@@ -1,27 +1,24 @@
-from guilt.data.unprocessed_jobs import UnprocessedJobsData, UnprocessedJob
+from guilt.data.unprocessed_jobs import UnprocessedJobsData
 from guilt.config.cpu_profiles import CpuProfilesConfig
 from guilt.log import logger
 import os
 from guilt.services.slurm_accounting import SlurmAccountingService
 from argparse import Namespace
 from guilt.utility.subparser_adder import SubparserAdder
+from guilt.mappers.slurm_accounting_result import FromSlurmAccountingResult
 
 def execute(args: Namespace):
   user = os.getenv("USER", None)
   if user is None:
     logger.error("Couldn't get user environment variable")
     return
-  
-  jobs = SlurmAccountingService.getAllJobsForUser(user)
-  
+    
   unprocessed_jobs_data = UnprocessedJobsData.from_file()
   cpu_profiles_config = CpuProfilesConfig.from_file()
   
-  for job in jobs:
-    unprocessed_jobs_data.add_job(UnprocessedJob(
-      job.job_id,
-      cpu_profiles_config.default
-    ))
+  for result in SlurmAccountingService.getAllJobsForUser(user):
+    unprocessed_job = FromSlurmAccountingResult.to_unprocessed_job(result, cpu_profiles_config.default)
+    unprocessed_jobs_data.add_job(unprocessed_job)
     
   unprocessed_jobs_data.save()
   
