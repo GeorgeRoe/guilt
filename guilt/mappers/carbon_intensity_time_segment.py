@@ -4,8 +4,8 @@ from guilt.utility.safe_get import safe_get_string, safe_get_dict, safe_get_floa
 from guilt.models.carbon_intensity_time_segment import CarbonIntensityTimeSegment
 
 class MapToCarbonIntensityTimeSegment:
-  @classmethod
-  def from_api_dict(cls, data: dict[str, Any]) -> CarbonIntensityTimeSegment:
+  @staticmethod
+  def from_api_dict(data: dict[str, Any]) -> CarbonIntensityTimeSegment:
     from_str = safe_get_string(data, "from")
     to_str = safe_get_string(data, "to")
     

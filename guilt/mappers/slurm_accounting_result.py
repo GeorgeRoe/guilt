@@ -4,8 +4,8 @@ from guilt.utility.safe_get import safe_get_string, safe_get_dict, safe_get_floa
 from guilt.models.slurm_accounting_result import SlurmAccountingResult
 
 class MapToSlurmAccountingResult:
-  @classmethod
-  def from_command_dict(cls, data: dict[str, Any]) -> SlurmAccountingResult:
+  @staticmethod
+  def from_command_dict(data: dict[str, Any]) -> SlurmAccountingResult:
     job_id = safe_get_string(data, "job_id")
         
     time = safe_get_dict(data, "time")

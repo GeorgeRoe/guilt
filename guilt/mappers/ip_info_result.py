@@ -3,8 +3,8 @@ from guilt.models.ip_info_result import IpInfoResult
 from guilt.utility.safe_get import safe_get_string
 
 class MapToIpInfoResult:
-  @classmethod
-  def from_api_dict(cls, data: dict[str, Any]) -> IpInfoResult:
+  @staticmethod
+  def from_api_dict(data: dict[str, Any]) -> IpInfoResult:
     ip = safe_get_string(data, "ip")
     hostname = safe_get_string(data, "hostname")
     city = safe_get_string(data, "city")

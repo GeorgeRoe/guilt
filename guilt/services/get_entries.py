@@ -2,9 +2,9 @@ import subprocess
 from pathlib import Path
 from guilt.models.get_entires_password_result import GetEntriesPasswordResult
 
-class GetEntriesService:
-  @classmethod
-  def password(cls) -> list[GetEntriesPasswordResult]:
+class GetEntriesService: 
+  @staticmethod
+  def password() -> list[GetEntriesPasswordResult]:
     command = ["getent", "passwd"]
       
     result = subprocess.run(command, capture_output=True, text=True)

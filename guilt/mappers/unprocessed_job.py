@@ -3,9 +3,8 @@ from guilt.data.unprocessed_jobs import UnprocessedJob
 from guilt.config.cpu_profiles import CpuProfile
     
 class MapToUnprocessedJob:
-  @classmethod
+  @staticmethod
   def from_slurm_accounting_result(
-    cls,
     slurm_accounting_result: SlurmAccountingResult,
     cpu_profile: CpuProfile
   ) -> UnprocessedJob:

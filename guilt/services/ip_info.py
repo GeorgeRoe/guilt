@@ -9,8 +9,8 @@ class IpInfoService:
   def fetchData(cls) -> IpInfoResult:
     return MapToIpInfoResult.from_api_dict(asyncio.run(cls.request()))
 
-  @classmethod
-  async def request(cls) -> dict[str, Any]:
+  @staticmethod
+  async def request() -> dict[str, Any]:
     async with httpx.AsyncClient() as client:
       response = await client.get("http://ipinfo.io")
 

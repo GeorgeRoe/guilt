@@ -37,8 +37,8 @@ class SlurmAccountingService:
 
     return [MapToSlurmAccountingResult.from_command_dict(job_data) for job_data in jobs_data]
     
-  @classmethod
-  def runCommand(cls, options: CommandParameters):
+  @staticmethod
+  def runCommand(options: CommandParameters):
     command = ["sacct"]
     
     for key, value in options.items():

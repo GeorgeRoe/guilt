@@ -5,8 +5,8 @@ from guilt.models.carbon_intensity_time_segment import CarbonIntensityTimeSegmen
 from guilt.mappers.carbon_intensity_time_segment import MapToCarbonIntensityTimeSegment
 
 class MapToCarbonIntensityForecastResult:
-  @classmethod
-  def from_api_dict(cls, data: dict[str, Any]) -> CarbonIntensityForecastResult:
+  @staticmethod
+  def from_api_dict(data: dict[str, Any]) -> CarbonIntensityForecastResult:
     region_id = safe_get_int(data, "regionid")
     short_name = safe_get_string(data, "shortname")
     postcode = safe_get_string(data, "postcode")
