@@ -1,5 +1,5 @@
-from pathlib import Path
 from guilt.constants.branding import LOGO, CENTERED_TAGLINE
+from guilt.constants.paths import GUILT_DIRECTORY
 from argparse import Namespace
 from guilt.utility.subparser_adder import SubparserAdder
 from guilt.dependencies.manager import dependency_manager
@@ -7,9 +7,7 @@ from guilt.dependencies.manager import dependency_manager
 setup_service = dependency_manager.service.setup
 
 def execute(args: Namespace):
-  guilt_dir = Path.home() / ".guilt"
-
-  if guilt_dir.exists():
+  if GUILT_DIRECTORY.exists():
     print("Error: GUILT has already been setup!")
     return
 
