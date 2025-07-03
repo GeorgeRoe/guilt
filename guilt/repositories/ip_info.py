@@ -5,12 +5,10 @@ from guilt.mappers.ip_info_result import MapToIpInfoResult
 from typing import Any
 
 class IpInfoRepository:
-  @classmethod
-  def fetchData(cls) -> IpInfoResult:
-    return MapToIpInfoResult.from_api_dict(asyncio.run(cls.request()))
+  def fetch_data(self) -> IpInfoResult:
+    return MapToIpInfoResult.from_api_dict(asyncio.run(self.request()))
 
-  @staticmethod
-  async def request() -> dict[str, Any]:
+  async def request(self) -> dict[str, Any]:
     async with httpx.AsyncClient() as client:
       response = await client.get("http://ipinfo.io")
 

@@ -1,21 +1,23 @@
 from datetime import datetime, timedelta, timezone
 import plotext as plt
 import shutil
-from guilt.repositories.ip_info import IpInfoRepository
-from guilt.repositories.carbon_intensity_forecast import CarbonIntensityForecastRepository
 from guilt.log import logger
 from argparse import Namespace
 from guilt.utility.subparser_adder import SubparserAdder
+from guilt.dependency_manager import dependency_manager
+
+ip_info_repository = dependency_manager.repository.ip_info
+carbon_intensity_forecast_repository = dependency_manager.repository.carbon_intensity_forecast
 
 def execute(args: Namespace):
-  ip_info = IpInfoRepository.fetchData()
+  ip_info = ip_info_repository.fetch_data()
 
   start = datetime.now(timezone.utc)
   end = start + timedelta(hours=12)
   
   logger.debug(f"Time range: {start} -> {end}")
 
-  forecast = CarbonIntensityForecastRepository.fetch_data(start, end, ip_info.postal)
+  forecast = carbon_intensity_forecast_repository.fetch_data(start, end, ip_info.postal)
 
   times_dt = [segment.from_time for segment in forecast.segments]
   values = [segment.intensity for segment in forecast.segments]

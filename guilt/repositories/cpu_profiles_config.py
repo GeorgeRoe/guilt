@@ -9,8 +9,7 @@ import json
 class CpuProfilesConfigRepository:
   DEFAULT_PATH: Final[Path] = Path.home() / ".guilt" / "cpu_profiles.json"
   
-  @staticmethod
-  def get_default_data() -> CpuProfilesConfig:
+  def get_default_data(self) -> CpuProfilesConfig:
     default = CpuProfile("AMD EPYC 9654", 360, 96)
     
     profiles = [
@@ -22,14 +21,12 @@ class CpuProfilesConfigRepository:
     
     return CpuProfilesConfig(default, {profile.name: profile for profile in profiles})
   
-  @classmethod
-  def fetch_data(cls) -> CpuProfilesConfig:
-    with cls.DEFAULT_PATH.open("r") as file:
+  def fetch_data(self) -> CpuProfilesConfig:
+    with self.DEFAULT_PATH.open("r") as file:
       return MapToCpuProfilesConfig.from_json_file_contents(json.load(file))
   
-  @classmethod
-  def submit_data(cls, cpu_profiles_config: CpuProfilesConfig) -> None:
-    cls.DEFAULT_PATH.parent.mkdir(parents=True, exist_ok=True)
+  def submit_data(self, cpu_profiles_config: CpuProfilesConfig) -> None:
+    self.DEFAULT_PATH.parent.mkdir(parents=True, exist_ok=True)
     
-    with cls.DEFAULT_PATH.open("w") as file:
+    with self.DEFAULT_PATH.open("w") as file:
       json.dump(MapToJsonFileContents.from_cpu_profiles_config(cpu_profiles_config), file, indent=2)

@@ -1,4 +1,3 @@
-from guilt.repositories.processed_jobs_data import ProcessedJobsDataRepository
 from guilt.models.processed_job import ProcessedJob
 from guilt.utility.format_grams import format_grams
 from guilt.utility.format_duration import format_duration
@@ -7,12 +6,15 @@ import shutil
 import plotext as plt
 from argparse import Namespace
 from guilt.utility.subparser_adder import SubparserAdder
+from guilt.dependency_manager import dependency_manager
+
+processed_jobs_data_repository = dependency_manager.repository.processed_jobs_data
 
 def print_report(jobs: list[ProcessedJob]):
   total_emissions = sum([job.emissions for job in jobs])
 
   generation_mix: dict[str, float] = {}
-  total_duration = 0
+  total_duration = float(0)
 
   for job in jobs:
     duration = (job.end - job.start).total_seconds()
@@ -43,7 +45,7 @@ def print_report(jobs: list[ProcessedJob]):
   plt.show()
 
 def execute(args: Namespace):
-  processed_jobs_data = ProcessedJobsDataRepository.fetch_data()
+  processed_jobs_data = processed_jobs_data_repository.fetch_data()
   
   group_by_key_format: dict[str, str] = {
     "day": "%Y-%m-%d",

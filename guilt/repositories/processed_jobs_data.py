@@ -8,18 +8,15 @@ import json
 class ProcessedJobsDataRepository:
   DEFAULT_PATH: Final[Path] = Path.home() / ".guilt" / "processed_jobs.json"
   
-  @staticmethod
-  def get_default_data() -> ProcessedJobsData:
+  def get_default_data(self) -> ProcessedJobsData:
     return ProcessedJobsData({})
   
-  @classmethod
-  def fetch_data(cls) -> ProcessedJobsData:
-    with cls.DEFAULT_PATH.open("r") as file:
+  def fetch_data(self) -> ProcessedJobsData:
+    with self.DEFAULT_PATH.open("r") as file:
       return MapToProcessedJobsData.from_json_file_contents(json.load(file))
     
-  @classmethod
-  def submit_data(cls, processed_jobs_data: ProcessedJobsData) -> None:
-    cls.DEFAULT_PATH.parent.mkdir(parents=True, exist_ok=True)
+  def submit_data(self, processed_jobs_data: ProcessedJobsData) -> None:
+    self.DEFAULT_PATH.parent.mkdir(parents=True, exist_ok=True)
     
-    with cls.DEFAULT_PATH.open("w") as file:
+    with self.DEFAULT_PATH.open("w") as file:
       json.dump(MapToJsonFileContents.from_processed_jobs_data(processed_jobs_data), file, indent=2)

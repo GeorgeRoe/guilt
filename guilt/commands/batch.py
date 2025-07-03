@@ -1,13 +1,15 @@
 from pathlib import Path
 import subprocess
-from guilt.repositories.cpu_profiles_config import CpuProfilesConfigRepository
-from guilt.repositories.unprocessed_jobs_data import UnprocessedJobsDataRepository
 from guilt.models.unprocessed_job import UnprocessedJob
 from guilt.log import logger
 from argparse import Namespace
 from guilt.utility.subparser_adder import SubparserAdder
 from guilt.utility.safe_get import safe_get_string
 from typing import Union
+from guilt.dependency_manager import dependency_manager
+
+cpu_profiles_config_repository = dependency_manager.repository.cpu_profiles_config
+unprocessed_jobs_data_repository = dependency_manager.repository.unprocessed_jobs_data
 
 DIRECTIVE_START = "#GUILT --"
 
@@ -39,7 +41,7 @@ def execute(args: Namespace):
     logger.error("No CPU profile directive found in batch file")
     return
 
-  cpu_profile = CpuProfilesConfigRepository.fetch_data().profiles.get(picked_cpu_profile_name)
+  cpu_profile = cpu_profiles_config_repository.fetch_data().profiles.get(picked_cpu_profile_name)
   if cpu_profile is None:
     logger.error(f"CPU Profile '{picked_cpu_profile_name}' doesn't exist")
     return
@@ -59,7 +61,7 @@ def execute(args: Namespace):
   job_id = result.stdout.strip()
   logger.info(f"Job submitted with ID {job_id}")
   
-  unprocessed_jobs_data = UnprocessedJobsDataRepository.fetch_data()
+  unprocessed_jobs_data = unprocessed_jobs_data_repository.fetch_data()
   if job_id in unprocessed_jobs_data.jobs.keys():
     logger.error(f"Unprocessed job with job id '{job_id}' already exists.")
     return
@@ -68,7 +70,7 @@ def execute(args: Namespace):
     job_id,
     cpu_profile
   )
-  UnprocessedJobsDataRepository.submit_data(unprocessed_jobs_data)
+  unprocessed_jobs_data_repository.submit_data(unprocessed_jobs_data)
   logger.debug(f"Saved new unprocessed job with ID {job_id}")
 
 def register_subparser(subparsers: SubparserAdder):
