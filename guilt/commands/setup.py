@@ -1,7 +1,7 @@
 from pathlib import Path
 from guilt.constants import LOGO, CENTERED_TAGLINE
-from guilt.data.processed_jobs import ProcessedJobsData
-from guilt.data.unprocessed_jobs import UnprocessedJobsData
+from guilt.services.processed_jobs_data import ProcessedJobsDataService
+from guilt.services.unprocessed_jobs_data import UnprocessedJobsDataService
 from guilt.services.cpu_profiles_config import CpuProfilesConfigService
 from argparse import Namespace
 from guilt.utility.subparser_adder import SubparserAdder
@@ -17,8 +17,8 @@ def execute(args: Namespace):
   print("\033[0m")
 
   CpuProfilesConfigService.submit_data(CpuProfilesConfigService.get_default_data())
-  ProcessedJobsData.get_default().save()
-  UnprocessedJobsData.get_default().save()
+  ProcessedJobsDataService.submit_data(ProcessedJobsDataService.get_default_data())
+  UnprocessedJobsDataService.submit_data(UnprocessedJobsDataService.get_default_data())
   
   print("GUILT is now setup!")
 

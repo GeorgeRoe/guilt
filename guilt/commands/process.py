@@ -1,5 +1,6 @@
-from guilt.data.unprocessed_jobs import UnprocessedJobsData
-from guilt.data.processed_jobs import ProcessedJobsData, ProcessedJob
+from guilt.services.processed_jobs_data import ProcessedJobsDataService
+from guilt.services.unprocessed_jobs_data import UnprocessedJobsDataService
+from guilt.models.processed_job import ProcessedJob
 from guilt.services.ip_info import IpInfoService
 from guilt.utility.format_grams import format_grams
 from datetime import timedelta
@@ -11,8 +12,8 @@ from guilt.utility.subparser_adder import SubparserAdder
 from guilt.utility.safe_get import safe_get_float
 
 def execute(args: Namespace):
-  unprocessed_jobs_data = UnprocessedJobsData.from_file()
-  processed_jobs_data = ProcessedJobsData.from_file()
+  unprocessed_jobs_data = UnprocessedJobsDataService.fetch_data()
+  processed_jobs_data = ProcessedJobsDataService.fetch_data()
   
   sacct_results = []
   try:
@@ -87,16 +88,20 @@ def execute(args: Namespace):
       average_mix
     )
     
-    if not processed_jobs_data.add_job(processed_job):
-      logger.error("Failed to add processed job")
+    if processed_job.job_id in processed_jobs_data.jobs.keys():
+      logger.error(f"Processed job with job id '{processed_job.job_id}' already exists")
       return
-    
-    if not unprocessed_jobs_data.remove_job(result.job_id):
-      logger.error("Failed to remove unprocessed job")
+    else:
+      processed_jobs_data.jobs[processed_job.job_id] = processed_job
+      
+    if not processed_job.job_id in unprocessed_jobs_data.jobs.keys():
+      logger.error(f"Unprocessed job with job id '{processed_job.job_id}' cannot be removed as it doesn't exist")
       return
+    else:
+      del unprocessed_jobs_data.jobs[processed_job.job_id]
         
-  unprocessed_jobs_data.save()
-  processed_jobs_data.save()
+  UnprocessedJobsDataService.submit_data(unprocessed_jobs_data)
+  ProcessedJobsDataService.submit_data(processed_jobs_data)
 
 def register_subparser(subparsers: SubparserAdder):
   subparser = subparsers.add_parser("process")

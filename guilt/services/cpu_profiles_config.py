@@ -28,7 +28,7 @@ class CpuProfilesConfigService:
       return MapToCpuProfilesConfig.from_json_file_contents(json.load(file))
   
   @classmethod
-  def submit_data(cls, cpu_profiles_config: CpuProfilesConfig):
+  def submit_data(cls, cpu_profiles_config: CpuProfilesConfig) -> None:
     cls.DEFAULT_PATH.parent.mkdir(parents=True, exist_ok=True)
     
     with cls.DEFAULT_PATH.open("w") as file:

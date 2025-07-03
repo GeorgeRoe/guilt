@@ -1,4 +1,4 @@
-from guilt.data.unprocessed_jobs import UnprocessedJobsData
+from guilt.services.unprocessed_jobs_data import UnprocessedJobsDataService
 from guilt.services.cpu_profiles_config import CpuProfilesConfigService
 from guilt.log import logger
 import os
@@ -13,14 +13,16 @@ def execute(args: Namespace):
     logger.error("Couldn't get user environment variable")
     return
     
-  unprocessed_jobs_data = UnprocessedJobsData.from_file()
+  unprocessed_jobs_data = UnprocessedJobsDataService.fetch_data()
   cpu_profiles_config = CpuProfilesConfigService.fetch_data()
   
   for result in SlurmAccountingService.getAllJobsForUser(user):
     unprocessed_job = MapToUnprocessedJob.from_slurm_accounting_result(result, cpu_profiles_config.default)
-    unprocessed_jobs_data.add_job(unprocessed_job)
     
-  unprocessed_jobs_data.save()
+    if not unprocessed_job.job_id in unprocessed_jobs_data.jobs.keys():
+      unprocessed_jobs_data.jobs[unprocessed_job.job_id] = unprocessed_job
+    
+  UnprocessedJobsDataService.submit_data(unprocessed_jobs_data)
   
 def register_subparser(subparsers: SubparserAdder):
   subparser = subparsers.add_parser("backfill")

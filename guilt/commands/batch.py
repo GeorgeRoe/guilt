@@ -1,7 +1,8 @@
 from pathlib import Path
 import subprocess
 from guilt.services.cpu_profiles_config import CpuProfilesConfigService
-from guilt.data.unprocessed_jobs import UnprocessedJobsData, UnprocessedJob
+from guilt.services.unprocessed_jobs_data import UnprocessedJobsDataService
+from guilt.models.unprocessed_job import UnprocessedJob
 from guilt.log import logger
 from argparse import Namespace
 from guilt.utility.subparser_adder import SubparserAdder
@@ -10,7 +11,7 @@ from typing import Union
 
 DIRECTIVE_START = "#GUILT --"
 
-def execute(args: Namespace):    
+def execute(args: Namespace):
   path = Path(args.input)
   logger.info(f"Processing batch input file: {path}")
 
@@ -58,12 +59,16 @@ def execute(args: Namespace):
   job_id = result.stdout.strip()
   logger.info(f"Job submitted with ID {job_id}")
   
-  unprocessed_jobs_data = UnprocessedJobsData.from_file()
-  unprocessed_jobs_data.add_job(UnprocessedJob(
+  unprocessed_jobs_data = UnprocessedJobsDataService.fetch_data()
+  if job_id in unprocessed_jobs_data.jobs.keys():
+    logger.error(f"Unprocessed job with job id '{job_id}' already exists.")
+    return
+  
+  unprocessed_jobs_data.jobs[job_id] = UnprocessedJob(
     job_id,
     cpu_profile
-  ))
-  unprocessed_jobs_data.save()
+  )
+  UnprocessedJobsDataService.submit_data(unprocessed_jobs_data)
   logger.debug(f"Saved new unprocessed job with ID {job_id}")
 
 def register_subparser(subparsers: SubparserAdder):

@@ -1,5 +1,5 @@
 from guilt.services.slurm_accounting import SlurmAccountingResult
-from guilt.data.unprocessed_jobs import UnprocessedJob
+from guilt.models.unprocessed_job import UnprocessedJob
 from guilt.models.cpu_profile import CpuProfile
     
 class MapToUnprocessedJob:

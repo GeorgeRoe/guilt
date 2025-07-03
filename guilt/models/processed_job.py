@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from datetime import datetime
+from guilt.models.cpu_profile import CpuProfile
 
 @dataclass
 class ProcessedJob:
