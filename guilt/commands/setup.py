@@ -2,7 +2,7 @@ from pathlib import Path
 from guilt.constants import LOGO, CENTERED_TAGLINE
 from guilt.data.processed_jobs import ProcessedJobsData
 from guilt.data.unprocessed_jobs import UnprocessedJobsData
-from guilt.config.cpu_profiles import CpuProfilesConfig
+from guilt.services.cpu_profiles_config import CpuProfilesConfigService
 from argparse import Namespace
 from guilt.utility.subparser_adder import SubparserAdder
 
@@ -16,7 +16,7 @@ def execute(args: Namespace):
   print("\n\033[91m" + LOGO + "\n" * 2 + CENTERED_TAGLINE)
   print("\033[0m")
 
-  CpuProfilesConfig.get_default().save()
+  CpuProfilesConfigService.submit_data(CpuProfilesConfigService.get_default_data())
   ProcessedJobsData.get_default().save()
   UnprocessedJobsData.get_default().save()
   

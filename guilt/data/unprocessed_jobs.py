@@ -1,4 +1,6 @@
-from guilt.config.cpu_profiles import CpuProfile
+from guilt.models.cpu_profile import CpuProfile
+from guilt.mappers.cpu_profile import MapToCpuProfile
+from dataclasses import asdict
 from pathlib import Path
 import json
 from guilt.log import logger
@@ -23,14 +25,14 @@ class UnprocessedJob:
     logger.debug(f"Deserializing ProcessedJob: {data}")
     
     job_id = safe_get_string(data, "job_id")
-    cpu_profile = CpuProfile.from_dict(safe_get_dict(data, "cpu_profile"))
+    cpu_profile = MapToCpuProfile.from_json_file_contents(safe_get_dict(data, "cpu_profile"))
     
     return cls(job_id, cpu_profile)
   
   def to_dict(self) -> dict[str, Any]:
     return {
       "job_id": self.job_id,
-      "cpu_profile": self.cpu_profile.to_dict()
+      "cpu_profile": asdict(self.cpu_profile)
     }
 
 class UnprocessedJobsData:

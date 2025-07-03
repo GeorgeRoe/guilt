@@ -1,5 +1,7 @@
 from datetime import datetime
-from guilt.config.cpu_profiles import CpuProfile
+from guilt.models.cpu_profile import CpuProfile
+from guilt.mappers.cpu_profile import MapToCpuProfile
+from dataclasses import asdict
 from pathlib import Path
 import json
 from guilt.log import logger
@@ -25,7 +27,7 @@ class ProcessedJob:
     start = datetime.fromisoformat(safe_get_string(data, "start"))
     end = datetime.fromisoformat(safe_get_string(data, "end"))
     job_id = safe_get_string(data, "job_id")
-    cpu_profile = CpuProfile.from_dict(safe_get_dict(data, "cpu_profile"))
+    cpu_profile = MapToCpuProfile.from_json_file_contents(safe_get_dict(data, "cpu_profile"))
     energy = safe_get_float(data, "energy")
     emissions = safe_get_float(data, "emissions")
     generation_mix = cast(dict[str, float], safe_get_dict(data, "generation_mix"))
@@ -37,7 +39,7 @@ class ProcessedJob:
       "start": self.start.isoformat(),
       "end": self.end.isoformat(),
       "job_id": self.job_id,
-      "cpu_profile": self.cpu_profile.to_dict(),
+      "cpu_profile": asdict(self.cpu_profile),
       "energy": self.energy,
       "emissions": self.emissions,
       "generation_mix": self.generation_mix

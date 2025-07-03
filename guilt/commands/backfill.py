@@ -1,5 +1,5 @@
 from guilt.data.unprocessed_jobs import UnprocessedJobsData
-from guilt.config.cpu_profiles import CpuProfilesConfig
+from guilt.services.cpu_profiles_config import CpuProfilesConfigService
 from guilt.log import logger
 import os
 from guilt.services.slurm_accounting import SlurmAccountingService
@@ -14,7 +14,7 @@ def execute(args: Namespace):
     return
     
   unprocessed_jobs_data = UnprocessedJobsData.from_file()
-  cpu_profiles_config = CpuProfilesConfig.from_file()
+  cpu_profiles_config = CpuProfilesConfigService.fetch_data()
   
   for result in SlurmAccountingService.getAllJobsForUser(user):
     unprocessed_job = MapToUnprocessedJob.from_slurm_accounting_result(result, cpu_profiles_config.default)

@@ -1,6 +1,6 @@
 from pathlib import Path
 import subprocess
-from guilt.config.cpu_profiles import CpuProfilesConfig
+from guilt.services.cpu_profiles_config import CpuProfilesConfigService
 from guilt.data.unprocessed_jobs import UnprocessedJobsData, UnprocessedJob
 from guilt.log import logger
 from argparse import Namespace
@@ -38,7 +38,7 @@ def execute(args: Namespace):
     logger.error("No CPU profile directive found in batch file")
     return
 
-  cpu_profile = CpuProfilesConfig.from_file().get_profile(picked_cpu_profile_name)
+  cpu_profile = CpuProfilesConfigService.fetch_data().profiles.get(picked_cpu_profile_name)
   if cpu_profile is None:
     logger.error(f"CPU Profile '{picked_cpu_profile_name}' doesn't exist")
     return
