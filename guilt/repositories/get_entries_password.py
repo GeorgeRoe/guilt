@@ -2,9 +2,9 @@ import subprocess
 from guilt.models.get_entires_password_result import GetEntriesPasswordResult
 from guilt.mappers.get_entries_password_result import MapToGetEntriesPasswordResult
 
-class GetEntriesRepository: 
+class GetEntriesPasswordRepository: 
   @staticmethod
-  def password() -> list[GetEntriesPasswordResult]:
+  def fetch_data() -> list[GetEntriesPasswordResult]:
     command = ["getent", "passwd"]
       
     result = subprocess.run(command, capture_output=True, text=True)
