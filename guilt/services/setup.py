@@ -1,7 +1,6 @@
 from guilt.repositories.cpu_profiles_config import CpuProfilesConfigRepository
 from guilt.repositories.processed_jobs_data import ProcessedJobsDataRepository
 from guilt.repositories.unprocessed_jobs_data import UnprocessedJobsDataRepository
-from pathlib import Path
 
 class SetupService:
   def __init__(
