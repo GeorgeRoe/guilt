@@ -7,7 +7,7 @@ from guilt.mappers.slurm_accounting_result import MapToSlurmAccountingResult
 
 CommandParameters = dict[str, Union[str, int, float, list[str], list[int], list[float]]]
 
-class SlurmAccountingService:
+class SlurmAccountingRepository:
   @classmethod
   def getJobs(cls, ids: list[str]) -> list[SlurmAccountingResult]:
     return cls.fetchData({

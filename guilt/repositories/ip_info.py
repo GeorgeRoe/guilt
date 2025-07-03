@@ -4,7 +4,7 @@ from guilt.models.ip_info_result import IpInfoResult
 from guilt.mappers.ip_info_result import MapToIpInfoResult
 from typing import Any
 
-class IpInfoService:
+class IpInfoRepository:
   @classmethod
   def fetchData(cls) -> IpInfoResult:
     return MapToIpInfoResult.from_api_dict(asyncio.run(cls.request()))

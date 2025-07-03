@@ -1,6 +1,6 @@
 from guilt.log import logger
 from pathlib import Path
-from guilt.services.get_entries import GetEntriesService
+from guilt.repositories.get_entries import GetEntriesRepository
 from guilt.models.get_entires_password_result import GetEntriesPasswordResult
 from argparse import Namespace
 from guilt.utility.subparser_adder import SubparserAdder
@@ -8,7 +8,7 @@ from guilt.utility.subparser_adder import SubparserAdder
 def execute(args: Namespace):
   users = []
   try:
-    users = GetEntriesService.password()
+    users = GetEntriesRepository.password()
   except Exception as e:
     logger.error(f"Error getting users: {e}")
     return

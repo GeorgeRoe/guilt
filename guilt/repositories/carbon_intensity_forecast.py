@@ -7,11 +7,11 @@ from guilt.utility.safe_get import safe_get_dict
 from guilt.models.carbon_intensity_forecast_result import CarbonIntensityForecastResult
 from guilt.mappers.carbon_intensity_forecast_result import MapToCarbonIntensityForecastResult
 
-class CarbonIntensityForecastService:
+class CarbonIntensityForecastRepository:
   @staticmethod
   def fetch_data(from_time: datetime, to_time: datetime, postcode: str) -> CarbonIntensityForecastResult:
     return MapToCarbonIntensityForecastResult.from_api_dict(
-      asyncio.run(CarbonIntensityForecastService.request(from_time, to_time, postcode))
+      asyncio.run(CarbonIntensityForecastRepository.request(from_time, to_time, postcode))
     )
   
   @staticmethod

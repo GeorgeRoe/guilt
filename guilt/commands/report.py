@@ -1,4 +1,4 @@
-from guilt.services.processed_jobs_data import ProcessedJobsDataService
+from guilt.repositories.processed_jobs_data import ProcessedJobsDataRepository
 from guilt.models.processed_job import ProcessedJob
 from guilt.utility.format_grams import format_grams
 from guilt.utility.format_duration import format_duration
@@ -43,7 +43,7 @@ def print_report(jobs: list[ProcessedJob]):
   plt.show()
 
 def execute(args: Namespace):
-  processed_jobs_data = ProcessedJobsDataService.fetch_data()
+  processed_jobs_data = ProcessedJobsDataRepository.fetch_data()
   
   group_by_key_format: dict[str, str] = {
     "day": "%Y-%m-%d",

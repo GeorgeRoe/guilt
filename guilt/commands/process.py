@@ -1,23 +1,23 @@
-from guilt.services.processed_jobs_data import ProcessedJobsDataService
-from guilt.services.unprocessed_jobs_data import UnprocessedJobsDataService
+from guilt.repositories.processed_jobs_data import ProcessedJobsDataRepository
+from guilt.repositories.unprocessed_jobs_data import UnprocessedJobsDataRepository
 from guilt.models.processed_job import ProcessedJob
-from guilt.services.ip_info import IpInfoService
+from guilt.repositories.ip_info import IpInfoRepository
 from guilt.utility.format_grams import format_grams
 from datetime import timedelta
 from guilt.log import logger
-from guilt.services.slurm_accounting import SlurmAccountingService
-from guilt.services.carbon_intensity_forecast import CarbonIntensityForecastService
+from guilt.repositories.slurm_accounting import SlurmAccountingRepository
+from guilt.repositories.carbon_intensity_forecast import CarbonIntensityForecastRepository
 from argparse import Namespace
 from guilt.utility.subparser_adder import SubparserAdder
 from guilt.utility.safe_get import safe_get_float
 
 def execute(args: Namespace):
-  unprocessed_jobs_data = UnprocessedJobsDataService.fetch_data()
-  processed_jobs_data = ProcessedJobsDataService.fetch_data()
+  unprocessed_jobs_data = UnprocessedJobsDataRepository.fetch_data()
+  processed_jobs_data = ProcessedJobsDataRepository.fetch_data()
   
   sacct_results = []
   try:
-    sacct_results = SlurmAccountingService.getJobs(list(unprocessed_jobs_data.jobs.keys()))
+    sacct_results = SlurmAccountingRepository.getJobs(list(unprocessed_jobs_data.jobs.keys()))
   except Exception as e:
     logger.error(f"Error getting jobs: {e}")
     return
@@ -26,7 +26,7 @@ def execute(args: Namespace):
     print("No Jobs to process")
     return
   
-  ip_info = IpInfoService.fetchData()
+  ip_info = IpInfoRepository.fetchData()
   
   for result in sacct_results:
     if not "cpu" in result.resources:
@@ -51,7 +51,7 @@ def execute(args: Namespace):
     forecast_start = result.start_time - buffer
     forecast_end = result.end_time + buffer
 
-    forecast = CarbonIntensityForecastService.fetch_data(forecast_start, forecast_end, ip_info.postal)
+    forecast = CarbonIntensityForecastRepository.fetch_data(forecast_start, forecast_end, ip_info.postal)
     
     emissions = 0.0 # kg of CO2
     kwh = 0.0
@@ -100,8 +100,8 @@ def execute(args: Namespace):
     else:
       del unprocessed_jobs_data.jobs[processed_job.job_id]
         
-  UnprocessedJobsDataService.submit_data(unprocessed_jobs_data)
-  ProcessedJobsDataService.submit_data(processed_jobs_data)
+  UnprocessedJobsDataRepository.submit_data(unprocessed_jobs_data)
+  ProcessedJobsDataRepository.submit_data(processed_jobs_data)
 
 def register_subparser(subparsers: SubparserAdder):
   subparser = subparsers.add_parser("process")

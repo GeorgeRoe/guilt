@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Final
 import json
 
-class CpuProfilesConfigService:
+class CpuProfilesConfigRepository:
   DEFAULT_PATH: Final[Path] = Path.home() / ".guilt" / "cpu_profiles.json"
   
   @staticmethod

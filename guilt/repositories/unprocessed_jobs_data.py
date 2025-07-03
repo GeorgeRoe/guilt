@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Final
 import json
 
-class UnprocessedJobsDataService:
+class UnprocessedJobsDataRepository:
   DEFAULT_PATH: Final[Path] = Path.home() / ".guilt" / "unprocessed_jobs.json"
   
   @staticmethod
