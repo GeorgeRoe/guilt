@@ -4,7 +4,7 @@ import shutil
 from guilt.log import logger
 from argparse import Namespace
 from guilt.utility.subparser_adder import SubparserAdder
-from guilt.dependency_manager import dependency_manager
+from guilt.dependencies.manager import dependency_manager
 
 ip_info_repository = dependency_manager.repository.ip_info
 carbon_intensity_forecast_repository = dependency_manager.repository.carbon_intensity_forecast

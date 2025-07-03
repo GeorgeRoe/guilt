@@ -5,7 +5,7 @@ from guilt.log import logger
 from argparse import Namespace
 from guilt.utility.subparser_adder import SubparserAdder
 from guilt.utility.safe_get import safe_get_float
-from guilt.dependency_manager import dependency_manager
+from guilt.dependencies.manager import dependency_manager
 
 unprocessed_jobs_data_repository = dependency_manager.repository.unprocessed_jobs_data
 processed_jobs_data_repository = dependency_manager.repository.processed_jobs_data

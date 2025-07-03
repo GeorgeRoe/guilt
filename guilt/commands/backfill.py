@@ -3,7 +3,7 @@ import os
 from argparse import Namespace
 from guilt.utility.subparser_adder import SubparserAdder
 from guilt.mappers.unprocessed_job import MapToUnprocessedJob
-from guilt.dependency_manager import dependency_manager
+from guilt.dependencies.manager import dependency_manager
 
 unprocessed_jobs_data_repository = dependency_manager.repository.unprocessed_jobs_data
 cpu_profiles_config_repository = dependency_manager.repository.cpu_profiles_config

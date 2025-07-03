@@ -3,7 +3,7 @@ from pathlib import Path
 from guilt.models.get_entires_password_result import GetEntriesPasswordResult
 from argparse import Namespace
 from guilt.utility.subparser_adder import SubparserAdder
-from guilt.dependency_manager import dependency_manager
+from guilt.dependencies.manager import dependency_manager
 
 get_entires_password_repository = dependency_manager.repository.get_entries_password
 

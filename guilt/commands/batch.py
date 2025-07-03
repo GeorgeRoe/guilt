@@ -6,7 +6,7 @@ from argparse import Namespace
 from guilt.utility.subparser_adder import SubparserAdder
 from guilt.utility.safe_get import safe_get_string
 from typing import Union
-from guilt.dependency_manager import dependency_manager
+from guilt.dependencies.manager import dependency_manager
 
 cpu_profiles_config_repository = dependency_manager.repository.cpu_profiles_config
 unprocessed_jobs_data_repository = dependency_manager.repository.unprocessed_jobs_data

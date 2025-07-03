@@ -6,7 +6,7 @@ import shutil
 import plotext as plt
 from argparse import Namespace
 from guilt.utility.subparser_adder import SubparserAdder
-from guilt.dependency_manager import dependency_manager
+from guilt.dependencies.manager import dependency_manager
 
 processed_jobs_data_repository = dependency_manager.repository.processed_jobs_data
 
