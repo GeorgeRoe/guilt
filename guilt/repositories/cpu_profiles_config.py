@@ -1,7 +1,6 @@
 from guilt.models.cpu_profiles_config import CpuProfilesConfig
 from guilt.models.cpu_profile import CpuProfile
-from guilt.mappers.json_file_contents import MapToJsonFileContents
-from guilt.mappers.cpu_profiles_config import MapToCpuProfilesConfig
+from guilt.mappers import map_to
 from guilt.constants.paths import CPU_PROFILES_PATH
 import json
 
@@ -20,10 +19,10 @@ class CpuProfilesConfigRepository:
   
   def fetch_data(self) -> CpuProfilesConfig:
     with CPU_PROFILES_PATH.open("r") as file:
-      return MapToCpuProfilesConfig.from_json_file_contents(json.load(file))
+      return map_to.cpu_profiles_config.from_json_file_contents(json.load(file))
   
   def submit_data(self, cpu_profiles_config: CpuProfilesConfig) -> None:
     CPU_PROFILES_PATH.parent.mkdir(parents=True, exist_ok=True)
     
     with CPU_PROFILES_PATH.open("w") as file:
-      json.dump(MapToJsonFileContents.from_cpu_profiles_config(cpu_profiles_config), file, indent=2)
+      json.dump(map_to.json_file_contents.from_cpu_profiles_config(cpu_profiles_config), file, indent=2)

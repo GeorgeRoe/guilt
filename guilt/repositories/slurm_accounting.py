@@ -3,7 +3,7 @@ from guilt.log import logger
 import json
 from typing import Union
 from guilt.models.slurm_accounting_result import SlurmAccountingResult
-from guilt.mappers.slurm_accounting_result import MapToSlurmAccountingResult
+from guilt.mappers import map_to
 
 CommandParameters = dict[str, Union[str, int, float, list[str], list[int], list[float]]]
 
@@ -32,7 +32,7 @@ class SlurmAccountingRepository:
     if jobs_data is None:
       raise ValueError("Jobs is required.")
 
-    return [MapToSlurmAccountingResult.from_command_dict(job_data) for job_data in jobs_data]
+    return [map_to.slurm_accounting_result.from_command_dict(job_data) for job_data in jobs_data]
     
   def runCommand(self, options: CommandParameters):
     command = ["sacct"]

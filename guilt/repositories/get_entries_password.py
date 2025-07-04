@@ -1,6 +1,6 @@
 import subprocess
 from guilt.models.get_entires_password_result import GetEntriesPasswordResult
-from guilt.mappers.get_entries_password_result import MapToGetEntriesPasswordResult
+from guilt.mappers import map_to
 
 class GetEntriesPasswordRepository: 
   def fetch_data(self) -> list[GetEntriesPasswordResult]:
@@ -11,4 +11,4 @@ class GetEntriesPasswordRepository:
     if result.returncode != 0:
       raise Exception(f"Command failed with code {result.returncode}: {result.stderr.strip()}")
     
-    return [MapToGetEntriesPasswordResult.from_command_line(line) for line in result.stdout.splitlines()]
+    return [map_to.get_entries_password_result.from_command_line(line) for line in result.stdout.splitlines()]

@@ -5,14 +5,14 @@ import asyncio
 from guilt.log import logger
 from guilt.utility.safe_get import safe_get_dict
 from guilt.models.carbon_intensity_forecast_result import CarbonIntensityForecastResult
-from guilt.mappers.carbon_intensity_forecast_result import MapToCarbonIntensityForecastResult
+from guilt.mappers import map_to
 
 class CarbonIntensityForecastRepository:
   def fetch_data(self, from_time: datetime, to_time: datetime, postcode: str) -> CarbonIntensityForecastResult:
-    return MapToCarbonIntensityForecastResult.from_api_dict(
+    return map_to.carbon_intensity_forecast_result.from_api_dict(
       asyncio.run(self.request(from_time, to_time, postcode))
     )
-  
+    
   async def request(self, from_time: datetime, to_time: datetime, postcode: str) -> dict[str, Any]:
     time_format = "%Y-%m-%dT%H:%MZ"
     from_str = from_time.strftime(time_format)
