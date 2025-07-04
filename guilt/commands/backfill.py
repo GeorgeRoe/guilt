@@ -2,12 +2,12 @@ from guilt.log import logger
 import os
 from argparse import Namespace
 from guilt.utility.subparser_adder import SubparserAdder
-from guilt.mappers.unprocessed_job import MapToUnprocessedJob
 from guilt.dependencies.manager import dependency_manager
 
 unprocessed_jobs_data_repository = dependency_manager.repository.unprocessed_jobs_data
-cpu_profiles_config_repository = dependency_manager.repository.cpu_profiles_config
 slurm_accounting_repository = dependency_manager.repository.slurm_accounting
+
+backfill_service = dependency_manager.service.backfill
 
 def execute(args: Namespace):
   user = os.getenv("USER", None)
@@ -16,14 +16,15 @@ def execute(args: Namespace):
     return
     
   unprocessed_jobs_data = unprocessed_jobs_data_repository.fetch_data()
-  cpu_profiles_config = cpu_profiles_config_repository.fetch_data()
   
-  for result in slurm_accounting_repository.getAllJobsForUser(user):
-    unprocessed_job = MapToUnprocessedJob.from_slurm_accounting_result(result, cpu_profiles_config.default)
-    
+  all_historical_user_jobs = slurm_accounting_repository.getAllJobsForUser(user)
+  
+  converted_unprocessed_jobs = backfill_service.convert_slurm_jobs_to_unprocessed_jobs(all_historical_user_jobs)
+  
+  for unprocessed_job in converted_unprocessed_jobs:
     if not unprocessed_job.job_id in unprocessed_jobs_data.jobs.keys():
       unprocessed_jobs_data.jobs[unprocessed_job.job_id] = unprocessed_job
-    
+      
   unprocessed_jobs_data_repository.submit_data(unprocessed_jobs_data)
   
 def register_subparser(subparsers: SubparserAdder):
