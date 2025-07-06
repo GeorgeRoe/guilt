@@ -1,6 +1,8 @@
 from guilt.interfaces.services.slurm_accounting import SlurmAccountingServiceInterface
 from guilt.models.slurm_accounting_result import SlurmAccountingResult
 from guilt.mappers import map_to
+from guilt.types.json import Json
+from guilt.utility.json_reader import JsonReader
 from typing import Any, cast
 import subprocess
 import json
@@ -23,13 +25,11 @@ class SlurmAccountingService(SlurmAccountingServiceInterface):
     if result.returncode != 0:
       raise Exception(f"Command failed with code {result.returncode}: {result.stderr.strip()}")
     
-    raw_data = json.loads(result.stdout.strip())
+    raw_data = JsonReader.expect_dict(cast(Json, json.loads(result.stdout.strip())))
     
-    jobs_data = raw_data.get("jobs")
-    if jobs_data is None:
-      raise ValueError("Jobs is required.")
+    jobs_data = JsonReader.ensure_get_list(raw_data, "jobs")
 
-    return [map_to.slurm_accounting_result.from_command_dict(job_data) for job_data in jobs_data]
+    return [map_to.slurm_accounting_result.from_json(job_data) for job_data in jobs_data]
   
   def get_jobs_with_ids(self, ids: list[str]) -> list[SlurmAccountingResult]:
     return self._run_sacct_command({

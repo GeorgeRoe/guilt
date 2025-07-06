@@ -12,4 +12,4 @@ class GetEntriesPasswordService(GetEntriesPasswordServiceInterface):
     if result.returncode != 0:
       raise Exception(f"Command failed with code {result.returncode}: {result.stderr.strip()}")
     
-    return [map_to.get_entries_password_result.from_command_line(line) for line in result.stdout.splitlines()]
+    return [map_to.get_entries_password_result.from_line(line) for line in result.stdout.splitlines()]
