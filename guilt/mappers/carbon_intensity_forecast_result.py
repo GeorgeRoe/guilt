@@ -1,22 +1,18 @@
-from typing import Any, cast
-from guilt.utility.safe_get import safe_get_int, safe_get_string, safe_get_list
 from guilt.models.carbon_intensity_forecast_result import CarbonIntensityForecastResult
-from guilt.models.carbon_intensity_time_segment import CarbonIntensityTimeSegment
 from guilt.mappers.carbon_intensity_time_segment import MapToCarbonIntensityTimeSegment
+from guilt.types.json import Json
+from guilt.utility.json_reader import JsonReader
 
 class MapToCarbonIntensityForecastResult:
   @staticmethod
-  def from_api_dict(data: dict[str, Any]) -> CarbonIntensityForecastResult:
-    region_id = safe_get_int(data, "regionid")
-    short_name = safe_get_string(data, "shortname")
-    postcode = safe_get_string(data, "postcode")
-    segment_data = safe_get_list(data, "data")
+  def from_json(data: Json) -> CarbonIntensityForecastResult:
+    data = JsonReader.expect_dict(data)
     
-    segments: list[CarbonIntensityTimeSegment] = []
-    for item in segment_data:
-      if isinstance(item, dict):
-        segments.append(MapToCarbonIntensityTimeSegment.from_api_dict(cast(dict[str, Any], item)))
-      else:
-        raise ValueError("Items in time segment data should be dicts.")
-      
+    region_id = int(JsonReader.ensure_get_number(data, "regionid"))
+    short_name = JsonReader.ensure_get_str(data, "shortname")
+    postcode = JsonReader.ensure_get_str(data, "postcode")
+    segment_data = JsonReader.ensure_get_list(data, "data")
+    
+    segments = [MapToCarbonIntensityTimeSegment.from_json(item) for item in segment_data]
+    
     return CarbonIntensityForecastResult(region_id, short_name, postcode, segments)

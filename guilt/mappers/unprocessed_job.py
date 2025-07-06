@@ -1,4 +1,4 @@
-from guilt.repositories.slurm_accounting import SlurmAccountingResult
+from guilt.models.slurm_accounting_result import SlurmAccountingResult
 from guilt.models.unprocessed_job import UnprocessedJob
 from guilt.models.cpu_profile import CpuProfile
     

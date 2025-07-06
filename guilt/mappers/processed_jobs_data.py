@@ -1,22 +1,34 @@
 from guilt.models.processed_jobs_data import ProcessedJobsData
 from guilt.models.processed_job import ProcessedJob
 from guilt.mappers.cpu_profile import MapToCpuProfile
-from guilt.utility.safe_get import safe_get_string, safe_get_dict, safe_get_float
-from typing import Any
+from guilt.types.json import Json
+from guilt.utility.json_reader import JsonReader
 from datetime import datetime
 
 class MapToProcessedJobsData:
   @staticmethod
-  def from_json_file_contents(data: dict[str, Any]) -> ProcessedJobsData:
-    return ProcessedJobsData({
-      job_id: ProcessedJob(
-        datetime.fromisoformat(safe_get_string(values, "start")),
-        datetime.fromisoformat(safe_get_string(values, "end")),
+  def from_json(data: Json) -> ProcessedJobsData:
+    data = JsonReader.expect_dict(data)
+    
+    processed_jobs: list[ProcessedJob] = []
+    for job_id, processed_job_values  in data.items():
+      processed_job_data = JsonReader.expect_dict(processed_job_values)
+      
+      start = datetime.fromisoformat(JsonReader.ensure_get_str(processed_job_data, "start"))
+      end = datetime.fromisoformat(JsonReader.ensure_get_str(processed_job_data, "end"))
+      cpu_profile = MapToCpuProfile.from_json(JsonReader.ensure_get_dict(processed_job_data, "cpu_profile"))
+      energy = float(JsonReader.ensure_get_number(processed_job_data, "energy"))
+      emissions = float(JsonReader.ensure_get_number(processed_job_data, "emissions"))
+      generation_mix = {source: float(JsonReader.expect_number(percentage)) for source, percentage in JsonReader.ensure_get_dict(processed_job_data, "generation_mix").items()}
+    
+      processed_jobs.append(ProcessedJob(
+        start,
+        end,
         job_id,
-        MapToCpuProfile.from_json_file_contents(safe_get_dict(values, "cpu_profile")),
-        safe_get_float(values, "energy"),
-        safe_get_float(values, "emissions"),
-        {source: float(percentage) for source, percentage in safe_get_dict(values, "generation_mix").items()}
-      )
-      for job_id, values in data.items()
-    })
+        cpu_profile,
+        energy,
+        emissions,
+        generation_mix
+      ))
+    
+    return ProcessedJobsData({processed_job.job_id: processed_job for processed_job in processed_jobs})

@@ -3,7 +3,7 @@ from pathlib import Path
 
 class MapToGetEntriesPasswordResult:
   @staticmethod
-  def from_command_line(line: str) -> GetEntriesPasswordResult:
+  def from_line(line: str) -> GetEntriesPasswordResult:
     parts = line.strip().split(":")
     
     if len(parts) != 7:

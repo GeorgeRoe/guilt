@@ -1,11 +1,12 @@
 from guilt.models.cpu_profile import CpuProfile
-from guilt.utility.safe_get import safe_get_string, safe_get_float, safe_get_int
-from typing import Any
+from guilt.types.json import Json
+from guilt.utility.json_reader import JsonReader
 
 class MapToCpuProfile:
   @staticmethod
-  def from_json_file_contents(data: dict[str, Any]) -> CpuProfile:
-    name = safe_get_string(data, "name")
-    tdp = safe_get_float(data, "tdp")
-    cores = safe_get_int(data, "cores")
+  def from_json(data: Json) -> CpuProfile:
+    data = JsonReader.expect_dict(data)
+    name = JsonReader.ensure_get_str(data, "name")
+    tdp = float(JsonReader.ensure_get_number(data, "tdp"))
+    cores = int(JsonReader.ensure_get_number(data, "cores"))
     return CpuProfile(name, tdp, cores)

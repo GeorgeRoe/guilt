@@ -4,7 +4,7 @@ from guilt.mappers.cpu_profile import MapToCpuProfile
 from guilt.mappers.cpu_profiles_config import MapToCpuProfilesConfig
 from guilt.mappers.get_entries_password_result import MapToGetEntriesPasswordResult
 from guilt.mappers.ip_info_result import MapToIpInfoResult
-from guilt.mappers.json_file_contents import MapToJsonFileContents
+from guilt.mappers.json import MapToJson
 from guilt.mappers.processed_jobs_data import MapToProcessedJobsData
 from guilt.mappers.slurm_accounting_result import MapToSlurmAccountingResult
 from guilt.mappers.unprocessed_job import MapToUnprocessedJob
@@ -19,7 +19,7 @@ class MapperRegistry:
   cpu_profiles_config: MapToCpuProfilesConfig = MapToCpuProfilesConfig()
   get_entries_password_result: MapToGetEntriesPasswordResult = MapToGetEntriesPasswordResult()
   ip_info_result: MapToIpInfoResult = MapToIpInfoResult()
-  json_file_contents: MapToJsonFileContents = MapToJsonFileContents()
+  json: MapToJson = MapToJson()
   processed_jobs_data: MapToProcessedJobsData = MapToProcessedJobsData()
   slurm_accounting_result: MapToSlurmAccountingResult = MapToSlurmAccountingResult()
   unprocessed_job: MapToUnprocessedJob = MapToUnprocessedJob()

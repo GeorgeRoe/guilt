@@ -1,19 +1,21 @@
-from typing import Any
 from guilt.models.ip_info_result import IpInfoResult
-from guilt.utility.safe_get import safe_get_string
+from guilt.types.json import Json
+from guilt.utility.json_reader import JsonReader
 
 class MapToIpInfoResult:
   @staticmethod
-  def from_api_dict(data: dict[str, Any]) -> IpInfoResult:
-    ip = safe_get_string(data, "ip")
-    hostname = safe_get_string(data, "hostname")
-    city = safe_get_string(data, "city")
-    region = safe_get_string(data, "region")
-    country = safe_get_string(data, "country")
-    latitude, longitude = [float(value) for value in safe_get_string(data, "loc").split(",")]
-    organisation = safe_get_string(data, "org")
-    postal = safe_get_string(data, "postal")
-    timezone = safe_get_string(data, "timezone")
+  def from_json(data: Json) -> IpInfoResult:
+    data = JsonReader.expect_dict(data)
+    
+    ip = JsonReader.ensure_get_str(data, "ip")
+    hostname = JsonReader.ensure_get_str(data, "hostname")
+    city = JsonReader.ensure_get_str(data, "city")
+    region = JsonReader.ensure_get_str(data, "region")
+    country = JsonReader.ensure_get_str(data, "country")
+    latitude, longitude = [float(value) for value in JsonReader.ensure_get_str(data, "loc").split(",")]
+    organisation = JsonReader.ensure_get_str(data, "org")
+    postal = JsonReader.ensure_get_str(data, "postal")
+    timezone = JsonReader.ensure_get_str(data, "timezone")
     
     return IpInfoResult(
       ip,
