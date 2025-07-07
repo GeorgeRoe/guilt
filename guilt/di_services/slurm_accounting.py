@@ -1,4 +1,5 @@
 from guilt.interfaces.services.slurm_accounting import SlurmAccountingServiceInterface
+from guilt.interfaces.services.environment_variables import EnvironmentVariablesServiceInterface
 from guilt.models.slurm_accounting_result import SlurmAccountingResult
 from guilt.mappers import map_to
 from guilt.types.json import Json
@@ -8,6 +9,9 @@ import subprocess
 import json
 
 class SlurmAccountingService(SlurmAccountingServiceInterface):
+  def __init__(self, environment_variables_service: EnvironmentVariablesServiceInterface):
+    self.environment_variables_service = environment_variables_service
+  
   def _run_sacct_command(self, parameters: dict[str, Any]) -> list[SlurmAccountingResult]:
     command = ["sacct"]
     
@@ -41,3 +45,6 @@ class SlurmAccountingService(SlurmAccountingServiceInterface):
       "user": user,
       "starttime": "1970-01-01"
     })
+    
+  def get_current_users_jobs(self) -> list[SlurmAccountingResult]:
+    return self.get_users_jobs(self.environment_variables_service.get_user())

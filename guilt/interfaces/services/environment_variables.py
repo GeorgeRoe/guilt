@@ -7,5 +7,9 @@ class EnvironmentVariablesServiceInterface(ABC):
     pass
   
   @abstractmethod
-  def get_user(self) -> Union[str, None]:
+  def ensure_get_variable(self, name: str) -> str:
+    pass
+  
+  @abstractmethod
+  def get_user(self) -> str:
     pass

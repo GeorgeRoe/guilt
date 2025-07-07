@@ -6,5 +6,13 @@ class EnvironmentVariablesService(EnvironmentVariablesServiceInterface):
   def get_variable(self, name: str) -> Union[str, None]:
     return os.getenv(name)
   
-  def get_user(self) -> Union[str, None]:
-    return self.get_variable("USER")
+  def ensure_get_variable(self, name: str) -> str:
+    variable = self.get_variable(name)
+    
+    if variable is None:
+      raise ValueError(f"The environment variable '{name}' must be set.")
+    
+    return variable    
+
+  def get_user(self) -> str:
+    return self.ensure_get_variable("USER")

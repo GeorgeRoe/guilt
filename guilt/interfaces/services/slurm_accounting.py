@@ -9,3 +9,7 @@ class SlurmAccountingServiceInterface(ABC):
   @abstractmethod
   def get_users_jobs(self, user: str) -> list[SlurmAccountingResult]:
     pass
+  
+  @abstractmethod
+  def get_current_users_jobs(self) -> list[SlurmAccountingResult]:
+    pass
