@@ -4,20 +4,17 @@ import shutil
 from guilt.log import logger
 from argparse import Namespace
 from guilt.utility.subparser_adder import SubparserAdder
-from guilt.dependencies.manager import dependency_manager
+from guilt.registries.service import ServiceRegistry
 
-ip_info_repository = dependency_manager.repository.ip_info
-carbon_intensity_forecast_repository = dependency_manager.repository.carbon_intensity_forecast
-
-def execute(args: Namespace):
-  ip_info = ip_info_repository.fetch_data()
+def execute(services: ServiceRegistry, args: Namespace):
+  ip_info = services.ip_info.get_ip_info()
 
   start = datetime.now(timezone.utc)
   end = start + timedelta(hours=12)
   
   logger.debug(f"Time range: {start} -> {end}")
 
-  forecast = carbon_intensity_forecast_repository.fetch_data(start, end, ip_info.postal)
+  forecast = services.carbon_intensity_forecast.get_forecast(start, end, ip_info.postal)
 
   times_dt = [segment.from_time for segment in forecast.segments]
   values = [segment.intensity for segment in forecast.segments]

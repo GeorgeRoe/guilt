@@ -4,22 +4,15 @@ from datetime import timedelta
 from guilt.log import logger
 from argparse import Namespace
 from guilt.utility.subparser_adder import SubparserAdder
-from guilt.utility.safe_get import safe_get_float
-from guilt.dependencies.manager import dependency_manager
+from guilt.registries.service import ServiceRegistry
 
-unprocessed_jobs_data_repository = dependency_manager.repository.unprocessed_jobs_data
-processed_jobs_data_repository = dependency_manager.repository.processed_jobs_data
-slurm_accounting_repository = dependency_manager.repository.slurm_accounting
-ip_info_repository = dependency_manager.repository.ip_info
-carbon_intensity_forecast_repository = dependency_manager.repository.carbon_intensity_forecast
-
-def execute(args: Namespace):
-  unprocessed_jobs_data = unprocessed_jobs_data_repository.fetch_data()
-  processed_jobs_data = processed_jobs_data_repository.fetch_data()
+def execute(services: ServiceRegistry, args: Namespace):
+  unprocessed_jobs_data = services.unprocessed_jobs_data.read_from_file()
+  processed_jobs_data = services.processed_jobs_data.read_from_file()
   
   sacct_results = []
   try:
-    sacct_results = slurm_accounting_repository.getJobs(list(unprocessed_jobs_data.jobs.keys()))
+    sacct_results = services.slurm_accounting.get_jobs_with_ids(list(unprocessed_jobs_data.jobs.keys()))
   except Exception as e:
     logger.error(f"Error getting jobs: {e}")
     return
@@ -28,7 +21,7 @@ def execute(args: Namespace):
     print("No Jobs to process")
     return
   
-  ip_info = ip_info_repository.fetch_data()
+  ip_info = services.ip_info.get_ip_info()
   
   for result in sacct_results:
     if not "cpu" in result.resources:
@@ -41,9 +34,8 @@ def execute(args: Namespace):
       logger.error(f"Unprocessed job with ID '{result.job_id}' could not be found")
       return
     
-    try:
-      cpu_utilisation = safe_get_float(result.resources, "cpu")
-    except:
+    cpu_utilisation = result.resources.get("cpu")
+    if cpu_utilisation is None:
       logger.error("Unprocessed job did not contain CPU utilisation.")
       return
     
@@ -53,7 +45,7 @@ def execute(args: Namespace):
     forecast_start = result.start_time - buffer
     forecast_end = result.end_time + buffer
 
-    forecast = carbon_intensity_forecast_repository.fetch_data(forecast_start, forecast_end, ip_info.postal)
+    forecast = services.carbon_intensity_forecast.get_forecast(forecast_start, forecast_end, ip_info.postal)
     
     emissions = 0.0 # kg of CO2
     kwh = 0.0
@@ -101,9 +93,9 @@ def execute(args: Namespace):
       return
     else:
       del unprocessed_jobs_data.jobs[processed_job.job_id]
-        
-  unprocessed_jobs_data_repository.submit_data(unprocessed_jobs_data)
-  processed_jobs_data_repository.submit_data(processed_jobs_data)
+  
+  services.unprocessed_jobs_data.write_to_file(unprocessed_jobs_data)
+  services.processed_jobs_data.write_to_file(processed_jobs_data)
 
 def register_subparser(subparsers: SubparserAdder):
   subparser = subparsers.add_parser("process")

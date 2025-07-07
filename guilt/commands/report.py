@@ -6,9 +6,8 @@ import shutil
 import plotext as plt
 from argparse import Namespace
 from guilt.utility.subparser_adder import SubparserAdder
-from guilt.dependencies.manager import dependency_manager
+from guilt.registries.service import ServiceRegistry
 
-processed_jobs_data_repository = dependency_manager.repository.processed_jobs_data
 
 def print_report(jobs: list[ProcessedJob]):
   total_emissions = sum([job.emissions for job in jobs])
@@ -44,8 +43,8 @@ def print_report(jobs: list[ProcessedJob]):
   plt.simple_bar(sources, values, title = "Generation Mix", width = columns - 1)
   plt.show()
 
-def execute(args: Namespace):
-  processed_jobs_data = processed_jobs_data_repository.fetch_data()
+def execute(services: ServiceRegistry, args: Namespace):
+  processed_jobs_data = services.processed_jobs_data.read_from_file()
   
   group_by_key_format: dict[str, str] = {
     "day": "%Y-%m-%d",

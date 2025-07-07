@@ -1,10 +1,26 @@
-from guilt.services.setup import SetupService
-from guilt.services.backfill import BackfillService
-from guilt.services.personal_slurm_accounting import PersonalSlurmAccounting
+from guilt.interfaces.services.backfill import BackfillServiceInterface
+from guilt.interfaces.services.carbon_intensity_forecast import CarbonIntensityForecastServiceInterface
+from guilt.interfaces.services.cpu_profiles_config import CpuProfilesConfigServiceInterface
+from guilt.interfaces.services.environment_variables import EnvironmentVariablesServiceInterface
+from guilt.interfaces.services.file_system import FileSystemServiceInterface
+from guilt.interfaces.services.get_entries_password import GetEntriesPasswordServiceInterface
+from guilt.interfaces.services.ip_info import IpInfoServiceInterface
+from guilt.interfaces.services.processed_jobs_data import ProcessedJobsDataServiceInterface
+from guilt.interfaces.services.setup import SetupServiceInterface
+from guilt.interfaces.services.slurm_accounting import SlurmAccountingServiceInterface
+from guilt.interfaces.services.unprocessed_jobs_data import UnprocessedJobsDataServiceInterface
 from dataclasses import dataclass
 
 @dataclass
 class ServiceRegistry:
-  setup: SetupService
-  backfill: BackfillService
-  personal_slurm_accounting: PersonalSlurmAccounting
+  backfill: BackfillServiceInterface
+  carbon_intensity_forecast: CarbonIntensityForecastServiceInterface
+  cpu_profiles_config: CpuProfilesConfigServiceInterface
+  environment_variables: EnvironmentVariablesServiceInterface
+  file_system: FileSystemServiceInterface
+  get_entries_password: GetEntriesPasswordServiceInterface
+  ip_info: IpInfoServiceInterface
+  processed_jobs_data: ProcessedJobsDataServiceInterface
+  setup: SetupServiceInterface
+  slurm_accounting: SlurmAccountingServiceInterface
+  unprocessed_jobs_data: UnprocessedJobsDataServiceInterface

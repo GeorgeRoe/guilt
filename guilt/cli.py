@@ -2,6 +2,7 @@ from guilt.log import logger
 import argparse
 import logging
 import guilt.commands as commands
+from guilt.dependencies.default import construct_default_service_registry
 
 level_map = {
   "debug": logging.DEBUG,
@@ -11,6 +12,8 @@ level_map = {
 }
 
 def main():
+  services = construct_default_service_registry()
+
   parser = argparse.ArgumentParser(
     description="GUILT: Green Usage Impact Logging Tool"
   )
@@ -37,4 +40,4 @@ def main():
   )
   logger.setLevel(level)
   
-  args.function(args)
+  args.function(services, args)

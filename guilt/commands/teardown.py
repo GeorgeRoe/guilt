@@ -3,8 +3,9 @@ from guilt.log import logger
 from argparse import Namespace
 from guilt.utility.subparser_adder import SubparserAdder
 from guilt.constants.paths import GUILT_DIRECTORY
+from guilt.registries.service import ServiceRegistry
 
-def execute(args: Namespace):
+def execute(services: ServiceRegistry, args: Namespace):
   if not GUILT_DIRECTORY.exists():
     logger.error("Error: GUILT has not been setup!")
     return

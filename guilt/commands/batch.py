@@ -4,27 +4,16 @@ from guilt.models.unprocessed_job import UnprocessedJob
 from guilt.log import logger
 from argparse import Namespace
 from guilt.utility.subparser_adder import SubparserAdder
-from guilt.utility.safe_get import safe_get_string
 from typing import Union
-from guilt.dependencies.manager import dependency_manager
-
-cpu_profiles_config_repository = dependency_manager.repository.cpu_profiles_config
-unprocessed_jobs_data_repository = dependency_manager.repository.unprocessed_jobs_data
+from guilt.registries.service import ServiceRegistry
 
 DIRECTIVE_START = "#GUILT --"
 
-def execute(args: Namespace):
+def execute(services: ServiceRegistry, args: Namespace):
   path = Path(args.input)
   logger.info(f"Processing batch input file: {path}")
 
-  content = None
-  try:
-    with path.open("r") as file:
-      content = file.read().splitlines()
-    logger.debug(f"Read {len(content)} lines from {path}")
-  except Exception as e:
-    logger.error(f"Failed to read file '{path}': {e}")
-    return
+  content = services.file_system.read_from_file(path).splitlines()
 
   directives: dict[str, Union[str, bool]] = {}
   for line in content:
@@ -35,16 +24,23 @@ def execute(args: Namespace):
       directives[directive[0]] = directive[1] if len(directive) == 2 else True
   logger.debug(f"Parsed directives: {directives}")
 
-  try:
-    picked_cpu_profile_name = safe_get_string(directives, "cpu-profile")
-  except:
-    logger.error("No CPU profile directive found in batch file")
+  picked_cpu_profile_name = directives.get("cpu-profile")
+  if picked_cpu_profile_name is None:
+    logger.warning("No CPU profile directive found in batch file")
+  elif isinstance(picked_cpu_profile_name, bool):
+    logger.error("Cpu profile directive must be a string")
     return
 
-  cpu_profile = cpu_profiles_config_repository.fetch_data().profiles.get(picked_cpu_profile_name)
-  if cpu_profile is None:
-    logger.error(f"CPU Profile '{picked_cpu_profile_name}' doesn't exist")
-    return
+  cpu_profiles_config = services.cpu_profiles_config.read_from_file()
+  
+  
+  cpu_profile = cpu_profiles_config.default
+  if not picked_cpu_profile_name is None:
+    found_cpu_profile = cpu_profiles_config.profiles.get(picked_cpu_profile_name)
+    if found_cpu_profile is None:
+      logger.error(f"CPU Profile '{picked_cpu_profile_name}' doesn't exist")
+      return
+    cpu_profile = found_cpu_profile
   
   command = ["sbatch", "--parsable", str(args.input)]
   logger.info(f"Running command: {' '.join(command)}")
@@ -61,7 +57,7 @@ def execute(args: Namespace):
   job_id = result.stdout.strip()
   logger.info(f"Job submitted with ID {job_id}")
   
-  unprocessed_jobs_data = unprocessed_jobs_data_repository.fetch_data()
+  unprocessed_jobs_data = services.unprocessed_jobs_data.read_from_file()
   if job_id in unprocessed_jobs_data.jobs.keys():
     logger.error(f"Unprocessed job with job id '{job_id}' already exists.")
     return
@@ -70,7 +66,7 @@ def execute(args: Namespace):
     job_id,
     cpu_profile
   )
-  unprocessed_jobs_data_repository.submit_data(unprocessed_jobs_data)
+  services.unprocessed_jobs_data.write_to_file(unprocessed_jobs_data)
   logger.debug(f"Saved new unprocessed job with ID {job_id}")
 
 def register_subparser(subparsers: SubparserAdder):
