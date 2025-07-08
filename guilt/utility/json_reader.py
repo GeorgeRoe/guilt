@@ -1,12 +1,12 @@
 from guilt.types.json import Json
-from typing import Type, TypeVar, cast, Union
+from typing import Type, TypeVar, cast, Union, get_origin
 
 T = TypeVar("T")
 
 class JsonReader:
   @staticmethod
   def _expect_type(data: Json, expected_type: Type[T]) -> T:
-    if isinstance(data, expected_type):
+    if isinstance(data, get_origin(expected_type) or expected_type):
       return cast(T, data)
     raise ValueError(f"Expected JSON data to be of type '{expected_type.__name__}', but got '{type(data).__name__}'") 
 
@@ -16,10 +16,14 @@ class JsonReader:
   
   @classmethod
   def expect_int(cls, data: Json) -> int:
+    if isinstance(data, bool):
+      raise ValueError("Expected int, got bool")
     return cls._expect_type(data, int)
   
   @classmethod
   def expect_float(cls, data: Json) -> float:
+    if isinstance(data, bool):
+      raise ValueError("Expected float, got bool")
     return cls._expect_type(data, float)
   
   @classmethod
