@@ -8,7 +8,7 @@ class MapToCarbonIntensityForecastResult:
   def from_json(data: Json) -> CarbonIntensityForecastResult:
     data = JsonReader.expect_dict(data)
     
-    region_id = int(JsonReader.ensure_get_number(data, "regionid"))
+    region_id = JsonReader.ensure_get_int(data, "regionid")
     short_name = JsonReader.ensure_get_str(data, "shortname")
     postcode = JsonReader.ensure_get_str(data, "postcode")
     segment_data = JsonReader.ensure_get_list(data, "data")
