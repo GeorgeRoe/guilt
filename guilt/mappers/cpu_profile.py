@@ -8,5 +8,5 @@ class MapToCpuProfile:
     data = JsonReader.expect_dict(data)
     name = JsonReader.ensure_get_str(data, "name")
     tdp = float(JsonReader.ensure_get_number(data, "tdp"))
-    cores = int(JsonReader.ensure_get_number(data, "cores"))
+    cores = JsonReader.ensure_get_int(data, "cores")
     return CpuProfile(name, tdp, cores)
