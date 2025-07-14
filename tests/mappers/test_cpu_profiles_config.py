@@ -38,7 +38,7 @@ def test_from_json_sucess() -> None:
 	[
 		(item)
 		for item
-		in all_variants_with_one_key_removed(VALID_JSON) + all_variants_with_one_key_incorrectly_typed(VALID_JSON, {"tdp"})
+		in all_variants_with_one_key_removed(VALID_JSON) + all_variants_with_one_key_incorrectly_typed(VALID_JSON)
 	]
 )
 def test_from_json_invalid_raises(data: dict[str, Json]) -> None:
