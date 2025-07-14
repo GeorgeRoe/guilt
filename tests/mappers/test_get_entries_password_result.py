@@ -1,3 +1,4 @@
+import pytest
 from guilt.mappers.get_entries_password_result import MapToGetEntriesPasswordResult
 from guilt.models.get_entires_password_result import GetEntriesPasswordResult
 from pathlib import Path
@@ -16,3 +17,14 @@ def test_from_line_success() -> None:
   assert result.info == "info"
   assert result.home_directory == Path("/path/to/home")
   assert result.shell == Path("/path/to/shell")
+
+@pytest.mark.parametrize(
+  "line",
+  [
+    "",
+    VALID_LINE + ":extra_field"
+  ]
+)
+def test_from_line_invalid_raises(line: str) -> None:
+  with pytest.raises(ValueError):
+    MapToGetEntriesPasswordResult.from_line(line)
