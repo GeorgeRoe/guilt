@@ -4,6 +4,7 @@ from guilt.interfaces.services.cpu_profiles_config import CpuProfilesConfigServi
 from guilt.interfaces.services.environment_variables import EnvironmentVariablesServiceInterface
 from guilt.interfaces.services.file_system import FileSystemServiceInterface
 from guilt.interfaces.services.get_entries_password import GetEntriesPasswordServiceInterface
+from guilt.interfaces.services.guilt_directory import GuiltDirectoryServiceInterface
 from guilt.interfaces.services.ip_info import IpInfoServiceInterface
 from guilt.interfaces.services.processed_jobs_data import ProcessedJobsDataServiceInterface
 from guilt.interfaces.services.setup import SetupServiceInterface
@@ -19,6 +20,7 @@ class ServiceRegistry:
   environment_variables: EnvironmentVariablesServiceInterface
   file_system: FileSystemServiceInterface
   get_entries_password: GetEntriesPasswordServiceInterface
+  guilt_directory: GuiltDirectoryServiceInterface
   ip_info: IpInfoServiceInterface
   processed_jobs_data: ProcessedJobsDataServiceInterface
   setup: SetupServiceInterface
