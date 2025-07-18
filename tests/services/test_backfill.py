@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from guilt.interfaces.services.backfill import BackfillServiceInterface
 from guilt.interfaces.services.cpu_profiles_config import CpuProfilesConfigServiceInterface
 from guilt.services.backfill import BackfillService
@@ -20,16 +19,11 @@ profiles = [
   
 DEFAULT_CPU_PROFILES_CONFIG = CpuProfilesConfig(default_profile, {profile.name: profile for profile in profiles})
 
-@dataclass
-class BackfillServiceTestDependencies:
-  backfill: BackfillServiceInterface
-  cpu_profiles_config: CpuProfilesConfigServiceInterface
-
 def test_convert_slurm_jobs_to_unprocessed_jobs() -> None:
   di = DependencyInjector()
   di.register_instance(CpuProfilesConfigServiceInterface, MockCpuProfilesConfigService(DEFAULT_CPU_PROFILES_CONFIG))
   di.bind(BackfillServiceInterface, BackfillService)
-  services = di.build(BackfillServiceTestDependencies)
+  backfill_service = di.resolve(BackfillServiceInterface) # type: ignore[type-abstract]
   
   slurm_jobs: list[SlurmAccountingResult] = [
     SlurmAccountingResult(
@@ -43,7 +37,7 @@ def test_convert_slurm_jobs_to_unprocessed_jobs() -> None:
     )
   ]
   
-  result = services.backfill.convert_slurm_jobs_to_unprocessed_jobs(slurm_jobs)
+  result = backfill_service.convert_slurm_jobs_to_unprocessed_jobs(slurm_jobs)
   
   assert len(result) == 1
   
