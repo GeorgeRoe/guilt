@@ -17,7 +17,10 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0"]
+dev = [
+    "pytest>=8.0",
+    "respx>=0.20.0"
+]
 
 [tool.pytest.ini_options]
 minversion = "6.0"
