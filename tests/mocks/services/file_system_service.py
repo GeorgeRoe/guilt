@@ -72,6 +72,30 @@ class MockFileSystemService(FileSystemServiceInterface):
 
       current = current[part]
       
+  def remove_directory(self, path: Path) -> None:
+    if not path.parts:
+      raise ValueError("Cannot remove root")
+
+    current: FileSystemNode = self._file_system
+    for part in path.parts[:-1]:
+      if isinstance(current, str):
+        raise NotADirectoryError(f"Cannot access subdirectory '{part}' under a file.")
+      if part not in current or not isinstance(current[part], dict):
+        raise FileNotFoundError(f"Directory '{part}' does not exist.")
+      current = current[part]
+
+    final_part = path.parts[-1]
+    if isinstance(current, str):
+      raise NotADirectoryError("Parent is not a directory")
+
+    if final_part not in current:
+      raise FileNotFoundError(f"Directory '{final_part}' does not exist.")
+
+    if isinstance(current[final_part], str):
+      raise NotADirectoryError(f"'{final_part}' is a file, not a directory.")
+
+    del current[final_part]
+    
   def write_to_file(self, path: Path, contents: str) -> None:
     parent = self._file_system
     for part in path.parts[:-1]:

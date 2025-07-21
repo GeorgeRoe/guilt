@@ -1,6 +1,7 @@
 from guilt.interfaces.services.file_system import FileSystemServiceInterface
 from guilt.types.json import Json
 from pathlib import Path
+from shutil import rmtree
 from typing import cast
 import json
 
@@ -10,6 +11,9 @@ class FileSystemService(FileSystemServiceInterface):
   
   def create_directory(self, path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
+    
+  def remove_directory(self, path: Path) -> None:
+    rmtree(path)
   
   def write_to_file(self, path: Path, contents: str) -> None:
     with path.open("w") as file:

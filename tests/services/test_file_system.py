@@ -25,6 +25,15 @@ def test_create_directory(tmp_path: Path) -> None:
   file_system_service.create_directory(new_dir)
   assert new_dir.exists()
   assert new_dir.is_dir()
+  
+def test_remove_directory(tmp_path: Path) -> None:
+  file_system_service = resolve_file_system_service()
+  
+  new_dir = tmp_path / "test"
+  new_dir.mkdir(parents=True, exist_ok=True)
+  assert new_dir.exists()
+  file_system_service.remove_directory(new_dir)
+  assert not new_dir.exists()
 
 def test_write_and_read_file(tmp_path: Path) -> None:
   file_system_service = resolve_file_system_service()

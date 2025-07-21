@@ -12,6 +12,10 @@ class FileSystemServiceInterface(ABC):
     pass
   
   @abstractmethod
+  def remove_directory(self, path: Path) -> None:
+    pass
+  
+  @abstractmethod
   def write_to_file(self, path: Path, contents: str) -> None:
     pass
   
