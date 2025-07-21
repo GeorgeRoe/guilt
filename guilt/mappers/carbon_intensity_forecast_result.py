@@ -7,6 +7,7 @@ class MapToCarbonIntensityForecastResult:
   @staticmethod
   def from_json(data: Json) -> CarbonIntensityForecastResult:
     data = JsonReader.expect_dict(data)
+    data = JsonReader.ensure_get_dict(data, "data")
     
     region_id = JsonReader.ensure_get_int(data, "regionid")
     short_name = JsonReader.ensure_get_str(data, "shortname")
