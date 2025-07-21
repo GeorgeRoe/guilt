@@ -8,7 +8,7 @@ class MapToSlurmAccountingResult:
   def from_json(data: Json) -> SlurmAccountingResult:
     data = JsonReader.expect_dict(data)
     
-    job_id = JsonReader.ensure_get_str(data, "job_id")
+    job_id = str(JsonReader.ensure_get_json(data, "job_id"))
     
     time_data = JsonReader.ensure_get_dict(data, "time")
     start = datetime.fromtimestamp(float(JsonReader.ensure_get_number(time_data, "start"))).replace(tzinfo=timezone.utc)

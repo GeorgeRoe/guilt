@@ -11,9 +11,10 @@ def execute(services: ServiceRegistry, args: Namespace):
   print("\n\033[91m" + LOGO + "\n" * 2 + CENTERED_TAGLINE)
   print("\033[0m")
 
-  services.setup.setup_all_files()
-  
-  print("GUILT is now setup!")
+  if services.setup.setup_all_files():
+    print("GUILT is now setup!")
+  else:
+    print("failed to setup GUILT.")
 
 def register_subparser(subparsers: SubparserAdder):
   subparser = subparsers.add_parser("setup")

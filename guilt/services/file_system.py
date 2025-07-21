@@ -24,6 +24,7 @@ class FileSystemService(FileSystemServiceInterface):
       return file.read()
     
   def write_to_json_file(self, path: Path, data: Json) -> None:
+    self.create_directory(path.parent)
     with path.open("w") as file:
       json.dump(data, file, indent=2)
       
