@@ -53,8 +53,9 @@ def all_variants_with_given_key_incorrectly_typed(data: dict[str, Json], modify_
     )
   ]
   
-def all_variants_with_one_key_incorrectly_typed(data: dict[str, Json], number_keys: set[str] = set()) -> list[dict[str, Json]]:
+def all_variants_with_one_key_incorrectly_typed(data: dict[str, Json], number_keys: set[str] = set(), ignore_keys: set[str] = set()) -> list[dict[str, Json]]:
   return list(chain.from_iterable(
     all_variants_with_given_key_incorrectly_typed(data, key, key in number_keys)
     for key in data
+    if not key in ignore_keys
   ))

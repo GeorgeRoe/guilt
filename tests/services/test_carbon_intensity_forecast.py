@@ -24,57 +24,59 @@ def test_get_forecast_success() -> None:
   url = f"https://api.carbonintensity.org.uk/regional/intensity/{from_str}/{to_str}/postcode/{postcode}"
   
   response: dict[str, Json] = {
-    "regionid": 13,
-    "shortname": "London",
-    "postcode": postcode,
-    "data": [
-      {
-        "from": from_str,
-        "to": to_str,
-        "intensity": {
-          "forecast": 40,
-          "index": "low"
-        },
-        "generationmix": [
-          {
-            "fuel": "biomass",
-            "perc": 0.9
+    "data": {
+      "regionid": 13,
+      "shortname": "London",
+      "postcode": postcode,
+      "data": [
+        {
+          "from": from_str,
+          "to": to_str,
+          "intensity": {
+            "forecast": 40,
+            "index": "low"
           },
-          {
-            "fuel": "coal",
-            "perc": 0
-          },
-          {
-            "fuel": "imports",
-            "perc": 10.6
-          },
-          {
-            "fuel": "gas",
-            "perc": 6.8
-          },
-          {
-            "fuel": "nuclear",
-            "perc": 16.1
-          },
-          {
-            "fuel": "other",
-            "perc": 0
-          },
-          {
-            "fuel": "hydro",
-            "perc": 0.2
-          },
-          {
-            "fuel": "solar",
-            "perc": 0.5
-          },
-          {
-            "fuel": "wind",
-            "perc": 64.9
-          }
-        ]
-      }
-    ]
+          "generationmix": [
+            {
+              "fuel": "biomass",
+              "perc": 0.9
+            },
+            {
+              "fuel": "coal",
+              "perc": 0
+            },
+            {
+              "fuel": "imports",
+              "perc": 10.6
+            },
+            {
+              "fuel": "gas",
+              "perc": 6.8
+            },
+            {
+              "fuel": "nuclear",
+              "perc": 16.1
+            },
+            {
+              "fuel": "other",
+              "perc": 0
+            },
+            {
+              "fuel": "hydro",
+              "perc": 0.2
+            },
+            {
+              "fuel": "solar",
+              "perc": 0.5
+            },
+            {
+              "fuel": "wind",
+              "perc": 64.9
+            }
+          ]
+        }
+      ]
+    }
   }
   
   respx.get(url).mock(return_value=httpx.Response(200, json=response))

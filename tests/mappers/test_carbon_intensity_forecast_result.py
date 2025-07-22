@@ -59,8 +59,13 @@ VALID_JSON: dict[str, Json] = {
   ]
 }
 
+def _wrap(data: Json) -> dict[str, Json]:
+  return {
+    "data": data
+  }
+
 def test_from_json_success() -> None: 
-  result = MapToCarbonIntensityForecastResult.from_json(VALID_JSON)
+  result = MapToCarbonIntensityForecastResult.from_json(_wrap(VALID_JSON))
   
   assert isinstance(result, CarbonIntensityForecastResult)
   assert result.region_id == 13
@@ -72,7 +77,7 @@ def test_from_json_success() -> None:
 @pytest.mark.parametrize(
   "data",
   [
-    (item)
+    (_wrap(item))
     for item
     in all_variants_with_one_key_removed(VALID_JSON) + all_variants_with_one_key_incorrectly_typed(VALID_JSON)
   ]
