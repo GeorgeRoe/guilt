@@ -1,5 +1,4 @@
 from pathlib import Path
-import subprocess
 from guilt.models.unprocessed_job import UnprocessedJob
 from guilt.log import logger
 from argparse import Namespace
@@ -33,7 +32,6 @@ def execute(services: ServiceRegistry, args: Namespace):
 
   cpu_profiles_config = services.cpu_profiles_config.read_from_file()
   
-  
   cpu_profile = cpu_profiles_config.default
   if not picked_cpu_profile_name is None:
     found_cpu_profile = cpu_profiles_config.profiles.get(picked_cpu_profile_name)
@@ -42,19 +40,7 @@ def execute(services: ServiceRegistry, args: Namespace):
       return
     cpu_profile = found_cpu_profile
   
-  command = ["sbatch", "--parsable", str(args.input)]
-  logger.info(f"Running command: {' '.join(command)}")
-  try:
-    result = subprocess.run(command, capture_output=True, text=True)
-  except Exception as e:
-    logger.error(f"Error running command '{' '.join(command)}': {e}")
-    return
-  
-  if result.returncode != 0:
-    logger.error(f"Command failed with code {result.returncode}: {result.stderr.strip()}")
-    return
-  
-  job_id = result.stdout.strip()
+  job_id = services.slurm_batch.submit_job(path)
   logger.info(f"Job submitted with ID {job_id}")
   
   unprocessed_jobs_data = services.unprocessed_jobs_data.read_from_file()

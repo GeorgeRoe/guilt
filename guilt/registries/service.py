@@ -9,6 +9,7 @@ from guilt.interfaces.services.ip_info import IpInfoServiceInterface
 from guilt.interfaces.services.processed_jobs_data import ProcessedJobsDataServiceInterface
 from guilt.interfaces.services.setup import SetupServiceInterface
 from guilt.interfaces.services.slurm_accounting import SlurmAccountingServiceInterface
+from guilt.interfaces.services.slurm_batch import SlurmBatchServiceInterface
 from guilt.interfaces.services.unprocessed_jobs_data import UnprocessedJobsDataServiceInterface
 from dataclasses import dataclass
 
@@ -25,4 +26,5 @@ class ServiceRegistry:
   processed_jobs_data: ProcessedJobsDataServiceInterface
   setup: SetupServiceInterface
   slurm_accounting: SlurmAccountingServiceInterface
+  slurm_batch: SlurmBatchServiceInterface
   unprocessed_jobs_data: UnprocessedJobsDataServiceInterface
