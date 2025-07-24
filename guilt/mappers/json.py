@@ -5,6 +5,7 @@ from guilt.models.unprocessed_jobs_data import UnprocessedJobsData
 from typing import cast
 from guilt.types.json import Json
 from dataclasses import asdict
+import json
 
 class MapToJson:
   @staticmethod
@@ -16,7 +17,7 @@ class MapToJson:
     })
   
   @classmethod
-  def from_cpu_profiles_config(cls, cpu_profiles_config: CpuProfilesConfig) -> dict[str, Json]:   
+  def from_cpu_profiles_config(cls, cpu_profiles_config: CpuProfilesConfig) -> dict[str, Json]:
     return cast(dict[str, Json], {
       "default": cpu_profiles_config.default.name,
       "profiles": {
@@ -45,3 +46,22 @@ class MapToJson:
       job_id: {key: value for key, value in asdict(unprocessed_job).items() if key != "job_id"}
       for job_id, unprocessed_job in unprocessed_jobs_data.jobs.items() 
     })
+    
+  @staticmethod
+  def from_directive_lines(lines: list[str], directive_comment: str) -> dict[str, Json]:
+    directives: dict[str, Json] = {}
+    for line in lines:
+      if line.startswith(directive_comment):
+        directive = line.replace(directive_comment, "").replace("--", "").split("=")
+        key = directive[0].strip()
+        value_str = directive[1].strip()
+
+        value: Json = None
+        if value_str:
+          value = cast(Json, json.loads(value_str))
+        else:
+          value = True
+        
+        directives[key] = value
+        
+    return directives
