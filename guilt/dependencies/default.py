@@ -12,6 +12,7 @@ from guilt.services.ip_info import IpInfoService
 from guilt.services.processed_jobs_data import ProcessedJobsDataService
 from guilt.services.setup import SetupService
 from guilt.services.slurm_accounting import SlurmAccountingService
+from guilt.services.slurm_batch import SlurmBatchService
 from guilt.services.unprocessed_jobs_data import UnprocessedJobsDataService
 
 from guilt.interfaces.services.backfill import BackfillServiceInterface
@@ -25,6 +26,7 @@ from guilt.interfaces.services.ip_info import IpInfoServiceInterface
 from guilt.interfaces.services.processed_jobs_data import ProcessedJobsDataServiceInterface
 from guilt.interfaces.services.setup import SetupServiceInterface
 from guilt.interfaces.services.slurm_accounting import SlurmAccountingServiceInterface
+from guilt.interfaces.services.slurm_batch import SlurmBatchServiceInterface
 from guilt.interfaces.services.unprocessed_jobs_data import UnprocessedJobsDataServiceInterface
 
 def construct_default_service_registry() -> ServiceRegistry:
@@ -41,6 +43,7 @@ def construct_default_service_registry() -> ServiceRegistry:
   di.bind(ProcessedJobsDataServiceInterface, ProcessedJobsDataService)
   di.bind(SetupServiceInterface, SetupService)
   di.bind(SlurmAccountingServiceInterface, SlurmAccountingService)
+  di.bind(SlurmBatchServiceInterface, SlurmBatchService)
   di.bind(UnprocessedJobsDataServiceInterface, UnprocessedJobsDataService)
   
   return di.build(ServiceRegistry)
