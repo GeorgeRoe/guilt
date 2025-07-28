@@ -1,9 +1,10 @@
 from dataclasses import dataclass
+from typing import Optional
 
 @dataclass
 class IpInfoResult:
   ip: str
-  hostname: str
+  hostname: Optional[str]
   city: str
   region: str
   country: str

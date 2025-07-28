@@ -8,7 +8,7 @@ class MapToIpInfoResult:
     data = JsonReader.expect_dict(data)
     
     ip = JsonReader.ensure_get_str(data, "ip")
-    hostname = JsonReader.ensure_get_str(data, "hostname")
+    hostname = data.get("hostname")
     city = JsonReader.ensure_get_str(data, "city")
     region = JsonReader.ensure_get_str(data, "region")
     country = JsonReader.ensure_get_str(data, "country")
