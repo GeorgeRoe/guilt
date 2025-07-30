@@ -58,7 +58,10 @@ class MapToJson:
 
         value: Json = None
         if value_str:
-          value = cast(Json, json.loads(value_str))
+          try:
+            value = json.loads(value_str)
+          except json.JSONDecodeError:
+            value = value_str
         else:
           value = True
         

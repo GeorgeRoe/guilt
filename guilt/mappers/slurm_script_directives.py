@@ -7,5 +7,8 @@ class MapToSlurmScriptDirectives:
   @staticmethod
   def from_json_directives(directives: dict[str, Json]) -> SlurmScriptDirectives:
     return SlurmScriptDirectives(
-      time=parse_timedelta_string(JsonReader.ensure_get_str(directives, "time"))
+      time=parse_timedelta_string(JsonReader.ensure_get_str(directives, "time")),
+      nodes=JsonReader.ensure_get_int(directives, "nodes"),
+      tasks_per_node=JsonReader.ensure_get_int(directives, "tasks-per-node"),
+      cpus_per_task=JsonReader.ensure_get_int(directives, "cpus-per-task")
     )

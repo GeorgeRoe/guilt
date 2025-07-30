@@ -8,7 +8,9 @@ from guilt.mappers.ip_info_result import MapToIpInfoResult
 from guilt.mappers.json import MapToJson
 from guilt.mappers.processed_jobs_data import MapToProcessedJobsData
 from guilt.mappers.slurm_accounting_result import MapToSlurmAccountingResult
+from guilt.mappers.slurm_batch_test_result import MapToSlurmBatchTestResult
 from guilt.mappers.slurm_script_directives import MapToSlurmScriptDirectives
+from guilt.mappers.time_series_data import MapToTimeSeriesData
 from guilt.mappers.unprocessed_job import MapToUnprocessedJob
 from guilt.mappers.unprocessed_jobs_data import MapToUnprocessedJobsData
 from dataclasses import dataclass
@@ -25,6 +27,8 @@ class MapperRegistry:
   json: MapToJson = MapToJson()
   processed_jobs_data: MapToProcessedJobsData = MapToProcessedJobsData()
   slurm_accounting_result: MapToSlurmAccountingResult = MapToSlurmAccountingResult()
+  slurm_batch_test_result: MapToSlurmBatchTestResult = MapToSlurmBatchTestResult()
   slurm_script_directives: MapToSlurmScriptDirectives = MapToSlurmScriptDirectives()
+  time_series_data: MapToTimeSeriesData = MapToTimeSeriesData()
   unprocessed_job: MapToUnprocessedJob = MapToUnprocessedJob()
   unprocessed_jobs_data: MapToUnprocessedJobsData = MapToUnprocessedJobsData()
