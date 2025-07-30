@@ -2,7 +2,6 @@ from guilt.mappers.carbon_intensity_forecast_result import MapToCarbonIntensityF
 from guilt.mappers.carbon_intensity_time_segment import MapToCarbonIntensityTimeSegment
 from guilt.mappers.cpu_profile import MapToCpuProfile
 from guilt.mappers.cpu_profiles_config import MapToCpuProfilesConfig
-from guilt.mappers.get_entries_password_result import MapToGetEntriesPasswordResult
 from guilt.mappers.guilt_script_directives import MapToGuiltScriptDirectives
 from guilt.mappers.ip_info_result import MapToIpInfoResult
 from guilt.mappers.json import MapToJson
@@ -21,7 +20,6 @@ class MapperRegistry:
   carbon_intensity_time_segment: MapToCarbonIntensityTimeSegment = MapToCarbonIntensityTimeSegment()
   cpu_profile: MapToCpuProfile = MapToCpuProfile()
   cpu_profiles_config: MapToCpuProfilesConfig = MapToCpuProfilesConfig()
-  get_entries_password_result: MapToGetEntriesPasswordResult = MapToGetEntriesPasswordResult()
   guilt_script_directives: MapToGuiltScriptDirectives = MapToGuiltScriptDirectives()
   ip_info_result: MapToIpInfoResult = MapToIpInfoResult()
   json: MapToJson = MapToJson()

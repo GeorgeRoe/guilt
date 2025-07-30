@@ -1,6 +1,6 @@
 from guilt.log import logger
 from pathlib import Path
-from guilt.models.get_entires_password_result import GetEntriesPasswordResult
+from guilt.models.lazy_get_entries_password_result import LazyGetEntriesPasswordResult
 from argparse import Namespace
 from guilt.utility.subparser_adder import SubparserAdder
 from guilt.registries.service import ServiceRegistry
@@ -13,9 +13,9 @@ def execute(services: ServiceRegistry, args: Namespace):
     logger.error(f"Error getting users: {e}")
     return
 
-  friends: list[GetEntriesPasswordResult] = []
+  friends: list[LazyGetEntriesPasswordResult] = []
   for user in users:
-    path = Path(user.home_directory) / ".guilt"
+    path = user.home_directory / ".guilt"
     
     try:
       if services.file_system.does_path_exist(path):

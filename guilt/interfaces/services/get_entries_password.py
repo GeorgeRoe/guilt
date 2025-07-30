@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
-from guilt.models.get_entires_password_result import GetEntriesPasswordResult
+from guilt.models.lazy_get_entries_password_result import LazyGetEntriesPasswordResult
 
 class GetEntriesPasswordServiceInterface(ABC):
   @abstractmethod
-  def get_entries(self) -> list[GetEntriesPasswordResult]:
+  def get_entries(self) -> list[LazyGetEntriesPasswordResult]:
     pass
