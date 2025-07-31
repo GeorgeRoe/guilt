@@ -5,7 +5,6 @@ from guilt.mappers.cpu_profiles_config import MapToCpuProfilesConfig
 from guilt.mappers.guilt_script_directives import MapToGuiltScriptDirectives
 from guilt.mappers.json import MapToJson
 from guilt.mappers.processed_jobs_data import MapToProcessedJobsData
-from guilt.mappers.slurm_accounting_result import MapToSlurmAccountingResult
 from guilt.mappers.slurm_batch_test_result import MapToSlurmBatchTestResult
 from guilt.mappers.slurm_script_directives import MapToSlurmScriptDirectives
 from guilt.mappers.time_series_data import MapToTimeSeriesData
@@ -22,7 +21,6 @@ class MapperRegistry:
   guilt_script_directives: MapToGuiltScriptDirectives = MapToGuiltScriptDirectives()
   json: MapToJson = MapToJson()
   processed_jobs_data: MapToProcessedJobsData = MapToProcessedJobsData()
-  slurm_accounting_result: MapToSlurmAccountingResult = MapToSlurmAccountingResult()
   slurm_batch_test_result: MapToSlurmBatchTestResult = MapToSlurmBatchTestResult()
   slurm_script_directives: MapToSlurmScriptDirectives = MapToSlurmScriptDirectives()
   time_series_data: MapToTimeSeriesData = MapToTimeSeriesData()

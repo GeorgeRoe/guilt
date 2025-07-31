@@ -3,7 +3,7 @@ from guilt.interfaces.services.environment_variables import EnvironmentVariables
 from guilt.services.slurm_accounting import SlurmAccountingService
 from tests.mocks.services.environment_variables import MockEnvironmentVariablesService
 from guilt.dependencies.injector import DependencyInjector
-from guilt.models.slurm_accounting_result import SlurmAccountingResult
+from guilt.models.lazy_slurm_accounting_result import LazySlurmAccountingResult
 from guilt.types.json import Json
 from pathlib import Path
 from pytest import MonkeyPatch
@@ -14,44 +14,49 @@ from subprocess import CompletedProcess
 import subprocess
 import pytest
 
-@dataclass
-class ExtendedSlurmAccountingResult(SlurmAccountingResult):
-  user: str
-
-EXAMPLE_RESULTS: list[ExtendedSlurmAccountingResult] = [
-  ExtendedSlurmAccountingResult(
-    job_id="1",
-    start_time=datetime(2025, 1, 1),
-    end_time=datetime(2025, 1 ,2),
-    resources={
-      "cpu": 4,
-      "mem": 16000
+EXAMPLE_RESULTS: list[tuple[str, LazySlurmAccountingResult]] = [
+  ("some-user", LazySlurmAccountingResult({
+    "job_id": "1",
+    "time": {
+      "start": datetime(2025, 1, 1).timestamp(),
+      "end": datetime(2025, 1, 2).timestamp()
     },
-    user="some-user"
-  ),
-  ExtendedSlurmAccountingResult(
-    job_id="2",
-    start_time=datetime(2025, 1, 5),
-    end_time=datetime(2025, 1, 7),
-    resources={
-      "cpu": 128,
-      "mem": 128000
+    "tres": {
+      "allocated": [
+        {"type": "cpu", "count": 4},
+        {"type": "mem", "count": 16000}
+      ]
+    }
+  })),
+  ("some-user", LazySlurmAccountingResult({
+    "job_id": "2",
+    "time": {
+      "start": datetime(2025, 1, 5).timestamp(),
+      "end": datetime(2025, 1, 7).timestamp()
     },
-    user="some-user"
-  ),
-  ExtendedSlurmAccountingResult(
-    job_id="3",
-    start_time=datetime(2025, 2, 1),
-    end_time=datetime(2025, 2, 2),
-    resources={
-      "cpu": 8,
-      "mem": 64000
+    "tres": {
+      "allocated": [
+        {"type": "cpu", "count": 128},
+        {"type": "mem", "count": 128000}
+      ]
+    }
+  })),
+  ("other-user", LazySlurmAccountingResult({
+    "job_id": "3",
+    "time": {
+      "start": datetime(2025, 2, 1).timestamp(),
+      "end": datetime(2025, 2, 2).timestamp()
     },
-    user="other-user"
-  )
+    "tres": {
+      "allocated": [
+        {"type": "cpu", "count": 8},
+        {"type": "mem", "count": 64000}
+      ]
+    }
+  }))
 ]
 
-def _extended_slurm_accounting_result_to_json(result: ExtendedSlurmAccountingResult) -> Json:
+def _slurm_accounting_result_to_json(result: LazySlurmAccountingResult) -> Json:
   return {
     "time": {
       "start": result.start_time.timestamp(),
@@ -68,7 +73,6 @@ def _extended_slurm_accounting_result_to_json(result: ExtendedSlurmAccountingRes
         in result.resources.items()
       ]
     },
-    "user": result.user
   }
   
 def _mock_run(command: list[str], capture_output: bool, text: bool) -> CompletedProcess[str]:
@@ -87,28 +91,28 @@ def _mock_run(command: list[str], capture_output: bool, text: bool) -> Completed
     job_ids = arguments["jobs"].split(",")
     filtered_results = [
       result for result in filtered_results
-      if result.job_id in job_ids
+      if result[1].job_id in job_ids
     ]
     
   if "user" in arguments:
     user = arguments["user"]
     filtered_results = [
       result for result in filtered_results
-      if result.user == user
+      if result[0] == user
     ]
     
   if "starttime" in arguments:
     start_time = datetime.strptime(arguments["starttime"], "%Y-%m-%d")
     filtered_results = [
       result for result in filtered_results
-      if result.start_time > start_time
+      if result[1].start_time > start_time
     ]
     
   return CompletedProcess(
     args=command,
     returncode=0,
     stdout=json.dumps({ "jobs": [
-      _extended_slurm_accounting_result_to_json(result)
+      _slurm_accounting_result_to_json(result[1])
       for result in filtered_results
     ]}),
     stderr=""
@@ -143,9 +147,9 @@ def test_get_users_jobs(monkeypatch: MonkeyPatch) -> None:
   assert set([
     result.job_id for result in results
   ]) == set([
-    result.job_id
-    for result in EXAMPLE_RESULTS
-    if result.user == user
+    example_result[1].job_id
+    for example_result in EXAMPLE_RESULTS
+    if example_result[0] == user
   ])
   
 def test_get_current_users_jobs(monkeypatch: MonkeyPatch) -> None:
@@ -163,9 +167,9 @@ def test_get_current_users_jobs(monkeypatch: MonkeyPatch) -> None:
   assert set([
     result.job_id for result in results
   ]) == set([
-    result.job_id
-    for result in EXAMPLE_RESULTS
-    if result.user == user
+    example_result[1].job_id
+    for example_result in EXAMPLE_RESULTS
+    if example_result[0] == user
   ])
   
 def test_get_failure(monkeypatch: MonkeyPatch) -> None:
