@@ -1,13 +1,13 @@
 from guilt.interfaces.services.ip_info import IpInfoServiceInterface
-from guilt.models.ip_info_result import IpInfoResult
-from guilt.mappers import map_to
+from guilt.models.lazy_ip_info_result import LazyIpInfoResult
 from guilt.types.json import Json
+from guilt.utility.json_reader import JsonReader
 import asyncio
 import httpx
 
 class IpInfoService(IpInfoServiceInterface):
-  def get_ip_info(self) -> IpInfoResult:
-    return map_to.ip_info_result.from_json(asyncio.run(self._api_fetch()))
+  def get_ip_info(self) -> LazyIpInfoResult:
+    return LazyIpInfoResult(JsonReader.expect_dict(asyncio.run(self._api_fetch())))
 
   async def _api_fetch(self) -> Json:
     async with httpx.AsyncClient() as client:

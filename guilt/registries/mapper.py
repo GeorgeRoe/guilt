@@ -3,7 +3,6 @@ from guilt.mappers.carbon_intensity_time_segment import MapToCarbonIntensityTime
 from guilt.mappers.cpu_profile import MapToCpuProfile
 from guilt.mappers.cpu_profiles_config import MapToCpuProfilesConfig
 from guilt.mappers.guilt_script_directives import MapToGuiltScriptDirectives
-from guilt.mappers.ip_info_result import MapToIpInfoResult
 from guilt.mappers.json import MapToJson
 from guilt.mappers.processed_jobs_data import MapToProcessedJobsData
 from guilt.mappers.slurm_accounting_result import MapToSlurmAccountingResult
@@ -21,7 +20,6 @@ class MapperRegistry:
   cpu_profile: MapToCpuProfile = MapToCpuProfile()
   cpu_profiles_config: MapToCpuProfilesConfig = MapToCpuProfilesConfig()
   guilt_script_directives: MapToGuiltScriptDirectives = MapToGuiltScriptDirectives()
-  ip_info_result: MapToIpInfoResult = MapToIpInfoResult()
   json: MapToJson = MapToJson()
   processed_jobs_data: MapToProcessedJobsData = MapToProcessedJobsData()
   slurm_accounting_result: MapToSlurmAccountingResult = MapToSlurmAccountingResult()

@@ -3,7 +3,7 @@ import httpx
 import pytest
 from guilt.interfaces.services.ip_info import IpInfoServiceInterface
 from guilt.services.ip_info import IpInfoService
-from guilt.models.ip_info_result import IpInfoResult
+from guilt.models.lazy_ip_info_result import LazyIpInfoResult
 from guilt.dependencies.injector import DependencyInjector
 from guilt.types.json import Json
 
@@ -28,11 +28,11 @@ def test_get_forecast_success() -> None:
     "readme": "https://ipinfo.io/missingauth"
   }
   
-  respx.get(url).mock(return_value=httpx.Response(200, json=response))
+  respx.get(url).mock(return_value=httpx.Response(200, json=response)models.ip_info_result)
   
   result = ip_info_service.get_ip_info()
   
-  assert isinstance(result, IpInfoResult)
+  assert isinstance(result, LazyIpInfoResult)
   
 @respx.mock
 def test_get_forecast_raises() -> None:
