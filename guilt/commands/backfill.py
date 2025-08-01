@@ -3,7 +3,12 @@ from guilt.utility.subparser_adder import SubparserAdder
 from guilt.registries.service import ServiceRegistry
 
 def execute(services: ServiceRegistry, args: Namespace):
-  all_historical_user_jobs = services.slurm_accounting.get_current_users_jobs()
+  current_user = services.user.get_current_user()
+
+  if current_user is None:
+    raise RuntimeError("No user is currently logged in. Please log in to continue.")
+  
+  all_historical_user_jobs = services.slurm_accounting.get_jobs_submitted_by_username(current_user.username)
   converted_unprocessed_jobs = services.backfill.convert_slurm_jobs_to_unprocessed_jobs(all_historical_user_jobs)
   
   unprocessed_jobs_data = services.unprocessed_jobs_data.read_from_file()

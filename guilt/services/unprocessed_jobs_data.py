@@ -1,26 +1,37 @@
 from guilt.interfaces.services.unprocessed_jobs_data import UnprocessedJobsDataServiceInterface
-from guilt.interfaces.services.guilt_directory import GuiltDirectoryServiceInterface
+from guilt.interfaces.services.user import UserServiceInterface
 from guilt.models.unprocessed_jobs_data import UnprocessedJobsData
 from guilt.mappers import map_to
 from guilt.types.json import Json
+from guilt.utility import guilt_user_file_paths 
 from typing import cast
 import json
 
 class UnprocessedJobsDataService(UnprocessedJobsDataServiceInterface):
   def __init__(
     self,
-    guilt_directory_service: GuiltDirectoryServiceInterface
+    user_service: UserServiceInterface
   ) -> None:
-    self.guilt_directory_service = guilt_directory_service
+    self.user_service = user_service
   
   def read_from_file(self) -> UnprocessedJobsData:
-    with self.guilt_directory_service.get_unprocessed_jobs_data_path().open('r') as file:
+    current_user = self.user_service.get_current_user()
+
+    if not current_user:
+      raise ValueError("No user is currently logged in. Cannot read CPU profiles config.")
+
+    with guilt_user_file_paths.get_unprocessed_jobs_data_path(current_user).open('r') as file:
       return map_to.unprocessed_jobs_data.from_json(
         cast(Json, json.load(file))
       )
   
   def write_to_file(self, unprocessed_jobs_data: UnprocessedJobsData) -> None:
-    path = self.guilt_directory_service.get_unprocessed_jobs_data_path()
+    current_user = self.user_service.get_current_user()
+
+    if not current_user:
+      raise ValueError("No user is currently logged in. Cannot write CPU profiles config.")
+
+    path = guilt_user_file_paths.get_unprocessed_jobs_data_path(current_user)
     
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open('w') as file:

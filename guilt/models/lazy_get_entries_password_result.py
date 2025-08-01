@@ -1,8 +1,9 @@
 from typing import Optional
 from pathlib import Path
 from guilt.parsers import parse_get_entries_password_line
+from guilt.interfaces.models.user import UserInterface
 
-class LazyGetEntriesPasswordResult:
+class LazyGetEntriesPasswordResult(UserInterface):
   def __init__(self, line: str) -> None:
     self._line_parts = line.strip().split(":")
 

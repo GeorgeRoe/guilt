@@ -2,9 +2,15 @@ from guilt.constants.branding import LOGO, CENTERED_TAGLINE
 from argparse import Namespace
 from guilt.utility.subparser_adder import SubparserAdder
 from guilt.registries.service import ServiceRegistry
+from guilt.utility import guilt_user_file_paths
 
 def execute(services: ServiceRegistry, args: Namespace):
-  if services.guilt_directory.get_guilt_directory_path().exists():
+  current_user = services.user.get_current_user()
+  if not current_user:
+    print("Error: No user is currently logged in. Please log in before setting up GUILT.")
+    return
+
+  if guilt_user_file_paths.get_guilt_directory_path(current_user).exists():
     print("Error: GUILT has already been setup!")
     return
 

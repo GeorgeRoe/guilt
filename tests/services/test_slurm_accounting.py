@@ -1,7 +1,5 @@
 from guilt.interfaces.services.slurm_accounting import SlurmAccountingServiceInterface
-from guilt.interfaces.services.environment_variables import EnvironmentVariablesServiceInterface
 from guilt.services.slurm_accounting import SlurmAccountingService
-from tests.mocks.services.environment_variables import MockEnvironmentVariablesService
 from guilt.dependencies.injector import DependencyInjector
 from guilt.models.lazy_slurm_accounting_result import LazySlurmAccountingResult
 from guilt.types.json import Json
@@ -120,7 +118,6 @@ def _mock_run(command: list[str], capture_output: bool, text: bool) -> Completed
 
 def test_get_jobs_with_ids(monkeypatch: MonkeyPatch) -> None:
   di = DependencyInjector()
-  di.register_instance(EnvironmentVariablesServiceInterface, MockEnvironmentVariablesService({}, Path()))
   di.bind(SlurmAccountingServiceInterface, SlurmAccountingService)
   slurm_accounting_service = di.resolve(SlurmAccountingServiceInterface) # type: ignore[type-abstract]
   
@@ -134,47 +131,25 @@ def test_get_jobs_with_ids(monkeypatch: MonkeyPatch) -> None:
   
 def test_get_users_jobs(monkeypatch: MonkeyPatch) -> None:
   di = DependencyInjector()
-  di.register_instance(EnvironmentVariablesServiceInterface, MockEnvironmentVariablesService({}, Path()))
   di.bind(SlurmAccountingServiceInterface, SlurmAccountingService)
   slurm_accounting_service = di.resolve(SlurmAccountingServiceInterface) # type: ignore[type-abstract]
    
   monkeypatch.setattr(subprocess, "run", _mock_run)
   
-  user = "some-user"
+  username = "some-user"
   
-  results = slurm_accounting_service.get_users_jobs(user)
-  
-  assert set([
-    result.job_id for result in results
-  ]) == set([
-    example_result[1].job_id
-    for example_result in EXAMPLE_RESULTS
-    if example_result[0] == user
-  ])
-  
-def test_get_current_users_jobs(monkeypatch: MonkeyPatch) -> None:
-  user = "some-user"
-  
-  di = DependencyInjector()
-  di.register_instance(EnvironmentVariablesServiceInterface, MockEnvironmentVariablesService({"USER": user}, Path()))
-  di.bind(SlurmAccountingServiceInterface, SlurmAccountingService)
-  slurm_accounting_service = di.resolve(SlurmAccountingServiceInterface) # type: ignore[type-abstract]
-  
-  monkeypatch.setattr(subprocess, "run", _mock_run)
-  
-  results = slurm_accounting_service.get_current_users_jobs()
+  results = slurm_accounting_service.get_jobs_submitted_by_username(username)
   
   assert set([
     result.job_id for result in results
   ]) == set([
     example_result[1].job_id
     for example_result in EXAMPLE_RESULTS
-    if example_result[0] == user
+    if example_result[0] == username
   ])
-  
+
 def test_get_failure(monkeypatch: MonkeyPatch) -> None:
   di = DependencyInjector()
-  di.register_instance(EnvironmentVariablesServiceInterface, MockEnvironmentVariablesService({}, Path()))
   di.bind(SlurmAccountingServiceInterface, SlurmAccountingService)
   slurm_accounting_service = di.resolve(SlurmAccountingServiceInterface) # type: ignore[type-abstract]
 
@@ -189,4 +164,4 @@ def test_get_failure(monkeypatch: MonkeyPatch) -> None:
   monkeypatch.setattr(subprocess, "run", mock_run)
     
   with pytest.raises(Exception):
-    slurm_accounting_service.get_users_jobs("")
+    slurm_accounting_service.get_jobs_submitted_by_username("")
