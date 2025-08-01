@@ -8,8 +8,8 @@ class MapToCarbonIntensityTimeSegment:
   def from_json(data: Json) -> CarbonIntensityTimeSegment:
     data = JsonReader.expect_dict(data)
     
-    from_time = datetime.fromisoformat(JsonReader.ensure_get_str(data, "from").replace("Z", "+00:00"))
-    to_time = datetime.fromisoformat(JsonReader.ensure_get_str(data, "to").replace("Z", "+00:00"))
+    from_time = datetime.fromisoformat(JsonReader.ensure_get_str(data, "from").replace("Z", ""))
+    to_time = datetime.fromisoformat(JsonReader.ensure_get_str(data, "to").replace("Z", ""))
     
     intensity_data = JsonReader.ensure_get_dict(data, "intensity")
     intensity = float(JsonReader.ensure_get_number(intensity_data, "forecast"))
