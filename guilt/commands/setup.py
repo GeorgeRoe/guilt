@@ -4,7 +4,7 @@ from guilt.utility.subparser_adder import SubparserAdder
 from guilt.registries.service import ServiceRegistry
 
 def execute(services: ServiceRegistry, args: Namespace):
-  if services.file_system.does_path_exist(services.guilt_directory.get_guilt_directory_path()):
+  if services.guilt_directory.get_guilt_directory_path().exists():
     print("Error: GUILT has already been setup!")
     return
 

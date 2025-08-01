@@ -3,9 +3,8 @@ from typing import Union
 from pathlib import Path
 
 class MockEnvironmentVariablesService(EnvironmentVariablesServiceInterface):
-  def __init__(self, variables: dict[str, str], home_dir: Path) -> None:
+  def __init__(self, variables: dict[str, str]) -> None:
     self._variables = variables
-    self._home_dir = home_dir
     
   def get_variable(self, name: str) -> Union[str, None]:
     return self._variables.get(name)
@@ -25,4 +24,5 @@ class MockEnvironmentVariablesService(EnvironmentVariablesServiceInterface):
     home = self.get_variable("HOME")
     if home:
       return Path(home).expanduser().resolve()
-    return self._home_dir
+
+    raise ValueError("The HOME environment variable must be set.")

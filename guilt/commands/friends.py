@@ -18,7 +18,7 @@ def execute(services: ServiceRegistry, args: Namespace):
     path = user.home_directory / ".guilt"
     
     try:
-      if services.file_system.does_path_exist(path):
+      if path.exists() and path.is_dir():
         friends.append(user)
     except:
       logger.warning(f"Cannot access path '{path}'")

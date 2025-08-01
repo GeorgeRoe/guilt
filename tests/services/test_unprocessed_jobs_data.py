@@ -1,8 +1,6 @@
 from guilt.interfaces.services.unprocessed_jobs_data import UnprocessedJobsDataServiceInterface
-from guilt.interfaces.services.file_system import FileSystemServiceInterface
 from guilt.interfaces.services.guilt_directory import GuiltDirectoryServiceInterface
 from guilt.services.unprocessed_jobs_data import UnprocessedJobsDataService
-from tests.mocks.services.file_system_service import MockFileSystemService, FileSystemNode, add_path_to_file_system, get_node_at_path
 from tests.mocks.services.guilt_directory import MockGuiltDirectoryService, TestGuiltDirectories
 from guilt.dependencies.injector import DependencyInjector
 from guilt.models.unprocessed_jobs_data import UnprocessedJobsData

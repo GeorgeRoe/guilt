@@ -5,7 +5,6 @@ from guilt.services.backfill import BackfillService
 from guilt.services.carbon_intensity_forecast import CarbonIntensityForecastService
 from guilt.services.cpu_profiles_config import CpuProfilesConfigService
 from guilt.services.environment_variables import EnvironmentVariablesService
-from guilt.services.file_system import FileSystemService
 from guilt.services.get_entries_password import GetEntriesPasswordService
 from guilt.services.guilt_directory import GuiltDirectoryService
 from guilt.services.ip_info import IpInfoService
@@ -19,7 +18,6 @@ from guilt.interfaces.services.backfill import BackfillServiceInterface
 from guilt.interfaces.services.carbon_intensity_forecast import CarbonIntensityForecastServiceInterface
 from guilt.interfaces.services.cpu_profiles_config import CpuProfilesConfigServiceInterface
 from guilt.interfaces.services.environment_variables import EnvironmentVariablesServiceInterface
-from guilt.interfaces.services.file_system import FileSystemServiceInterface
 from guilt.interfaces.services.get_entries_password import GetEntriesPasswordServiceInterface
 from guilt.interfaces.services.guilt_directory import GuiltDirectoryServiceInterface
 from guilt.interfaces.services.ip_info import IpInfoServiceInterface
@@ -36,7 +34,6 @@ def construct_default_service_registry() -> ServiceRegistry:
   di.bind(CarbonIntensityForecastServiceInterface, CarbonIntensityForecastService)
   di.bind(CpuProfilesConfigServiceInterface, CpuProfilesConfigService)
   di.bind(EnvironmentVariablesServiceInterface, EnvironmentVariablesService)
-  di.bind(FileSystemServiceInterface, FileSystemService)
   di.bind(GetEntriesPasswordServiceInterface, GetEntriesPasswordService)
   di.bind(GuiltDirectoryServiceInterface, GuiltDirectoryService)
   di.bind(IpInfoServiceInterface, IpInfoService)

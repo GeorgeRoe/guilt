@@ -5,7 +5,7 @@ from guilt.utility.subparser_adder import SubparserAdder
 from guilt.registries.service import ServiceRegistry
 
 def execute(services: ServiceRegistry, args: Namespace):
-  if not services.file_system.does_path_exist(services.guilt_directory.get_guilt_directory_path()):
+  if not services.guilt_directory.get_guilt_directory_path().exists():
     logger.error("Error: GUILT has not been setup!")
     return
 
@@ -19,7 +19,7 @@ def execute(services: ServiceRegistry, args: Namespace):
     print("Glad to see youre not guilty, the polar bears will thank you.")
     return
   else:
-    services.file_system.remove_directory(services.guilt_directory.get_guilt_directory_path())
+    shutil.rmtree(services.guilt_directory.get_guilt_directory_path())
     print(f"{services.guilt_directory.get_guilt_directory_path()} was removed!")
     print("\nWaving goodbye from GUILT software.")
     

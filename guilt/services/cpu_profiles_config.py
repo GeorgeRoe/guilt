@@ -1,17 +1,17 @@
 from guilt.interfaces.services.cpu_profiles_config import CpuProfilesConfigServiceInterface
-from guilt.interfaces.services.file_system import FileSystemServiceInterface
 from guilt.interfaces.services.guilt_directory import GuiltDirectoryServiceInterface
 from guilt.models.cpu_profiles_config import CpuProfilesConfig
 from guilt.models.cpu_profile import CpuProfile
 from guilt.mappers import map_to
+from guilt.types.json import Json
+from typing import cast
+import json
 
 class CpuProfilesConfigService(CpuProfilesConfigServiceInterface):
   def __init__(
     self,
-    file_system_service: FileSystemServiceInterface,
     guilt_directory_service: GuiltDirectoryServiceInterface
   ) -> None:
-    self.file_system_service = file_system_service
     self.guilt_directory_service = guilt_directory_service
     
   def get_default(self) -> CpuProfilesConfig:
@@ -27,12 +27,18 @@ class CpuProfilesConfigService(CpuProfilesConfigServiceInterface):
     return CpuProfilesConfig(default_profile, {profile.name: profile for profile in profiles})
   
   def read_from_file(self) -> CpuProfilesConfig:
-    return map_to.cpu_profiles_config.from_json(
-      self.file_system_service.read_from_json_file(self.guilt_directory_service.get_cpu_profiles_config_path())
-    )
-  
+    with self.guilt_directory_service.get_cpu_profiles_config_path().open('r') as file:
+      return map_to.cpu_profiles_config.from_json(
+        cast(Json, json.load(file))
+      )
+
   def write_to_file(self, cpu_profiles_config: CpuProfilesConfig) -> None:
-    self.file_system_service.write_to_json_file(
-      self.guilt_directory_service.get_cpu_profiles_config_path(),
-      map_to.json.from_cpu_profiles_config(cpu_profiles_config)
-    )
+    path = self.guilt_directory_service.get_cpu_profiles_config_path()
+    
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open('w') as file:
+      json.dump(
+        map_to.json.from_cpu_profiles_config(cpu_profiles_config),
+        file,
+        indent=2
+      )

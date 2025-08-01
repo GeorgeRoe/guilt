@@ -15,7 +15,8 @@ def execute(services: ServiceRegistry, args: Namespace):
   path = Path(args.input)
   logger.info(f"Processing batch input file: {path}")
 
-  content = services.file_system.read_from_file(path).splitlines()
+  with path.open("r") as file:
+    content = file.read().splitlines()
 
   guilt_directives = map_to.guilt_script_directives.from_json_directives(
     map_to.json.from_directive_lines(content, "#GUILT"),

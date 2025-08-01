@@ -3,7 +3,7 @@ from guilt.utility.json_reader import JsonReader
 from datetime import datetime, timezone
 
 def get_job_id(data: dict[str, Json]) -> str:
-  return JsonReader.ensure_get_str(data, "job_id")
+  return str(JsonReader.ensure_get_json(data, "job_id"))
 
 def get_start_time(data: dict[str, Json]) -> datetime:
   time_data = JsonReader.ensure_get_dict(data, "time")

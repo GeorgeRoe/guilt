@@ -22,4 +22,5 @@ class EnvironmentVariablesService(EnvironmentVariablesServiceInterface):
     home = self.get_variable("HOME")
     if home:
       return Path(home).expanduser().resolve()
-    return Path(os.path.expanduser("~")).resolve()
+
+    raise ValueError("The HOME environment variable must be set.")
