@@ -1,28 +1,20 @@
 from guilt.log import logger
 from pathlib import Path
-from guilt.models.lazy_get_entries_password_result import LazyGetEntriesPasswordResult
 from argparse import Namespace
 from guilt.utility.subparser_adder import SubparserAdder
 from guilt.registries.service import ServiceRegistry
+from guilt.interfaces.models.user import UserInterface
+from guilt.utility.has_guilt_installed import has_guilt_installed
+from typing import Sequence
 
 def execute(services: ServiceRegistry, args: Namespace):
-  users = []
-  try:
-    users = services.get_entries_password.get_entries()
-  except Exception as e:
-    logger.error(f"Error getting users: {e}")
-    return
+  friends: Sequence[UserInterface] = [
+    user
+    for user
+    in services.user.get_all_users()
+    if has_guilt_installed(user)
+  ]
 
-  friends: list[LazyGetEntriesPasswordResult] = []
-  for user in users:
-    path = user.home_directory / ".guilt"
-    
-    try:
-      if path.exists() and path.is_dir():
-        friends.append(user)
-    except:
-      logger.warning(f"Cannot access path '{path}'")
-      
   if len(friends) == 0:
     print("You are the only one using GUILT! :(")
     return

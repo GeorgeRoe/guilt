@@ -1,7 +1,6 @@
 from guilt.interfaces.services.backfill import BackfillServiceInterface
 from guilt.interfaces.services.carbon_intensity_forecast import CarbonIntensityForecastServiceInterface
 from guilt.interfaces.services.cpu_profiles_config import CpuProfilesConfigServiceInterface
-from guilt.interfaces.services.get_entries_password import GetEntriesPasswordServiceInterface
 from guilt.interfaces.services.ip_info import IpInfoServiceInterface
 from guilt.interfaces.services.processed_jobs_data import ProcessedJobsDataServiceInterface
 from guilt.interfaces.services.setup import SetupServiceInterface
@@ -16,7 +15,6 @@ class ServiceRegistry:
   backfill: BackfillServiceInterface
   carbon_intensity_forecast: CarbonIntensityForecastServiceInterface
   cpu_profiles_config: CpuProfilesConfigServiceInterface
-  get_entries_password: GetEntriesPasswordServiceInterface
   ip_info: IpInfoServiceInterface
   processed_jobs_data: ProcessedJobsDataServiceInterface
   setup: SetupServiceInterface

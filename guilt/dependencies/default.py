@@ -4,7 +4,6 @@ from guilt.registries.service import ServiceRegistry
 from guilt.services.backfill import BackfillService
 from guilt.services.carbon_intensity_forecast import CarbonIntensityForecastService
 from guilt.services.cpu_profiles_config import CpuProfilesConfigService
-from guilt.services.get_entries_password import GetEntriesPasswordService
 from guilt.services.ip_info import IpInfoService
 from guilt.services.processed_jobs_data import ProcessedJobsDataService
 from guilt.services.setup import SetupService
@@ -16,7 +15,6 @@ from guilt.services.user import UserService
 from guilt.interfaces.services.backfill import BackfillServiceInterface
 from guilt.interfaces.services.carbon_intensity_forecast import CarbonIntensityForecastServiceInterface
 from guilt.interfaces.services.cpu_profiles_config import CpuProfilesConfigServiceInterface
-from guilt.interfaces.services.get_entries_password import GetEntriesPasswordServiceInterface
 from guilt.interfaces.services.ip_info import IpInfoServiceInterface
 from guilt.interfaces.services.processed_jobs_data import ProcessedJobsDataServiceInterface
 from guilt.interfaces.services.setup import SetupServiceInterface
@@ -31,7 +29,6 @@ def construct_default_service_registry() -> ServiceRegistry:
   di.bind(BackfillServiceInterface, BackfillService)
   di.bind(CarbonIntensityForecastServiceInterface, CarbonIntensityForecastService)
   di.bind(CpuProfilesConfigServiceInterface, CpuProfilesConfigService)
-  di.bind(GetEntriesPasswordServiceInterface, GetEntriesPasswordService)
   di.bind(IpInfoServiceInterface, IpInfoService)
   di.bind(ProcessedJobsDataServiceInterface, ProcessedJobsDataService)
   di.bind(SetupServiceInterface, SetupService)
