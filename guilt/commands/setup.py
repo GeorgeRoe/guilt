@@ -1,27 +1,40 @@
-from guilt.constants.branding import LOGO, CENTERED_TAGLINE
-from argparse import Namespace
-from guilt.utility.subparser_adder import SubparserAdder
-from guilt.registries.service import ServiceRegistry
+from guilt.interfaces.command import CommandInterface
+from guilt.interfaces.services.user import UserServiceInterface
+from guilt.interfaces.services.setup import SetupServiceInterface
 from guilt.utility import guilt_user_file_paths
+from guilt.constants import branding
 
-def execute(services: ServiceRegistry, args: Namespace):
-  current_user = services.user.get_current_user()
-  if not current_user:
-    print("Error: No user is currently logged in. Please log in before setting up GUILT.")
-    return
+class SetupCommand(CommandInterface):
+  def __init__(
+    self,
+    user_service: UserServiceInterface,
+    setup_service: SetupServiceInterface
+  ) -> None:
+    self._user_service = user_service
+    self._setup_service = setup_service
 
-  if guilt_user_file_paths.get_guilt_directory_path(current_user).exists():
-    print("Error: GUILT has already been setup!")
-    return
+  @staticmethod
+  def name() -> str:
+    return "setup"
+  
+  @staticmethod
+  def configure_subparser(_) -> None:
+    pass
 
-  print("\n\033[91m" + LOGO + "\n" * 2 + CENTERED_TAGLINE)
-  print("\033[0m")
+  def execute(self, _) -> None:
+    current_user = self._user_service.get_current_user()
+    if not current_user:
+      print("Error: No user is currently logged in. Please log in before setting up GUILT.")
+      return
 
-  if services.setup.setup_all_files():
-    print("GUILT is now setup!")
-  else:
-    print("failed to setup GUILT.")
+    if guilt_user_file_paths.get_guilt_directory_path(current_user).exists():
+      print("Error: GUILT has already been setup!")
+      return
 
-def register_subparser(subparsers: SubparserAdder):
-  subparser = subparsers.add_parser("setup")
-  subparser.set_defaults(function=execute)
+    print("\n\033[91m" + branding.LOGO + "\n" * 2 + branding.CENTERED_TAGLINE)
+    print("\033[0m")
+
+    if self._setup_service.setup_all_files():
+      print("GUILT is now setup!")
+    else:
+      print("failed to setup GUILT.")

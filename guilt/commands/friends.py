@@ -1,27 +1,32 @@
-from guilt.log import logger
-from pathlib import Path
-from argparse import Namespace
-from guilt.utility.subparser_adder import SubparserAdder
-from guilt.registries.service import ServiceRegistry
+from guilt.interfaces.command import CommandInterface
+from guilt.interfaces.services.user import UserServiceInterface
 from guilt.interfaces.models.user import UserInterface
 from guilt.utility.has_guilt_installed import has_guilt_installed
 from typing import Sequence
 
-def execute(services: ServiceRegistry, args: Namespace):
-  friends: Sequence[UserInterface] = [
-    user
-    for user
-    in services.user.get_all_users()
-    if has_guilt_installed(user)
-  ]
+class FriendsCommand(CommandInterface):
+  def __init__(self, user_service: UserServiceInterface) -> None:
+    self._user_service = user_service
 
-  if len(friends) == 0:
-    print("You are the only one using GUILT! :(")
-    return
-  
-  print("Here are the other people using GUILT on this system:")
-  [print(f"{friend.username} -> {friend.info}") for friend in friends]
+  @staticmethod
+  def name() -> str:
+    return "friends"
 
-def register_subparser(subparsers: SubparserAdder):
-  subparser = subparsers.add_parser("friends")
-  subparser.set_defaults(function=execute)
+  @staticmethod
+  def configure_subparser(_) -> None:
+    pass
+
+  def execute(self, _) -> None:
+    friends: Sequence[UserInterface] = [
+      user
+      for user
+      in self._user_service.get_all_users()
+      if has_guilt_installed(user)
+    ]
+
+    if len(friends) == 0:
+      print("You are the only one using GUILT! :(")
+      return
+    
+    print("Here are the other people using GUILT on this system:")
+    [print(f"{friend.username} -> {friend.info}") for friend in friends]

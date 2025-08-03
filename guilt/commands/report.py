@@ -1,106 +1,116 @@
+from guilt.interfaces.command import CommandInterface
+from guilt.interfaces.services.processed_jobs_data import ProcessedJobsDataServiceInterface
 from guilt.models.processed_job import ProcessedJob
-from guilt.utility.format_grams import format_grams
 from guilt.utility.format_duration import format_duration
+from guilt.utility.format_grams import format_grams
+from argparse import ArgumentParser, Namespace
+from typing import Sequence
 from datetime import datetime
 import shutil
-import plotext as plt
-from argparse import Namespace
-from guilt.utility.subparser_adder import SubparserAdder
-from guilt.registries.service import ServiceRegistry
+import plotext
 
+class ReportCommand(CommandInterface):
+  def __init__(
+    self,
+    processed_jobs_data_service: ProcessedJobsDataServiceInterface
+  ) -> None:
+    self._processed_jobs_data_service = processed_jobs_data_service
 
-def print_report(jobs: list[ProcessedJob]):
-  total_emissions = sum([job.emissions for job in jobs])
+  @staticmethod
+  def name() -> str:
+    return "report"
 
-  generation_mix: dict[str, float] = {}
-  total_duration = float(0)
+  @staticmethod
+  def configure_subparser(subparser: ArgumentParser) -> None:
+    subparser.add_argument(
+      "--group-by",
+      help="How the report should be grouped by",
+      choices=["day", "week", "month", "year"],
+      default="month"
+    )
 
-  for job in jobs:
-    duration = (job.end - job.start).total_seconds()
-    total_duration += duration
-    
-    for key, value in job.generation_mix.items():
-      if not key in generation_mix:
-        generation_mix[key] = 0
+  def _print_report(self, jobs: Sequence[ProcessedJob]) -> None:
+    total_emissions = sum([job.emissions for job in jobs])
+
+    generation_mix: dict[str, float] = {}
+    total_duration = float(0)
+
+    for job in jobs:
+      duration = (job.end - job.start).total_seconds()
+      total_duration += duration
       
-      generation_mix[key] += value * duration
+      for key, value in job.generation_mix.items():
+        if not key in generation_mix:
+          generation_mix[key] = 0
+        
+        generation_mix[key] += value * duration
 
-  generation_mix = {k:v / total_duration for k, v in generation_mix.items() if v != 0}
+    generation_mix = {k:v / total_duration for k, v in generation_mix.items() if v != 0}
 
-  cpu_time = sum([(job.energy * 1000 * 3600) / job.cpu_profile.tdp_per_core for job in jobs])
-  formatted_cpu_time = format_duration(cpu_time)
-  
-  print(f"You ran {len(jobs)} job{'' if len(jobs) == 1 else 's'}.")
-  print(f"Your total CPU time was: {formatted_cpu_time if formatted_cpu_time != '0 seconds' else 'less than 1 second'}")
-  print(f"You emitted {format_grams(total_emissions)} of Carbon Dioxide.")
-  
-  columns, _ = shutil.get_terminal_size()
-  
-  sources = list(generation_mix.keys())
-  values = [generation_mix.get(source) for source in sources]
-
-  plt.clf()
-  plt.simple_bar(sources, values, title = "Generation Mix", width = columns - 1)
-  plt.show()
-
-def execute(services: ServiceRegistry, args: Namespace):
-  processed_jobs_data = services.processed_jobs_data.read_from_file()
-  
-  group_by_key_format: dict[str, str] = {
-    "day": "%Y-%m-%d",
-    "week": "%G-%V",
-    "month": "%Y-%m",
-    "year": "%Y"
-  }
-  
-  time_splits: dict[str, list[ProcessedJob]] = {}
-  for job in processed_jobs_data.jobs.values():
-    key = job.start.strftime(str(group_by_key_format.get(args.group_by)))
+    cpu_time = sum([(job.energy * 1000 * 3600) / job.cpu_profile.tdp_per_core for job in jobs])
+    formatted_cpu_time = format_duration(cpu_time)
     
-    if key in time_splits:
-      splits_for_key = time_splits.get(key)
-      if not splits_for_key is None: splits_for_key.append(job)
-    else:
-      time_splits[key] = [job]
-  
-  columns, _ = shutil.get_terminal_size()
-  
-  print("=" * columns)
+    print(f"You ran {len(jobs)} job{'' if len(jobs) == 1 else 's'}.")
+    print(f"Your total CPU time was: {formatted_cpu_time if formatted_cpu_time != '0 seconds' else 'less than 1 second'}")
+    print(f"You emitted {format_grams(total_emissions)} of Carbon Dioxide.")
+    
+    columns, _ = shutil.get_terminal_size()
+    
+    sources = list(generation_mix.keys())
+    values = [generation_mix.get(source) for source in sources]
 
-  group_by_title_format = {
-    "day": "%A %-d %B %Y",
-    "week": "Week %V (%B), %G  ",
-    "month": "%B %Y",
-    "year": "%Y"
-  }
+    plotext.clf()
+    plotext.simple_bar(sources, values, title = "Generation Mix", width = columns - 1)
+    plotext.show()
 
-  for date_str, jobs in time_splits.items():
-    if args.group_by == "week":
-      year, week = map(int, date_str.split("-"))
-      date = datetime.fromisocalendar(year, week, 1)
-    else:
-      date = datetime.strptime(date_str, str(group_by_key_format.get(args.group_by)))
-
-    print(f"{date.strftime(str(group_by_title_format.get(args.group_by)))}")
-    print("-" * columns)
-
-    print_report(jobs)
-
+  def execute(self, args: Namespace) -> None:
+    processed_jobs_data = self._processed_jobs_data_service.read_from_file()
+    
+    group_by_key_format: dict[str, str] = {
+      "day": "%Y-%m-%d",
+      "week": "%G-%V",
+      "month": "%Y-%m",
+      "year": "%Y"
+    }
+    
+    time_splits: dict[str, list[ProcessedJob]] = {}
+    for job in processed_jobs_data.jobs.values():
+      key = job.start.strftime(str(group_by_key_format.get(args.group_by)))
+      
+      if key in time_splits:
+        splits_for_key = time_splits.get(key)
+        if not splits_for_key is None: splits_for_key.append(job)
+      else:
+        time_splits[key] = [job]
+    
+    columns, _ = shutil.get_terminal_size()
+    
     print("=" * columns)
+
+    group_by_title_format = {
+      "day": "%A %-d %B %Y",
+      "week": "Week %V (%B), %G  ",
+      "month": "%B %Y",
+      "year": "%Y"
+    }
+
+    for date_str, jobs in time_splits.items():
+      if args.group_by == "week":
+        year, week = map(int, date_str.split("-"))
+        date = datetime.fromisocalendar(year, week, 1)
+      else:
+        date = datetime.strptime(date_str, str(group_by_key_format.get(args.group_by)))
+
+      print(f"{date.strftime(str(group_by_title_format.get(args.group_by)))}")
+      print("-" * columns)
+
+      self._print_report(jobs)
+
+      print("=" * columns)
+      
+    print("All Time")
+    print("-" * columns)
     
-  print("All Time")
-  print("-" * columns)
-  
-  print_report(list(processed_jobs_data.jobs.values()))
-  
-  print("=" * columns)
-  
-def register_subparser(subparsers: SubparserAdder):
-  subparser = subparsers.add_parser("report")
-  subparser.add_argument(
-    "--group-by",
-    help="How the report should be grouped by",
-    choices=["day", "week", "month", "year"],
-    default="month"
-  )
-  subparser.set_defaults(function=execute)
+    self._print_report(list(processed_jobs_data.jobs.values()))
+    
+    print("=" * columns)

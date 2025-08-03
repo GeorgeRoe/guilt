@@ -1,107 +1,128 @@
-from pathlib import Path
-from guilt.models.unprocessed_job import UnprocessedJob
-from guilt.log import logger
-from argparse import Namespace
-from guilt.utility.subparser_adder import SubparserAdder
-from guilt.registries.service import ServiceRegistry
-from guilt.mappers import map_to
-from datetime import datetime, timedelta, timezone
-from dataclasses import replace
-from typing import Optional
+from guilt.interfaces.command import CommandInterface
+from guilt.interfaces.services.cpu_profiles_config import CpuProfilesConfigServiceInterface
+from guilt.interfaces.services.slurm_batch import SlurmBatchServiceInterface
+from guilt.interfaces.services.carbon_intensity_forecast import CarbonIntensityForecastServiceInterface
+from guilt.interfaces.services.ip_info import IpInfoServiceInterface
+from guilt.interfaces.services.unprocessed_jobs_data import UnprocessedJobsDataServiceInterface
 from guilt.utility.time_series_data import WindowWithLowestSumResult
 from guilt.utility.format_duration import format_duration
+from guilt.models.unprocessed_job import UnprocessedJob
+from guilt.mappers import map_to
+from argparse import ArgumentParser, Namespace
+from pathlib import Path
+from datetime import datetime, timedelta
+from typing import Optional
+from dataclasses import replace
 
-def execute(services: ServiceRegistry, args: Namespace):
-  path = Path(args.input)
-  logger.info(f"Processing batch input file: {path}")
+class BatchCommand(CommandInterface):
+  def __init__(
+    self,
+    cpu_profiles_config_service: CpuProfilesConfigServiceInterface,
+    slurm_batch_service: SlurmBatchServiceInterface,
+    carbon_intensity_forecast_service: CarbonIntensityForecastServiceInterface,
+    ip_info_service: IpInfoServiceInterface,
+    unprocessed_jobs_data_service: UnprocessedJobsDataServiceInterface
+  ) -> None:
+    self._cpu_profiles_config_service = cpu_profiles_config_service
+    self._slurm_batch_service = slurm_batch_service
+    self._carbon_intensity_forecast_service = carbon_intensity_forecast_service
+    self._ip_info_service = ip_info_service
+    self._unprocessed_jobs_data_service = unprocessed_jobs_data_service
 
-  with path.open("r") as file:
-    content = file.read().splitlines()
+  @staticmethod
+  def name() -> str:
+    return "batch"
 
-  guilt_directives = map_to.guilt_script_directives.from_json_directives(
-    map_to.json.from_directive_lines(content, "#GUILT"),
-    services.cpu_profiles_config.read_from_file()
-  )
-
-  slurm_directives = map_to.slurm_script_directives.from_json_directives(
-    map_to.json.from_directive_lines(content, "#SBATCH")
-  )
-
-  test_job = services.slurm_batch.test_job(path, None)
-
-  earliest_possible_start_time = test_job.start_time.replace(tzinfo=timezone.utc)
-  latest_forecast_time = datetime.now().replace(tzinfo=timezone.utc) + timedelta(days=2, minutes=-30)
-
-  start_time: Optional[datetime] = None
-  if earliest_possible_start_time + slurm_directives.time > latest_forecast_time:
-    print("Your job is extends into unforecasted carbon intensity data. No delays will be applied.")
-  else:
-    intensity_data = map_to.time_series_data.from_carbon_intensity_forecast_result(
-      services.carbon_intensity_forecast.get_forecast(
-        earliest_possible_start_time,
-        latest_forecast_time,
-        services.ip_info.get_ip_info().postal
-      )
+  @staticmethod
+  def configure_subparser(subparser: ArgumentParser) -> None:
+    subparser.add_argument(
+      "input",
+      help="Input file or argument for batch command"
     )
 
-    tdp = slurm_directives.tasks_per_node * slurm_directives.cpus_per_task * slurm_directives.nodes * guilt_directives.cpu_profile.tdp_per_core
+  def execute(self, args: Namespace) -> None:
+    path = Path(args.input)
 
-    earliest_possible_time_sum = intensity_data.get_window_sum(
-      earliest_possible_start_time,
-      earliest_possible_start_time + slurm_directives.time
-    )
-    earliest_possible_time_grams = (tdp / 1000) * (earliest_possible_time_sum / 3600)
+    with path.open("r") as file:
+      content = file.read().splitlines()
 
-    best_times = intensity_data.get_windows_with_lowest_sum(
-      earliest_possible_start_time,
-      intensity_data.get_last_time() - slurm_directives.time - timedelta(minutes=1),
-      slurm_directives.time,
-      timedelta(minutes=1) 
+    guilt_directives = map_to.guilt_script_directives.from_json_directives(
+      map_to.json.from_directive_lines(content, "#GUILT"),
+      self._cpu_profiles_config_service.read_from_file()
     )
 
-    best_times_with_grams: list[WindowWithLowestSumResult] = []
-    for best_time in best_times:
-      emissions = (tdp / 1000) * (best_time.sum_value / 3600)
-      if emissions > earliest_possible_time_grams:
-        continue
+    slurm_directives = map_to.slurm_script_directives.from_json_directives(
+      map_to.json.from_directive_lines(content, "#SBATCH")
+    )
 
-      emissions_saved = earliest_possible_time_grams - emissions
+    test_job = self._slurm_batch_service.test_job(path, None)
 
-      delay = best_time.start_time - earliest_possible_start_time
-      delay_seconds = delay.total_seconds() or 1
+    earliest_possible_start_time = test_job.start_time
+    latest_forecast_time = datetime.now() + timedelta(days=2, minutes=-30)
 
-      if emissions_saved / delay_seconds > 0.001:
-        best_times_with_grams.append(replace(best_time, sum_value=emissions))
-
-    if not best_times_with_grams:
-      print("No suitable alternative start times for the job could be found. No delays will be applied.")
+    start_time: Optional[datetime] = None
+    if earliest_possible_start_time + slurm_directives.time > latest_forecast_time:
+      print("Your job is extends into unforecasted carbon intensity data. No delays will be applied.")
     else:
-      start_time = best_times_with_grams[0].start_time
+      intensity_data = map_to.time_series_data.from_carbon_intensity_forecast_result(
+        self._carbon_intensity_forecast_service.get_forecast(
+          earliest_possible_start_time,
+          latest_forecast_time,
+          self._ip_info_service.get_ip_info().postal
+        )
+      )
 
-      delay_seconds = (start_time - earliest_possible_start_time).total_seconds()
+      tdp = slurm_directives.tasks_per_node * slurm_directives.cpus_per_task * slurm_directives.nodes * guilt_directives.cpu_profile.tdp_per_core
 
-      print(f"If you had used 'sbatch', the job would have begun at {earliest_possible_start_time.strftime('%Y-%m-%d %H:%M')} and emitted {earliest_possible_time_grams:.2f} grams of CO2.")
-      print(f"By delaying the job to {best_times_with_grams[0].start_time.strftime('%Y-%m-%d %H:%M')}, it will emit {best_times_with_grams[0].sum_value:.2f} grams of CO2.")
-      print(f"You are saving {earliest_possible_time_grams- best_times_with_grams[0].sum_value:.2f} grams of CO2 by delaying the job by {format_duration(delay_seconds)}.")
+      earliest_possible_time_sum = intensity_data.get_window_sum(
+        earliest_possible_start_time,
+        earliest_possible_start_time + slurm_directives.time
+      )
+      earliest_possible_time_grams = (tdp / 1000) * (earliest_possible_time_sum / 3600)
 
-  job_id = services.slurm_batch.submit_job(path, start_time)
-  logger.info(f"Job submitted with ID {job_id}")
-  
-  unprocessed_jobs_data = services.unprocessed_jobs_data.read_from_file()
-  if job_id in unprocessed_jobs_data.jobs.keys():
-    logger.error(f"Unprocessed job with job id '{job_id}' already exists.")
-    return
-  
-  unprocessed_jobs_data.jobs[job_id] = UnprocessedJob(
-    job_id,
-    guilt_directives.cpu_profile
-  )
-  services.unprocessed_jobs_data.write_to_file(unprocessed_jobs_data)
-  logger.debug(f"Saved new unprocessed job with ID {job_id}")
+      best_times = intensity_data.get_windows_with_lowest_sum(
+        earliest_possible_start_time,
+        intensity_data.get_last_time() - slurm_directives.time - timedelta(minutes=1),
+        slurm_directives.time,
+        timedelta(minutes=1) 
+      )
 
-  print(f"Job submitted with ID {job_id}.")
+      best_times_with_grams: list[WindowWithLowestSumResult] = []
+      for best_time in best_times:
+        emissions = (tdp / 1000) * (best_time.sum_value / 3600)
+        if emissions > earliest_possible_time_grams:
+          continue
 
-def register_subparser(subparsers: SubparserAdder):
-  subparser = subparsers.add_parser("batch")
-  subparser.add_argument("input", help="Input file or argument for batch command")
-  subparser.set_defaults(function=execute)
+        emissions_saved = earliest_possible_time_grams - emissions
+
+        delay = best_time.start_time - earliest_possible_start_time
+        delay_seconds = delay.total_seconds() or 1
+
+        if emissions_saved / delay_seconds > 0.001:
+          best_times_with_grams.append(replace(best_time, sum_value=emissions))
+
+      if not best_times_with_grams:
+        print("No suitable alternative start times for the job could be found. No delays will be applied.")
+      else:
+        start_time = best_times_with_grams[0].start_time
+
+        delay_seconds = (start_time - earliest_possible_start_time).total_seconds()
+
+        print(f"If you had used 'sbatch', the job would have begun at {earliest_possible_start_time.strftime('%Y-%m-%d %H:%M')} and emitted {earliest_possible_time_grams:.2f} grams of CO2.")
+        print(f"By delaying the job to {best_times_with_grams[0].start_time.strftime('%Y-%m-%d %H:%M')}, it will emit {best_times_with_grams[0].sum_value:.2f} grams of CO2.")
+        print(f"You are saving {earliest_possible_time_grams- best_times_with_grams[0].sum_value:.2f} grams of CO2 by delaying the job by {format_duration(delay_seconds)}.")
+
+    job_id = self._slurm_batch_service.submit_job(path, start_time)
+    
+    unprocessed_jobs_data = self._unprocessed_jobs_data_service.read_from_file()
+    if job_id in unprocessed_jobs_data.jobs.keys():
+      print(f"Unprocessed job with ID {job_id} already exists.")
+      return
+    
+    unprocessed_jobs_data.jobs[job_id] = UnprocessedJob(
+      job_id,
+      guilt_directives.cpu_profile
+    )
+    self._unprocessed_jobs_data_service.write_to_file(unprocessed_jobs_data)
+
+    print(f"Job submitted with ID {job_id}.")

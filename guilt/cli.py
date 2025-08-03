@@ -1,8 +1,10 @@
+from guilt.commands import COMMANDS
+from guilt.utility.resolve_and_execute_command import resolve_and_execute_command_factory
+from guilt.dependencies.injector import DependencyInjector
+from guilt.dependencies.default import bind_default_services
 from guilt.log import logger
 import argparse
 import logging
-import guilt.commands as commands
-from guilt.dependencies.default import construct_default_service_registry
 
 level_map = {
   "debug": logging.DEBUG,
@@ -12,7 +14,8 @@ level_map = {
 }
 
 def main():
-  services = construct_default_service_registry()
+  di = DependencyInjector()
+  bind_default_services(di)
 
   parser = argparse.ArgumentParser(
     description="GUILT: Green Usage Impact Logging Tool"
@@ -27,12 +30,14 @@ def main():
 
   subparsers = parser.add_subparsers(dest="command", required=True)
   
-  for command_module in commands.ALL_COMMANDS:
-    command_module.register_subparser(subparsers)
+  for command in COMMANDS:
+    subparser = subparsers.add_parser(command.name())
+    subparser.set_defaults(function=resolve_and_execute_command_factory(di, command))
+    command.configure_subparser(subparser)
 
   args = parser.parse_args()
   
-  level = level_map.get(args.log_level, logging.WARNING)
+  level = level_map.get(str(args.log_level), logging.WARNING)
     
   logging.basicConfig(
     level=level,
@@ -40,4 +45,4 @@ def main():
   )
   logger.setLevel(level)
   
-  args.function(services, args)
+  args.function(args)

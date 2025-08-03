@@ -1,19 +1,21 @@
-from . import setup
-from . import teardown
-from . import forecast
-from . import batch
-from . import process
-from . import report
-from . import backfill
-from . import friends
+from .backfill import BackfillCommand
+from .batch import BatchCommand
+from .forecast import ForecastCommand
+from .friends import FriendsCommand
+from .process import ProcessCommand
+from .report import ReportCommand
+from .setup import SetupCommand
+from .teardown import TeardownCommand
+from guilt.interfaces.command import CommandInterface
+from typing import Iterable
 
-ALL_COMMANDS = [
-  setup,
-  teardown,
-  forecast,
-  batch,
-  process,
-  report,
-  backfill,
-  friends,
+COMMANDS: Iterable[type[CommandInterface]] = [
+  BackfillCommand,
+  BatchCommand,
+  ForecastCommand,
+  FriendsCommand,
+  ProcessCommand,
+  ReportCommand,
+  SetupCommand,
+  TeardownCommand,
 ]

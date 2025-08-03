@@ -1,5 +1,4 @@
 from guilt.dependencies.injector import DependencyInjector
-from guilt.registries.service import ServiceRegistry
 
 from guilt.services.backfill import BackfillService
 from guilt.services.carbon_intensity_forecast import CarbonIntensityForecastService
@@ -23,9 +22,7 @@ from guilt.interfaces.services.slurm_batch import SlurmBatchServiceInterface
 from guilt.interfaces.services.unprocessed_jobs_data import UnprocessedJobsDataServiceInterface
 from guilt.interfaces.services.user import UserServiceInterface
 
-def construct_default_service_registry() -> ServiceRegistry:
-  di = DependencyInjector()
-  
+def bind_default_services(di: DependencyInjector) -> None:
   di.bind(BackfillServiceInterface, BackfillService)
   di.bind(CarbonIntensityForecastServiceInterface, CarbonIntensityForecastService)
   di.bind(CpuProfilesConfigServiceInterface, CpuProfilesConfigService)
@@ -36,5 +33,3 @@ def construct_default_service_registry() -> ServiceRegistry:
   di.bind(SlurmBatchServiceInterface, SlurmBatchService)
   di.bind(UnprocessedJobsDataServiceInterface, UnprocessedJobsDataService)
   di.bind(UserServiceInterface, UserService)
-  
-  return di.build(ServiceRegistry)
