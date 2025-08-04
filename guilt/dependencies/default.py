@@ -4,7 +4,8 @@ from guilt.services.backfill import BackfillService
 from guilt.services.carbon_intensity_forecast import CarbonIntensityForecastService
 from guilt.services.cpu_profiles_config import CpuProfilesConfigService
 from guilt.services.ip_info import IpInfoService
-from guilt.services.plotext_plotting import PlotextPlottingService
+from guilt.services.plotting.plotext import PlotextPlottingService
+from guilt.services.plotting.matplotlib import MatplotlibPlottingService
 from guilt.services.processed_jobs_data import ProcessedJobsDataService
 from guilt.services.setup import SetupService
 from guilt.services.slurm_accounting import SlurmAccountingService
@@ -24,15 +25,18 @@ from guilt.interfaces.services.slurm_batch import SlurmBatchServiceInterface
 from guilt.interfaces.services.unprocessed_jobs_data import UnprocessedJobsDataServiceInterface
 from guilt.interfaces.services.user import UserServiceInterface
 
+import os
+
 def bind_default_services(di: DependencyInjector) -> None:
   di.bind(BackfillServiceInterface, BackfillService)
   di.bind(CarbonIntensityForecastServiceInterface, CarbonIntensityForecastService)
   di.bind(CpuProfilesConfigServiceInterface, CpuProfilesConfigService)
   di.bind(IpInfoServiceInterface, IpInfoService)
-  di.bind(PlottingServiceInterface, PlotextPlottingService)
   di.bind(ProcessedJobsDataServiceInterface, ProcessedJobsDataService)
   di.bind(SetupServiceInterface, SetupService)
   di.bind(SlurmAccountingServiceInterface, SlurmAccountingService)
   di.bind(SlurmBatchServiceInterface, SlurmBatchService)
   di.bind(UnprocessedJobsDataServiceInterface, UnprocessedJobsDataService)
   di.bind(UserServiceInterface, UserService)
+
+  di.bind(PlottingServiceInterface, MatplotlibPlottingService if os.getenv("TERM") == "xterm-kitty" else PlotextPlottingService)
