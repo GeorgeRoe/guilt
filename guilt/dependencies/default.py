@@ -8,7 +8,6 @@ from guilt.services.plotting.matplotlib import MatplotlibPlottingService
 from guilt.services.processed_jobs_data import ProcessedJobsDataService
 from guilt.services.pwd_user import PwdUserService
 from guilt.services.setup import SetupService
-from guilt.services.slurm_accounting import SlurmAccountingService
 from guilt.services.slurm_batch import SlurmBatchService
 from guilt.services.unprocessed_jobs_data import UnprocessedJobsDataService
 
@@ -18,7 +17,6 @@ from guilt.interfaces.services.ip_info import IpInfoServiceInterface
 from guilt.interfaces.services.plotting import PlottingServiceInterface
 from guilt.interfaces.services.processed_jobs_data import ProcessedJobsDataServiceInterface
 from guilt.interfaces.services.setup import SetupServiceInterface
-from guilt.interfaces.services.slurm_accounting import SlurmAccountingServiceInterface
 from guilt.interfaces.services.slurm_batch import SlurmBatchServiceInterface
 from guilt.interfaces.services.unprocessed_jobs_data import UnprocessedJobsDataServiceInterface
 from guilt.interfaces.services.user import UserServiceInterface
@@ -31,7 +29,6 @@ def bind_default_services(di: DependencyInjector) -> None:
   di.bind(IpInfoServiceInterface, IpInfoService)
   di.bind(ProcessedJobsDataServiceInterface, ProcessedJobsDataService)
   di.bind(SetupServiceInterface, SetupService)
-  di.bind(SlurmAccountingServiceInterface, SlurmAccountingService)
   di.bind(SlurmBatchServiceInterface, SlurmBatchService)
   di.bind(UnprocessedJobsDataServiceInterface, UnprocessedJobsDataService)
   di.bind(UserServiceInterface, PwdUserService)

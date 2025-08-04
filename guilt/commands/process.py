@@ -1,11 +1,11 @@
 from guilt.interfaces.command import CommandInterface
 from guilt.interfaces.services.unprocessed_jobs_data import UnprocessedJobsDataServiceInterface
 from guilt.interfaces.services.processed_jobs_data import ProcessedJobsDataServiceInterface
-from guilt.interfaces.services.slurm_accounting import SlurmAccountingServiceInterface
 from guilt.interfaces.services.ip_info import IpInfoServiceInterface
 from guilt.interfaces.services.carbon_intensity_forecast import CarbonIntensityForecastServiceInterface
 from guilt.models.processed_job import ProcessedJob
 from guilt.utility.format_grams import format_grams
+from guilt.utility import slurm_accounting
 from datetime import timedelta
 
 class ProcessCommand(CommandInterface):
@@ -13,13 +13,11 @@ class ProcessCommand(CommandInterface):
     self,
     unprocessed_jobs_data_service: UnprocessedJobsDataServiceInterface,
     processed_jobs_data_service: ProcessedJobsDataServiceInterface,
-    slurm_accounting_service: SlurmAccountingServiceInterface,
     ip_info_service: IpInfoServiceInterface,
     carbon_intensity_forecast_service: CarbonIntensityForecastServiceInterface
   ) -> None:
     self._unprocessed_jobs_data_service = unprocessed_jobs_data_service
     self._processed_jobs_data_service = processed_jobs_data_service
-    self._slurm_accounting_service = slurm_accounting_service
     self._ip_info_service = ip_info_service
     self._carbon_intensity_forecast_service = carbon_intensity_forecast_service
 
@@ -34,14 +32,12 @@ class ProcessCommand(CommandInterface):
   def execute(self, _) -> None:
     unprocessed_jobs_data = self._unprocessed_jobs_data_service.read_from_file()
     processed_jobs_data = self._processed_jobs_data_service.read_from_file()
-    
-    sacct_results = []
-    try:
-      sacct_results = self._slurm_accounting_service.get_jobs_with_ids(list(unprocessed_jobs_data.jobs.keys()))
-    except Exception as e:
-      print(f"Error getting jobs: {e}")
-      return
-    
+
+    job_ids = [str(job_id) for job_id in unprocessed_jobs_data.jobs.keys()]
+    sacct_results = slurm_accounting.run(
+      job_ids=job_ids
+    )
+
     if len(sacct_results) == 0:
       print("No Jobs to process")
       return
