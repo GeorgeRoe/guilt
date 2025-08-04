@@ -1,6 +1,5 @@
 from guilt.dependencies.injector import DependencyInjector
 
-from guilt.services.backfill import BackfillService
 from guilt.services.carbon_intensity_forecast import CarbonIntensityForecastService
 from guilt.services.cpu_profiles_config import CpuProfilesConfigService
 from guilt.services.ip_info import IpInfoService
@@ -13,7 +12,6 @@ from guilt.services.slurm_batch import SlurmBatchService
 from guilt.services.unprocessed_jobs_data import UnprocessedJobsDataService
 from guilt.services.user import UserService
 
-from guilt.interfaces.services.backfill import BackfillServiceInterface
 from guilt.interfaces.services.carbon_intensity_forecast import CarbonIntensityForecastServiceInterface
 from guilt.interfaces.services.cpu_profiles_config import CpuProfilesConfigServiceInterface
 from guilt.interfaces.services.ip_info import IpInfoServiceInterface
@@ -28,7 +26,6 @@ from guilt.interfaces.services.user import UserServiceInterface
 import os
 
 def bind_default_services(di: DependencyInjector) -> None:
-  di.bind(BackfillServiceInterface, BackfillService)
   di.bind(CarbonIntensityForecastServiceInterface, CarbonIntensityForecastService)
   di.bind(CpuProfilesConfigServiceInterface, CpuProfilesConfigService)
   di.bind(IpInfoServiceInterface, IpInfoService)
