@@ -11,6 +11,9 @@ class TimeSeriesData:
     self._points = dict(sorted(points.items()))
     self._times = sorted(self._points.keys())
 
+  def get_times(self) -> list[datetime]:
+    return self._times
+
   def get_first_time(self) -> datetime:
     if not self._times:
       raise ValueError("No data points available")

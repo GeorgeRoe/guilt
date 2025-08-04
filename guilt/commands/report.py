@@ -1,20 +1,23 @@
 from guilt.interfaces.command import CommandInterface
 from guilt.interfaces.services.processed_jobs_data import ProcessedJobsDataServiceInterface
+from guilt.interfaces.services.plotting import PlottingServiceInterface
 from guilt.models.processed_job import ProcessedJob
 from guilt.utility.format_duration import format_duration
 from guilt.utility.format_grams import format_grams
+from guilt.utility.plotting_context import PlottingContext
 from argparse import ArgumentParser, Namespace
 from typing import Sequence
 from datetime import datetime
 import shutil
-import plotext
 
 class ReportCommand(CommandInterface):
   def __init__(
     self,
-    processed_jobs_data_service: ProcessedJobsDataServiceInterface
+    processed_jobs_data_service: ProcessedJobsDataServiceInterface,
+    plotting_service: PlottingServiceInterface
   ) -> None:
     self._processed_jobs_data_service = processed_jobs_data_service
+    self._plotting_service = plotting_service
 
   @staticmethod
   def name() -> str:
@@ -54,14 +57,11 @@ class ReportCommand(CommandInterface):
     print(f"Your total CPU time was: {formatted_cpu_time if formatted_cpu_time != '0 seconds' else 'less than 1 second'}")
     print(f"You emitted {format_grams(total_emissions)} of Carbon Dioxide.")
     
-    columns, _ = shutil.get_terminal_size()
-    
-    sources = list(generation_mix.keys())
-    values = [generation_mix.get(source) for source in sources]
-
-    plotext.clf()
-    plotext.simple_bar(sources, values, title = "Generation Mix", width = columns - 1)
-    plotext.show()
+    with PlottingContext(self._plotting_service) as plot:
+      plot.plot_horizontal_bar_data(
+        generation_mix,
+        title="Generation Mix"
+      )
 
   def execute(self, args: Namespace) -> None:
     processed_jobs_data = self._processed_jobs_data_service.read_from_file()
