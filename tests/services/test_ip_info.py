@@ -28,7 +28,7 @@ def test_get_forecast_success() -> None:
     "readme": "https://ipinfo.io/missingauth"
   }
   
-  respx.get(url).mock(return_value=httpx.Response(200, json=response)models.ip_info_result)
+  respx.get(url).mock(return_value=httpx.Response(200, json=response))
   
   result = ip_info_service.get_ip_info()
   

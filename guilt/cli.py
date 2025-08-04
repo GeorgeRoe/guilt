@@ -3,7 +3,6 @@ from guilt.utility.resolve_and_execute_command import resolve_and_execute_comman
 from guilt.dependencies.injector import DependencyInjector
 from guilt.dependencies.default import bind_default_services
 import argparse
-import logging
 
 def main():
   di = DependencyInjector()

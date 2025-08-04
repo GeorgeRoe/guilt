@@ -2,7 +2,6 @@ from guilt.models.slurm_batch_test_result import SlurmBatchTestResult
 import re
 from datetime import datetime
 
-
 class MapToSlurmBatchTestResult:
     @staticmethod
     def from_line(line: str) -> SlurmBatchTestResult:
