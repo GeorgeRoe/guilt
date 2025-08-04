@@ -1,5 +1,5 @@
 from guilt.interfaces.services.user import UserServiceInterface
-from guilt.services.user import UserService
+from guilt.services.pwd_user import PwdUserService
 from guilt.dependencies.injector import DependencyInjector
 from pytest import MonkeyPatch
 from subprocess import CompletedProcess
@@ -9,7 +9,7 @@ import pytest
 
 def resolve_user_service() -> UserServiceInterface:
   di = DependencyInjector()
-  di.bind(UserServiceInterface, UserService)
+  di.bind(UserServiceInterface, PwdUserService)
   return di.resolve(UserServiceInterface)  # type: ignore[type-abstract]
 
 def test_get_user_by_username(monkeypatch: MonkeyPatch) -> None:

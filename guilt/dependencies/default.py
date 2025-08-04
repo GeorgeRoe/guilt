@@ -6,11 +6,11 @@ from guilt.services.ip_info import IpInfoService
 from guilt.services.plotting.plotext import PlotextPlottingService
 from guilt.services.plotting.matplotlib import MatplotlibPlottingService
 from guilt.services.processed_jobs_data import ProcessedJobsDataService
+from guilt.services.pwd_user import PwdUserService
 from guilt.services.setup import SetupService
 from guilt.services.slurm_accounting import SlurmAccountingService
 from guilt.services.slurm_batch import SlurmBatchService
 from guilt.services.unprocessed_jobs_data import UnprocessedJobsDataService
-from guilt.services.user import UserService
 
 from guilt.interfaces.services.carbon_intensity_forecast import CarbonIntensityForecastServiceInterface
 from guilt.interfaces.services.cpu_profiles_config import CpuProfilesConfigServiceInterface
@@ -34,6 +34,6 @@ def bind_default_services(di: DependencyInjector) -> None:
   di.bind(SlurmAccountingServiceInterface, SlurmAccountingService)
   di.bind(SlurmBatchServiceInterface, SlurmBatchService)
   di.bind(UnprocessedJobsDataServiceInterface, UnprocessedJobsDataService)
-  di.bind(UserServiceInterface, UserService)
+  di.bind(UserServiceInterface, PwdUserService)
 
   di.bind(PlottingServiceInterface, MatplotlibPlottingService if os.getenv("TERM") == "xterm-kitty" else PlotextPlottingService)
