@@ -1,6 +1,5 @@
 from guilt.interfaces.command import CommandInterface
 from guilt.interfaces.services.cpu_profiles_config import CpuProfilesConfigServiceInterface
-from guilt.interfaces.services.slurm_batch import SlurmBatchServiceInterface
 from guilt.interfaces.services.carbon_intensity_forecast import CarbonIntensityForecastServiceInterface
 from guilt.interfaces.services.ip_info import IpInfoServiceInterface
 from guilt.interfaces.services.unprocessed_jobs_data import UnprocessedJobsDataServiceInterface
@@ -8,6 +7,7 @@ from guilt.utility.time_series_data import WindowWithLowestSumResult
 from guilt.utility.format_duration import format_duration
 from guilt.models.unprocessed_job import UnprocessedJob
 from guilt.mappers import map_to
+from guilt.utility import slurm_batch
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from datetime import datetime, timedelta
@@ -18,13 +18,11 @@ class BatchCommand(CommandInterface):
   def __init__(
     self,
     cpu_profiles_config_service: CpuProfilesConfigServiceInterface,
-    slurm_batch_service: SlurmBatchServiceInterface,
     carbon_intensity_forecast_service: CarbonIntensityForecastServiceInterface,
     ip_info_service: IpInfoServiceInterface,
     unprocessed_jobs_data_service: UnprocessedJobsDataServiceInterface
   ) -> None:
     self._cpu_profiles_config_service = cpu_profiles_config_service
-    self._slurm_batch_service = slurm_batch_service
     self._carbon_intensity_forecast_service = carbon_intensity_forecast_service
     self._ip_info_service = ip_info_service
     self._unprocessed_jobs_data_service = unprocessed_jobs_data_service
@@ -55,7 +53,8 @@ class BatchCommand(CommandInterface):
       map_to.json.from_directive_lines(content, "#SBATCH")
     )
 
-    test_job = self._slurm_batch_service.test_job(path, None)
+    test_job = slurm_batch.test(path, None)
+    test_job
 
     earliest_possible_start_time = test_job.start_time
     latest_forecast_time = datetime.now() + timedelta(days=2, minutes=-30)
@@ -112,7 +111,7 @@ class BatchCommand(CommandInterface):
         print(f"By delaying the job to {best_times_with_grams[0].start_time.strftime('%Y-%m-%d %H:%M')}, it will emit {best_times_with_grams[0].sum_value:.2f} grams of CO2.")
         print(f"You are saving {earliest_possible_time_grams- best_times_with_grams[0].sum_value:.2f} grams of CO2 by delaying the job by {format_duration(delay_seconds)}.")
 
-    job_id = self._slurm_batch_service.submit_job(path, start_time)
+    job_id = slurm_batch.submit(path, start_time)
     
     unprocessed_jobs_data = self._unprocessed_jobs_data_service.read_from_file()
     if job_id in unprocessed_jobs_data.jobs.keys():
