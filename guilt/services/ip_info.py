@@ -12,7 +12,7 @@ class IpInfoService(IpInfoServiceInterface):
 
   def get_ip_info(self) -> LazyIpInfoResult:
     if self._cache is None:
-      self._cache = LazyIpInfoResult(self._api_fetch())
+      self._cache = LazyIpInfoResult(JsonReader.expect_dict(asyncio.run(self._api_fetch())))
     return self._cache
 
   async def _api_fetch(self) -> Json:
