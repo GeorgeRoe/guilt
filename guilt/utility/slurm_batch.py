@@ -35,4 +35,4 @@ def submit(file: Path, begin: Optional[datetime] = None) -> str:
   return _run_command(_construct_command(file, begin))
 
 def test(file: Path, begin: Optional[datetime] = None) -> SlurmBatchTestResult:
-  return map_to.slurm_batch_test_result.from_line(_run_command(_construct_command(file, begin, test=True))
+  return map_to.slurm_batch_test_result.from_line(_run_command(_construct_command(file, begin, test=True)))
