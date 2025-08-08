@@ -2,7 +2,7 @@ from guilt.interfaces.repositories.processed_jobs import ProcessedJobsRepository
 from guilt.interfaces.repositories.cpu_profiles import CpuProfilesRepositoryInterface
 from guilt.interfaces.models.processed_job import ProcessedJobInterface
 from guilt.models.lazy_json_processed_job import LazyJsonProcessedJob
-from guilt.utility.json_reader import JsonReader
+from guilt.utility import json_reader
 from guilt.types.json import Json
 from typing import Optional, Sequence, cast
 from pathlib import Path
@@ -19,17 +19,17 @@ class JsonProcessedJobsRepository(ProcessedJobsRepositoryInterface):
 
     self._jobs: dict[str, ProcessedJobInterface] = {}
     with self._path.open("r") as file:
-      raw_jobs = JsonReader.expect_list(json.load(file))
+      raw_jobs = json_reader.expect_list(json.load(file))
       for raw_job in raw_jobs:
-        job = JsonReader.expect_dict(raw_job)
+        job = json_reader.expect_dict(raw_job)
 
         cpu_profile = self._cpu_profiles_repository.get(
-          JsonReader.ensure_get_str(job, "cpu_profile_name")
+          json_reader.ensure_get_str(job, "cpu_profile_name")
         )
 
         if cpu_profile is None:
           raise ValueError(
-            f"CPU profile with ID {JsonReader.ensure_get_str(job, 'cpu_profile_name')} not found."
+            f"CPU profile with ID {json_reader.ensure_get_str(job, 'cpu_profile_name')} not found."
           ) 
 
         processed_job = LazyJsonProcessedJob(

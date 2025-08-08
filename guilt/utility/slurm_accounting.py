@@ -1,5 +1,5 @@
 from guilt.models.lazy_slurm_accounting_result import LazySlurmAccountingResult
-from guilt.utility.json_reader import JsonReader
+from guilt.utility import json_reader
 from guilt.types.json import Json
 from typing import Optional, Sequence, cast
 from datetime import datetime
@@ -30,8 +30,8 @@ def run(
   if result.returncode != 0:
     raise Exception(f"Command failed with code {result.returncode}: {result.stderr.strip()}")
 
-  raw_data = JsonReader.expect_dict(cast(Json, json.loads(result.stdout.strip())))
+  raw_data = json_reader.expect_dict(cast(Json, json.loads(result.stdout.strip())))
 
-  jobs_data = JsonReader.ensure_get_list(raw_data, "jobs")
+  jobs_data = json_reader.ensure_get_list(raw_data, "jobs")
 
-  return [LazySlurmAccountingResult(JsonReader.expect_dict(job_data)) for job_data in jobs_data]
+  return [LazySlurmAccountingResult(json_reader.expect_dict(job_data)) for job_data in jobs_data]

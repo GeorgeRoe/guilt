@@ -1,7 +1,7 @@
 from guilt.interfaces.repositories.cpu_profiles import CpuProfilesRepositoryInterface
 from guilt.interfaces.models.cpu_profile import CpuProfileInterface
 from guilt.models.lazy_json_cpu_profile import LazyJsonCpuProfile
-from guilt.utility.json_reader import JsonReader
+from guilt.utility import json_reader
 from guilt.types.json import Json
 from typing import Optional, Sequence
 from pathlib import Path
@@ -13,7 +13,7 @@ class JsonCpuProfilesRepository(CpuProfilesRepositoryInterface):
 
     self._profiles: dict[str, CpuProfileInterface] = {}
     with self._path.open("r") as file:
-      raw_profiles = JsonReader.expect_list(json.load(file))
+      raw_profiles = json_reader.expect_list(json.load(file))
       for profile in raw_profiles:
         lazy_profile = LazyJsonCpuProfile(profile)
         self._profiles[lazy_profile.name] = lazy_profile
