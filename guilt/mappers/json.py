@@ -1,29 +1,7 @@
-from guilt.models.cpu_profiles_config import CpuProfilesConfig
-from guilt.models.cpu_profile import CpuProfile
-from typing import cast
 from guilt.types.json import Json
-from dataclasses import asdict
 import json
 
 class MapToJson:
-  @staticmethod
-  def from_cpu_profile(cpu_profile: CpuProfile) -> dict[str, Json]:
-    return cast(dict[str, Json], {
-      "name": cpu_profile.name,
-      "tdp": cpu_profile.tdp,
-      "cores": cpu_profile.cores
-    })
-  
-  @classmethod
-  def from_cpu_profiles_config(cls, cpu_profiles_config: CpuProfilesConfig) -> dict[str, Json]:
-    return cast(dict[str, Json], {
-      "default": cpu_profiles_config.default.name,
-      "profiles": {
-        profile.name: {key: value for key, value in cls.from_cpu_profile(profile).items() if key != "name"}
-        for profile in cpu_profiles_config.profiles.values()
-      }
-    })
-    
   @staticmethod
   def from_directive_lines(lines: list[str], directive_comment: str) -> dict[str, Json]:
     directives: dict[str, Json] = {}

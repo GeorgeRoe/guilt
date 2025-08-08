@@ -1,7 +1,5 @@
 from guilt.mappers.carbon_intensity_forecast_result import MapToCarbonIntensityForecastResult
 from guilt.mappers.carbon_intensity_time_segment import MapToCarbonIntensityTimeSegment
-from guilt.mappers.cpu_profile import MapToCpuProfile
-from guilt.mappers.cpu_profiles_config import MapToCpuProfilesConfig
 from guilt.mappers.guilt_script_directives import MapToGuiltScriptDirectives
 from guilt.mappers.json import MapToJson
 from guilt.mappers.slurm_batch_test_result import MapToSlurmBatchTestResult
@@ -13,8 +11,6 @@ from dataclasses import dataclass
 class MapperRegistry:
   carbon_intensity_forecast_result: MapToCarbonIntensityForecastResult = MapToCarbonIntensityForecastResult()
   carbon_intensity_time_segment: MapToCarbonIntensityTimeSegment = MapToCarbonIntensityTimeSegment()
-  cpu_profile: MapToCpuProfile = MapToCpuProfile()
-  cpu_profiles_config: MapToCpuProfilesConfig = MapToCpuProfilesConfig()
   guilt_script_directives: MapToGuiltScriptDirectives = MapToGuiltScriptDirectives()
   json: MapToJson = MapToJson()
   slurm_batch_test_result: MapToSlurmBatchTestResult = MapToSlurmBatchTestResult()
