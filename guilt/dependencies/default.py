@@ -3,9 +3,6 @@ from guilt.dependencies.injector import DependencyInjector
 from guilt.interfaces.services.carbon_intensity_forecast import CarbonIntensityForecastServiceInterface
 from guilt.services.carbon_intensity_forecast import CarbonIntensityForecastService
 
-from guilt.interfaces.services.ip_info import IpInfoServiceInterface
-from guilt.services.ip_info import IpInfoService
-
 from guilt.interfaces.services.plotting import PlottingServiceInterface
 from guilt.services.plotting.plotext import PlotextPlottingService
 from guilt.services.plotting.matplotlib import MatplotlibPlottingService
@@ -23,7 +20,6 @@ import os
 
 def bind_default_services(di: DependencyInjector) -> None:
   di.bind(CarbonIntensityForecastServiceInterface, CarbonIntensityForecastService)
-  di.bind(IpInfoServiceInterface, IpInfoService)
   di.bind(UserServiceInterface, PwdUserService)
 
   # when a different storage method is used (e.g., sqlite), this should be changed

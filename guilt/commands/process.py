@@ -1,12 +1,12 @@
 from guilt.interfaces.command import CommandInterface
 from guilt.interfaces.services.repository_factory import RepositoryFactoryServiceInterface
 from guilt.interfaces.services.user import UserServiceInterface
-from guilt.interfaces.services.ip_info import IpInfoServiceInterface
 from guilt.interfaces.services.carbon_intensity_forecast import CarbonIntensityForecastServiceInterface
 from guilt.models.processed_job import ProcessedJob
 from guilt.utility.format_grams import format_grams
 from guilt.utility import slurm_accounting
 from guilt.utility.calculate_tdp_per_core import calculate_tdp_per_core
+from guilt.utility import ip_info
 from datetime import timedelta
 
 class ProcessCommand(CommandInterface):
@@ -14,12 +14,10 @@ class ProcessCommand(CommandInterface):
     self,
     user_service: UserServiceInterface,
     repository_factory_service: RepositoryFactoryServiceInterface,
-    ip_info_service: IpInfoServiceInterface,
     carbon_intensity_forecast_service: CarbonIntensityForecastServiceInterface
   ) -> None:
     self._user_service = user_service
     self._repository_factory_service = repository_factory_service
-    self._ip_info_service = ip_info_service
     self._carbon_intensity_forecast_service = carbon_intensity_forecast_service
 
   @staticmethod
@@ -49,7 +47,7 @@ class ProcessCommand(CommandInterface):
       print("No Jobs to process")
       return
     
-    postal = self._ip_info_service.get_ip_info().postal
+    postal = ip_info.get().postal
     
     for result in sacct_results:
       if not "cpu" in result.resources:

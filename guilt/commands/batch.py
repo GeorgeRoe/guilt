@@ -2,13 +2,13 @@ from guilt.interfaces.command import CommandInterface
 from guilt.interfaces.services.repository_factory import RepositoryFactoryServiceInterface
 from guilt.interfaces.services.user import UserServiceInterface
 from guilt.interfaces.services.carbon_intensity_forecast import CarbonIntensityForecastServiceInterface
-from guilt.interfaces.services.ip_info import IpInfoServiceInterface
 from guilt.utility.time_series_data import WindowWithLowestSumResult
 from guilt.utility.format_duration import format_duration
 from guilt.models.unprocessed_job import UnprocessedJob
 from guilt.mappers import map_to
 from guilt.utility import slurm_batch
 from guilt.utility.calculate_tdp_per_core import calculate_tdp_per_core
+from guilt.utility import ip_info
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from datetime import datetime, timedelta
@@ -21,12 +21,10 @@ class BatchCommand(CommandInterface):
     repository_factory_service: RepositoryFactoryServiceInterface,
     user_service: UserServiceInterface,
     carbon_intensity_forecast_service: CarbonIntensityForecastServiceInterface,
-    ip_info_service: IpInfoServiceInterface
   ) -> None:
     self._repository_factory_service = repository_factory_service
     self._user_service = user_service
     self._carbon_intensity_forecast_service = carbon_intensity_forecast_service
-    self._ip_info_service = ip_info_service
 
   @staticmethod
   def name() -> str:
@@ -73,7 +71,7 @@ class BatchCommand(CommandInterface):
         self._carbon_intensity_forecast_service.get_forecast(
           earliest_possible_start_time,
           latest_forecast_time,
-          self._ip_info_service.get_ip_info().postal
+          ip_info.get().postal
         )
       )
 
