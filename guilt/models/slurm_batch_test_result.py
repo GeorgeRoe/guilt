@@ -1,6 +1,6 @@
 from datetime import datetime
 
-class SlurmBatchTestResultInterface:
+class SlurmBatchTestResult:
   def __init__(
     self,
     job_id: str,
