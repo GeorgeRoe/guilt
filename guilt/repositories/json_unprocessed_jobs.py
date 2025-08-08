@@ -52,7 +52,6 @@ class JsonUnprocessedJobsRepository(UnprocessedJobsRepositoryInterface):
   def delete(self, job_id: str) -> None:
     if job_id in self._jobs:
       del self._jobs[job_id]
-      print(len(self._jobs.keys()))
 
   def save(self) -> bool:
     raw_jobs: list[dict[str, Json]] = []
@@ -67,5 +66,5 @@ class JsonUnprocessedJobsRepository(UnprocessedJobsRepositoryInterface):
       with self._path.open("w") as file:
         json.dump(raw_jobs, file, indent=2)
       return True
-    except Exception as e:
+    except Exception:
       return False
