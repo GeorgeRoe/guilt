@@ -54,19 +54,19 @@ class LazyIpInfoResult:
     return self._location
 
   @property
-  def organisation(self) -> Optional[str]:
+  def organisation(self) -> str:
     if self._organisation is None:
       self._organisation = parse_ip_info_json.get_organisation(self._data)
     return self._organisation
 
   @property
-  def postal(self) -> Optional[str]:
+  def postal(self) -> str:
     if self._postal is None:
       self._postal = parse_ip_info_json.get_postal(self._data)
     return self._postal
   
   @property
-  def timezone(self) -> Optional[str]:
+  def timezone(self) -> str:
     if self._timezone is None:
       self._timezone = parse_ip_info_json.get_timezone(self._data)
     return self._timezone

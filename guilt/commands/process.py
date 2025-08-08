@@ -1,23 +1,24 @@
 from guilt.interfaces.command import CommandInterface
-from guilt.interfaces.services.unprocessed_jobs_data import UnprocessedJobsDataServiceInterface
-from guilt.interfaces.services.processed_jobs_data import ProcessedJobsDataServiceInterface
+from guilt.interfaces.services.repository_factory import RepositoryFactoryServiceInterface
+from guilt.interfaces.services.user import UserServiceInterface
 from guilt.interfaces.services.ip_info import IpInfoServiceInterface
 from guilt.interfaces.services.carbon_intensity_forecast import CarbonIntensityForecastServiceInterface
 from guilt.models.processed_job import ProcessedJob
 from guilt.utility.format_grams import format_grams
 from guilt.utility import slurm_accounting
+from guilt.utility.calculate_tdp_per_core import calculate_tdp_per_core
 from datetime import timedelta
 
 class ProcessCommand(CommandInterface):
   def __init__(
     self,
-    unprocessed_jobs_data_service: UnprocessedJobsDataServiceInterface,
-    processed_jobs_data_service: ProcessedJobsDataServiceInterface,
+    user_service: UserServiceInterface,
+    repository_factory_service: RepositoryFactoryServiceInterface,
     ip_info_service: IpInfoServiceInterface,
     carbon_intensity_forecast_service: CarbonIntensityForecastServiceInterface
   ) -> None:
-    self._unprocessed_jobs_data_service = unprocessed_jobs_data_service
-    self._processed_jobs_data_service = processed_jobs_data_service
+    self._user_service = user_service
+    self._repository_factory_service = repository_factory_service
     self._ip_info_service = ip_info_service
     self._carbon_intensity_forecast_service = carbon_intensity_forecast_service
 
@@ -30,10 +31,16 @@ class ProcessCommand(CommandInterface):
     pass
 
   def execute(self, _) -> None:
-    unprocessed_jobs_data = self._unprocessed_jobs_data_service.read_from_file()
-    processed_jobs_data = self._processed_jobs_data_service.read_from_file()
+    current_user = self._user_service.get_current_user()
 
-    job_ids = [str(job_id) for job_id in unprocessed_jobs_data.jobs.keys()]
+    if current_user is None:
+      print("No current user found. Please log in first.")
+      return
+
+    processed_jobs_repository= self._repository_factory_service.get_processed_jobs_repository(current_user)
+    unprocessed_jobs_repository = self._repository_factory_service.get_unprocessed_jobs_repository(current_user)
+
+    job_ids = [job.job_id for job in unprocessed_jobs_repository.get_all()]
     sacct_results = slurm_accounting.run(
       job_ids=job_ids
     )
@@ -49,7 +56,7 @@ class ProcessCommand(CommandInterface):
         print("Skipping job due to lack of CPU resource usage information")
         continue
       
-      unprocessed_job = unprocessed_jobs_data.jobs.get(str(result.job_id))
+      unprocessed_job = unprocessed_jobs_repository.get(result.job_id)
 
       if unprocessed_job is None:
         print(f"Unprocessed job with ID '{result.job_id}' could not be found")
@@ -60,7 +67,7 @@ class ProcessCommand(CommandInterface):
         print("Unprocessed job did not contain CPU utilisation.")
         return
       
-      wattage = cpu_utilisation * unprocessed_job.cpu_profile.tdp_per_core
+      wattage = cpu_utilisation * calculate_tdp_per_core(unprocessed_job.cpu_profile)
       
       buffer = timedelta(minutes=30)
       forecast_start = result.start_time - buffer
@@ -102,18 +109,12 @@ class ProcessCommand(CommandInterface):
         emissions,
         average_mix
       )
-      
-      if processed_job.job_id in processed_jobs_data.jobs.keys():
-        print(f"Processed job with job id '{processed_job.job_id}' already exists")
-        return
-      else:
-        processed_jobs_data.jobs[processed_job.job_id] = processed_job
-        
-      if not processed_job.job_id in unprocessed_jobs_data.jobs.keys():
-        print(f"Unprocessed job with job id '{processed_job.job_id}' cannot be removed as it doesn't exist")
-        return
-      else:
-        del unprocessed_jobs_data.jobs[processed_job.job_id]
+
+      processed_jobs_repository.upsert(processed_job)
+      unprocessed_jobs_repository.delete(unprocessed_job.job_id)
     
-    self._unprocessed_jobs_data_service.write_to_file(unprocessed_jobs_data)
-    self._processed_jobs_data_service.write_to_file(processed_jobs_data)
+    if unprocessed_jobs_repository.save():
+      processed_jobs_repository.save()
+    else:
+      print("Failed to save processed jobs repository.")
+      return

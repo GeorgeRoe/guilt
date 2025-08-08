@@ -1,0 +1,4 @@
+from guilt.interfaces.repositories.base_jobs import BaseJobsRepositoryInterface
+from guilt.interfaces.models.processed_job import ProcessedJobInterface
+
+ProcessedJobsRepositoryInterface = BaseJobsRepositoryInterface[ProcessedJobInterface]

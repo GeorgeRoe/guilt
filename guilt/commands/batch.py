@@ -1,13 +1,14 @@
 from guilt.interfaces.command import CommandInterface
-from guilt.interfaces.services.cpu_profiles_config import CpuProfilesConfigServiceInterface
+from guilt.interfaces.services.repository_factory import RepositoryFactoryServiceInterface
+from guilt.interfaces.services.user import UserServiceInterface
 from guilt.interfaces.services.carbon_intensity_forecast import CarbonIntensityForecastServiceInterface
 from guilt.interfaces.services.ip_info import IpInfoServiceInterface
-from guilt.interfaces.services.unprocessed_jobs_data import UnprocessedJobsDataServiceInterface
 from guilt.utility.time_series_data import WindowWithLowestSumResult
 from guilt.utility.format_duration import format_duration
 from guilt.models.unprocessed_job import UnprocessedJob
 from guilt.mappers import map_to
 from guilt.utility import slurm_batch
+from guilt.utility.calculate_tdp_per_core import calculate_tdp_per_core
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from datetime import datetime, timedelta
@@ -17,15 +18,15 @@ from dataclasses import replace
 class BatchCommand(CommandInterface):
   def __init__(
     self,
-    cpu_profiles_config_service: CpuProfilesConfigServiceInterface,
+    repository_factory_service: RepositoryFactoryServiceInterface,
+    user_service: UserServiceInterface,
     carbon_intensity_forecast_service: CarbonIntensityForecastServiceInterface,
-    ip_info_service: IpInfoServiceInterface,
-    unprocessed_jobs_data_service: UnprocessedJobsDataServiceInterface
+    ip_info_service: IpInfoServiceInterface
   ) -> None:
-    self._cpu_profiles_config_service = cpu_profiles_config_service
+    self._repository_factory_service = repository_factory_service
+    self._user_service = user_service
     self._carbon_intensity_forecast_service = carbon_intensity_forecast_service
     self._ip_info_service = ip_info_service
-    self._unprocessed_jobs_data_service = unprocessed_jobs_data_service
 
   @staticmethod
   def name() -> str:
@@ -44,9 +45,14 @@ class BatchCommand(CommandInterface):
     with path.open("r") as file:
       content = file.read().splitlines()
 
+    current_user = self._user_service.get_current_user()
+
+    if current_user is None:
+      raise RuntimeError("No user is currently logged in. Please log in to continue.")
+
     guilt_directives = map_to.guilt_script_directives.from_json_directives(
       map_to.json.from_directive_lines(content, "#GUILT"),
-      self._cpu_profiles_config_service.read_from_file()
+      self._repository_factory_service.get_cpu_profiles_repository(current_user)
     )
 
     slurm_directives = map_to.slurm_script_directives.from_json_directives(
@@ -71,7 +77,7 @@ class BatchCommand(CommandInterface):
         )
       )
 
-      tdp = slurm_directives.tasks_per_node * slurm_directives.cpus_per_task * slurm_directives.nodes * guilt_directives.cpu_profile.tdp_per_core
+      tdp = slurm_directives.tasks_per_node * slurm_directives.cpus_per_task * slurm_directives.nodes * calculate_tdp_per_core(guilt_directives.cpu_profile)
 
       earliest_possible_time_sum = intensity_data.get_window_sum(
         earliest_possible_start_time,
@@ -113,15 +119,17 @@ class BatchCommand(CommandInterface):
 
     job_id = slurm_batch.submit(path, start_time)
     
-    unprocessed_jobs_data = self._unprocessed_jobs_data_service.read_from_file()
-    if job_id in unprocessed_jobs_data.jobs.keys():
+    unprocessed_jobs_repository = self._repository_factory_service.get_unprocessed_jobs_repository(current_user)
+
+    if job_id in [job.job_id for job in unprocessed_jobs_repository.get_all()]:
       print(f"Unprocessed job with ID {job_id} already exists.")
       return
     
-    unprocessed_jobs_data.jobs[job_id] = UnprocessedJob(
+    unprocessed_jobs_repository.upsert(UnprocessedJob(
       job_id,
       guilt_directives.cpu_profile
-    )
-    self._unprocessed_jobs_data_service.write_to_file(unprocessed_jobs_data)
+    ))
+
+    unprocessed_jobs_repository.save()
 
     print(f"Job submitted with ID {job_id}.")

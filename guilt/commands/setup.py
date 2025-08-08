@@ -1,25 +1,17 @@
 from guilt.interfaces.command import CommandInterface
 from guilt.interfaces.services.user import UserServiceInterface
-from guilt.interfaces.services.cpu_profiles_config import CpuProfilesConfigServiceInterface
-from guilt.interfaces.services.processed_jobs_data import ProcessedJobsDataServiceInterface
-from guilt.interfaces.services.unprocessed_jobs_data import UnprocessedJobsDataServiceInterface
-from guilt.models.processed_jobs_data import ProcessedJobsData
-from guilt.models.unprocessed_jobs_data import UnprocessedJobsData
-from guilt.utility.has_guilt_installed import has_guilt_installed
+from guilt.interfaces.strategies.repository_setup import RepositorySetupStrategyInterface
+from guilt.utility.guilt_directory import create_guilt_directory_for_user, does_user_have_guilt_directory
 from guilt.constants import branding
 
 class SetupCommand(CommandInterface):
   def __init__(
     self,
     user_service: UserServiceInterface,
-    cpu_profiles_config_service: CpuProfilesConfigServiceInterface,
-    processed_jobs_data_service: ProcessedJobsDataServiceInterface,
-    unprocessed_jobs_data_service: UnprocessedJobsDataServiceInterface
+    repository_setup_strategy: RepositorySetupStrategyInterface
   ) -> None:
     self._user_service = user_service
-    self._cpu_profiles_config_service = cpu_profiles_config_service
-    self._processed_jobs_data_service = processed_jobs_data_service
-    self._unprocessed_jobs_data_service = unprocessed_jobs_data_service
+    self._repository_setup_strategy = repository_setup_strategy
 
   @staticmethod
   def name() -> str:
@@ -35,31 +27,14 @@ class SetupCommand(CommandInterface):
       print("Error: No user is currently logged in. Please log in before setting up GUILT.")
       return
 
-    if has_guilt_installed(current_user):
+    if does_user_have_guilt_directory(current_user):
       print("Error: GUILT has already been setup!")
       return
 
     print("\n\033[91m" + branding.LOGO + "\n" * 2 + branding.CENTERED_TAGLINE)
     print("\033[0m")
 
-    try:
-      self._cpu_profiles_config_service.write_to_file(
-        self._cpu_profiles_config_service.get_default()
-      )
-    except Exception as e:
-      print(f"Error setting up CPU profiles config file: {e}")
-      return
-
-    try:
-      self._processed_jobs_data_service.write_to_file(ProcessedJobsData({}))
-    except Exception as e:
-      print(f"Error setting up processed jobs data file: {e}")
-      return
-    
-    try:
-      self._unprocessed_jobs_data_service.write_to_file(UnprocessedJobsData({}))
-    except Exception as e:
-      print(f"Error setting up unprocessed jobs data file: {e}")
-      return
+    create_guilt_directory_for_user(current_user)
+    self._repository_setup_strategy.execute(current_user)
 
     print("GUILT is now setup!")

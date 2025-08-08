@@ -1,7 +1,7 @@
 from guilt.interfaces.command import CommandInterface
 from guilt.interfaces.services.user import UserServiceInterface
 from guilt.interfaces.models.user import UserInterface
-from guilt.utility.has_guilt_installed import has_guilt_installed
+from guilt.utility.guilt_directory import does_user_have_guilt_directory 
 from typing import Sequence
 
 class FriendsCommand(CommandInterface):
@@ -21,7 +21,7 @@ class FriendsCommand(CommandInterface):
       user
       for user
       in self._user_service.get_all_users()
-      if has_guilt_installed(user)
+      if does_user_have_guilt_directory(user)
     ]
 
     if len(friends) == 0:

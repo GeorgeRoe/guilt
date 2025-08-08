@@ -1,6 +1,6 @@
 from dataclasses import dataclass
-from guilt.models.cpu_profile import CpuProfile
+from guilt.interfaces.models.cpu_profile import CpuProfileInterface
 
 @dataclass
 class GuiltScriptDirectives:
-  cpu_profile: CpuProfile
+  cpu_profile: CpuProfileInterface

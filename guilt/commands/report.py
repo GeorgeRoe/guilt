@@ -1,22 +1,26 @@
 from guilt.interfaces.command import CommandInterface
-from guilt.interfaces.services.processed_jobs_data import ProcessedJobsDataServiceInterface
+from guilt.interfaces.services.user import UserServiceInterface
+from guilt.interfaces.services.repository_factory import RepositoryFactoryServiceInterface
 from guilt.interfaces.services.plotting import PlottingServiceInterface
-from guilt.models.processed_job import ProcessedJob
+from guilt.interfaces.models.processed_job import ProcessedJobInterface
 from guilt.utility.format_duration import format_duration
 from guilt.utility.format_grams import format_grams
 from guilt.utility.plotting_context import PlottingContext
+from guilt.utility.calculate_tdp_per_core import calculate_tdp_per_core
 from argparse import ArgumentParser, Namespace
-from typing import Sequence
+from typing import Sequence, MutableSequence
 from datetime import datetime
 import shutil
 
 class ReportCommand(CommandInterface):
   def __init__(
     self,
-    processed_jobs_data_service: ProcessedJobsDataServiceInterface,
+    user_service: UserServiceInterface,
+    repository_factory_service: RepositoryFactoryServiceInterface,
     plotting_service: PlottingServiceInterface
   ) -> None:
-    self._processed_jobs_data_service = processed_jobs_data_service
+    self._user_service = user_service
+    self._repository_factory_service = repository_factory_service
     self._plotting_service = plotting_service
 
   @staticmethod
@@ -32,7 +36,7 @@ class ReportCommand(CommandInterface):
       default="month"
     )
 
-  def _print_report(self, jobs: Sequence[ProcessedJob]) -> None:
+  def _print_report(self, jobs: Sequence[ProcessedJobInterface]) -> None:
     total_emissions = sum([job.emissions for job in jobs])
 
     generation_mix: dict[str, float] = {}
@@ -50,7 +54,7 @@ class ReportCommand(CommandInterface):
 
     generation_mix = {k:v / total_duration for k, v in generation_mix.items() if v != 0}
 
-    cpu_time = sum([(job.energy * 1000 * 3600) / job.cpu_profile.tdp_per_core for job in jobs])
+    cpu_time = sum([(job.energy * 1000 * 3600) / calculate_tdp_per_core(job.cpu_profile) for job in jobs])
     formatted_cpu_time = format_duration(cpu_time)
     
     print(f"You ran {len(jobs)} job{'' if len(jobs) == 1 else 's'}.")
@@ -64,7 +68,13 @@ class ReportCommand(CommandInterface):
       )
 
   def execute(self, args: Namespace) -> None:
-    processed_jobs_data = self._processed_jobs_data_service.read_from_file()
+    current_user = self._user_service.get_current_user()
+
+    if current_user is None:
+      print("You need to be logged in to generate a report.")
+      return
+
+    processed_jobs_repository = self._repository_factory_service.get_processed_jobs_repository(current_user)
     
     group_by_key_format: dict[str, str] = {
       "day": "%Y-%m-%d",
@@ -73,8 +83,8 @@ class ReportCommand(CommandInterface):
       "year": "%Y"
     }
     
-    time_splits: dict[str, list[ProcessedJob]] = {}
-    for job in processed_jobs_data.jobs.values():
+    time_splits: dict[str, MutableSequence[ProcessedJobInterface]] = {}
+    for job in processed_jobs_repository.get_all():
       key = job.start.strftime(str(group_by_key_format.get(args.group_by)))
       
       if key in time_splits:
@@ -111,6 +121,6 @@ class ReportCommand(CommandInterface):
     print("All Time")
     print("-" * columns)
     
-    self._print_report(list(processed_jobs_data.jobs.values()))
+    self._print_report(processed_jobs_repository.get_all())
     
     print("=" * columns)

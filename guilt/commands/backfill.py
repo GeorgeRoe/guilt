@@ -1,21 +1,18 @@
 from guilt.interfaces.command import CommandInterface
 from guilt.interfaces.services.user import UserServiceInterface
-from guilt.interfaces.services.unprocessed_jobs_data import UnprocessedJobsDataServiceInterface
-from guilt.interfaces.services.cpu_profiles_config import CpuProfilesConfigServiceInterface
+from guilt.interfaces.services.repository_factory import RepositoryFactoryServiceInterface
 from guilt.utility import slurm_accounting
-from guilt.mappers import map_to
+from guilt.models.unprocessed_job import UnprocessedJob
 from datetime import datetime
 
 class BackfillCommand(CommandInterface):
   def __init__(
     self,
     user_service: UserServiceInterface,
-    unprocessed_jobs_data_service: UnprocessedJobsDataServiceInterface,
-    cpu_profiles_config_service: CpuProfilesConfigServiceInterface
+    repository_factory_service: RepositoryFactoryServiceInterface
   ) -> None:
     self._user_service = user_service
-    self._unprocessed_jobs_data_service = unprocessed_jobs_data_service
-    self._cpu_profiles_config_service = cpu_profiles_config_service
+    self._repository_factory_service = repository_factory_service
 
   @staticmethod
   def name() -> str:
@@ -35,20 +32,23 @@ class BackfillCommand(CommandInterface):
       user=current_user.username,
       since=datetime(1970, 1, 1),
     )
-    
-    print(all_historical_user_jobs)
 
-    default_cpu_profile = self._cpu_profiles_config_service.read_from_file().default
+    default_cpu_profile = self._repository_factory_service.get_settings_repository(current_user).get_default_cpu_profile()
+    if default_cpu_profile is None:
+      print("You must set a default CPU profile before running the backfill command.")
+      return
 
-    converted_unprocessed_jobs = [
-      map_to.unprocessed_job.from_slurm_accounting_result(result, default_cpu_profile)
+    converted_unprocessed_jobs: list[UnprocessedJob] = [
+      UnprocessedJob(
+        job_id=result.job_id,
+        cpu_profile=default_cpu_profile
+      )
       for result in all_historical_user_jobs
     ]
 
-    unprocessed_jobs_data = self._unprocessed_jobs_data_service.read_from_file()
+    unprocessed_jobs_repository = self._repository_factory_service.get_unprocessed_jobs_repository(current_user)
 
     for unprocessed_job in converted_unprocessed_jobs:
-      if not unprocessed_job.job_id in unprocessed_jobs_data.jobs.keys():
-        unprocessed_jobs_data.jobs[unprocessed_job.job_id] = unprocessed_job
+      unprocessed_jobs_repository.upsert(unprocessed_job)
 
-    self._unprocessed_jobs_data_service.write_to_file(unprocessed_jobs_data)
+    unprocessed_jobs_repository.save()
