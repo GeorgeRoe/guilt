@@ -2,6 +2,8 @@ mod cli;
 mod commands;
 mod ip_info;
 
+pub mod guilt_dir;
+
 use cli::{Cli, Commands};
 use clap::Parser;
 
