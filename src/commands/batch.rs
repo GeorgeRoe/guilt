@@ -1,4 +1,6 @@
-pub fn run() -> Result<(), Box<dyn std::error::Error>> {
+use crate::SomeError;
+
+pub fn run() -> Result<(), SomeError> {
     println!("NOT IMPLEMENTED");
     Ok(())
 }

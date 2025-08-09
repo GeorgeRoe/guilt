@@ -4,7 +4,9 @@ use std::io;
 use colored::Colorize;
 use crate::guilt_dir::guilt_dir_given_home;
 
-pub fn run() -> Result<(), Box<dyn std::error::Error>> {
+use crate::SomeError;
+
+pub fn run() -> Result<(), SomeError> {
     let home = env::home_dir().ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "Could not find home directory"))?;
     let guilt_dir = guilt_dir_given_home(&home);
 

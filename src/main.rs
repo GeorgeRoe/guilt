@@ -4,9 +4,13 @@ mod commands;
 pub mod ip_info;
 pub mod users;
 pub mod guilt_dir;
+pub mod models;
+pub mod repositories;
 
 use cli::{Cli, Commands};
 use clap::Parser;
+
+pub type SomeError = Box<dyn std::error::Error>;
 
 #[tokio::main]
 async fn main() {
