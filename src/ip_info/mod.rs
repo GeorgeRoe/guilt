@@ -1,7 +1,7 @@
-pub mod types;
+mod types;
 
 use reqwest;
-use crate::ip_info::types::IpInfo;
+pub use crate::ip_info::types::IpInfo;
 
 pub async fn fetch_ip_info() -> Result<IpInfo, reqwest::Error> {
     let response = reqwest::get("https://ipinfo.io/json").await?;
