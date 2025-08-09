@@ -1,20 +1,16 @@
 mod cli;
-mod commands {
-    pub mod backfill;
-    pub mod batch;
-    pub mod forecast;
-    pub mod friends;
-    pub mod process;
-    pub mod report;
-    pub mod setup;
-    pub mod teardown;
-}
+mod commands;
+mod ip_info;
 
 use cli::{Cli, Commands};
 use clap::Parser;
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let cli = Cli::parse();
+
+    let data = ip_info::fetch_ip_info().await.unwrap();
+    println!("Your postcode is {}", data.postal);
 
     match &cli.command {
         Commands::Backfill => commands::backfill::run(),
