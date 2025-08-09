@@ -1,7 +1,8 @@
 mod cli;
 mod commands;
-mod ip_info;
 
+pub mod ip_info;
+pub mod users;
 pub mod guilt_dir;
 
 use cli::{Cli, Commands};
