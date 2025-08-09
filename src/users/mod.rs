@@ -2,9 +2,11 @@ use std::process::Command;
 use std::str;
 use std::path::PathBuf;
 
-pub mod types;
+mod types;
 
-pub fn get_all_users() -> std::io::Result<Vec<types::User>> {
+pub use types::User;
+
+pub fn get_all_users() -> std::io::Result<Vec<User>> {
     let output = Command::new("getent")
         .arg("passwd")
         .output()?;
@@ -26,7 +28,7 @@ pub fn get_all_users() -> std::io::Result<Vec<types::User>> {
             let name = fields[0].to_string();
             let gecos = fields[4].to_string();
             let home_dir = PathBuf::from(fields[5]);
-            users.push(types::User { name, gecos, home_dir })
+            users.push(User { name, gecos, home_dir })
         }
     }
 

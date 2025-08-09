@@ -1,4 +1,4 @@
-use crate::users::{get_all_users, types::User};
+use crate::users::{get_all_users, User};
 use crate::guilt_dir::has_guilt_dir;
 use colored::Colorize;
 
