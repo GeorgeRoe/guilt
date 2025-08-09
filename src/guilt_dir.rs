@@ -1,5 +1,5 @@
 use std::path::PathBuf;
-use crate::users::types::User;
+use crate::users::User;
 
 pub fn guilt_dir_given_home(home: &PathBuf) -> PathBuf {
     let mut guilt_dir = home.clone();
