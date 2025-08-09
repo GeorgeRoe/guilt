@@ -12,7 +12,7 @@ async fn main() {
     let data = ip_info::fetch_ip_info().await.unwrap();
     println!("Your postcode is {}", data.postal);
 
-    match &cli.command {
+    let result = match &cli.command {
         Commands::Backfill => commands::backfill::run(),
         Commands::Batch => commands::batch::run(),
         Commands::Forecast => commands::forecast::run(),
@@ -21,5 +21,10 @@ async fn main() {
         Commands::Report => commands::report::run(),
         Commands::Setup => commands::setup::run(),
         Commands::Teardown => commands::teardown::run(),
+    };
+
+    if let Err(e) = result {
+        eprintln!("Error: {}", e);
+        std::process::exit(1);
     }
 }
