@@ -1,4 +1,0 @@
-from guilt.interfaces.repositories.base_jobs import BaseJobsRepositoryInterface
-from guilt.interfaces.models.unprocessed_job import UnprocessedJobInterface
-
-UnprocessedJobsRepositoryInterface = BaseJobsRepositoryInterface[UnprocessedJobInterface]
