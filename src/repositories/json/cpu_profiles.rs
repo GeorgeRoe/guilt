@@ -1,4 +1,4 @@
-use crate::repositories::cpu_profiles::CpuProfilesRepository;
+use crate::repositories::CpuProfilesRepository;
 use crate::models::CpuProfile;
 use std::path::PathBuf;
 use std::fs::File;
@@ -34,8 +34,8 @@ impl CpuProfilesRepository for JsonCpuProfilesRepository {
         Ok(self.profiles.get(name).cloned())
     }
 
-    fn upsert_profile(&mut self, profile: CpuProfile) -> Result<(), SomeError> {
-        self.profiles.insert(profile.name.clone(), profile);
+    fn upsert_profile(&mut self, profile: &CpuProfile) -> Result<(), SomeError> {
+        self.profiles.insert(profile.name.clone(), profile.clone());
         Ok(())
     }
 
