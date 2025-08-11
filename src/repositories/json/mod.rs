@@ -1,4 +1,5 @@
 pub mod io;
+pub mod paths;
 
 use std::path::PathBuf;
 use std::collections::HashMap;
@@ -16,9 +17,6 @@ pub struct JsonUserDataRepository {
 
     cpu_profiles: HashMap<String, CpuProfile>,
     unresolved_unprocessed_jobs: HashMap<String, UnresolvedUnprocessedJob>
-}
-
-impl JsonUserDataRepository {
 }
 
 mod cpu_profiles;

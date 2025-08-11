@@ -1,6 +1,7 @@
 use std::process::Command;
 use std::str;
 use std::path::PathBuf;
+use std::env;
 
 mod types;
 
@@ -33,4 +34,38 @@ pub fn get_all_users() -> std::io::Result<Vec<User>> {
     }
 
     Ok(users)
+}
+
+pub fn get_current_user() -> std::io::Result<User> {
+    // Get the username from environment variables
+    let username = env::var("USER")
+        .map_err(|_| std::io::Error::new(std::io::ErrorKind::NotFound, "USER environment variable not set"))?;
+
+    // Call getent passwd for the specific user
+    let output = Command::new("getent")
+        .arg("passwd")
+        .arg(&username)
+        .output()?;
+
+    if !output.status.success() {
+        return Err(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            format!("getent failed with status: {}", output.status)
+        ));
+    }
+
+    let stdout = str::from_utf8(&output.stdout)
+        .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e))?;
+
+    // Parse the single line output
+    let fields: Vec<&str> = stdout.trim_end().splitn(7, ":").collect();
+    if fields.len() < 7 {
+        return Err(std::io::Error::new(std::io::ErrorKind::InvalidData, "Malformed getent output"));
+    }
+
+    let name = fields[0].to_string();
+    let gecos = fields[4].to_string();
+    let home_dir = PathBuf::from(fields[5]);
+
+    Ok(User { name, gecos, home_dir })
 }
