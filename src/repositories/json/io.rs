@@ -5,7 +5,7 @@ use crate::SomeError;
 use std::path::Path;
 
 pub fn read_json_file<T: DeserializeOwned, P: AsRef<Path>>(path: P) -> Result<T, SomeError> {
-    let file = File::create(path)?;
+    let file = File::open(path)?;
     let reader = BufReader::new(file);
     let data = serde_json::from_reader(reader)?;
     Ok(data)
