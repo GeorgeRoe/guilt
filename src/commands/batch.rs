@@ -8,7 +8,7 @@ pub fn run() -> Result<(), SomeError> {
 
     let user_data_repo = JsonUserDataRepository::new(get_current_user()?)?;
 
-    println!("{}", user_data_repo.get_all_profiles()?.len());
+    println!("{}", user_data_repo.get_all_cpu_profiles()?.len());
 
     Ok(())
 }
