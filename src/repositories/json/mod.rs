@@ -1,3 +1,5 @@
+pub mod io;
+
 use std::path::PathBuf;
 use std::collections::HashMap;
 use crate::models::CpuProfile;
