@@ -1,16 +1,18 @@
-use std::env;
 use std::fs;
-use std::io;
 use colored::Colorize;
 use crate::guilt_dir::guilt_dir_given_home;
+use crate::repositories::json::JsonUserDataRepository;
+use crate::users::get_current_user;
+use crate::repositories::UserDataRepository;
 
 use crate::SomeError;
 
 pub fn run() -> Result<(), SomeError> {
-    let home = env::home_dir().ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "Could not find home directory"))?;
-    let guilt_dir = guilt_dir_given_home(&home);
+    let current_user = get_current_user()?;
+    let guilt_dir = guilt_dir_given_home(&current_user.home_dir);
 
     fs::create_dir_all(&guilt_dir)?;
+    JsonUserDataRepository::setup(current_user)?;
 
     let logo = r#"
  .d8888b.  888     888 8888888 888      88888888888 

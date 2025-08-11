@@ -19,6 +19,9 @@ async fn main() {
     let data = ip_info::fetch_ip_info().await.unwrap();
     println!("Your postcode is {}", data.postal);
 
+    let current_user = users::get_current_user().unwrap();
+    println!("Current user: {}", current_user.name);
+
     let result = match &cli.command {
         Commands::Backfill => commands::backfill::run(),
         Commands::Batch => commands::batch::run(),
