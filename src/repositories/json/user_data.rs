@@ -26,8 +26,8 @@ impl UserDataRepository for JsonUserDataRepository {
     fn new(user: User) -> Result<Self, SomeError> {
         let guilt_dir = guilt_dir_given_home(&user.home_dir);
 
-        let cpu_profiles: Vec<CpuProfile> = read_json_file(guilt_dir.join(cpu_profiles_file_given_guilt_dir(&guilt_dir)))?;
-        let unresolved_unprocessed_jobs: Vec<UnresolvedUnprocessedJob> = read_json_file(guilt_dir.join(unprocessed_jobs_file_given_guilt_dir(&guilt_dir)))?;
+        let cpu_profiles: Vec<CpuProfile> = read_json_file(cpu_profiles_file_given_guilt_dir(&guilt_dir))?;
+        let unresolved_unprocessed_jobs: Vec<UnresolvedUnprocessedJob> = read_json_file(unprocessed_jobs_file_given_guilt_dir(&guilt_dir))?;
 
         Ok(JsonUserDataRepository {
             path: guilt_dir,
