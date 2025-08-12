@@ -1,6 +1,6 @@
+use crate::SomeError;
 use crate::models::CpuProfile;
 use std::result::Result;
-use crate::SomeError;
 
 pub trait CpuProfilesRepository {
     fn get_all_cpu_profiles(&self) -> Result<Vec<CpuProfile>, SomeError>;

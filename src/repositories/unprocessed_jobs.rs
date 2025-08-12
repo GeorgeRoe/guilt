@@ -1,6 +1,6 @@
+use crate::SomeError;
 use crate::models::UnprocessedJob;
 use std::result::Result;
-use crate::SomeError;
 
 pub trait UnprocessedJobsRepository {
     fn get_all_unprocessed_jobs(&self) -> Result<Vec<UnprocessedJob>, SomeError>;

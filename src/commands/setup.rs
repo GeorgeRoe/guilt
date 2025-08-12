@@ -1,9 +1,9 @@
-use std::fs;
-use colored::Colorize;
 use crate::guilt_dir::guilt_dir_given_home;
+use crate::repositories::UserDataRepository;
 use crate::repositories::json::JsonUserDataRepository;
 use crate::users::get_current_user;
-use crate::repositories::UserDataRepository;
+use colored::Colorize;
+use std::fs;
 
 use crate::SomeError;
 
@@ -29,7 +29,10 @@ Y88b  d88P Y88b. .d88P   888   888          888
 
     println!("{}", logo.red());
 
-    println!("Welcome to GUILT! A directory has been created for your data at: {}", guilt_dir.display().to_string().green());
+    println!(
+        "Welcome to GUILT! A directory has been created for your data at: {}",
+        guilt_dir.display().to_string().green()
+    );
 
     Ok(())
 }
