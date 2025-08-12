@@ -1,6 +1,8 @@
 use crate::SomeError;
 use crate::repositories::json::JsonUserDataRepository;
-use crate::repositories::{UserDataRepository, CpuProfilesRepository, UnprocessedJobsRepository, ProcessedJobsRepository};
+use crate::repositories::{
+    CpuProfilesRepository, ProcessedJobsRepository, UnprocessedJobsRepository, UserDataRepository,
+};
 use crate::users::get_current_user;
 
 pub fn run() -> Result<(), SomeError> {

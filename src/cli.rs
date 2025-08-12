@@ -5,7 +5,7 @@ use clap::{Parser, Subcommand};
 #[command(about = "GUILT: Green Usage Impact Logging Tool")]
 pub struct Cli {
     #[command(subcommand)]
-    pub command: Commands
+    pub command: Commands,
 }
 
 #[derive(Subcommand, Clone)]

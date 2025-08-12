@@ -1,6 +1,6 @@
+use crate::SomeError;
 use crate::models::ProcessedJob;
 use std::result::Result;
-use crate::SomeError;
 
 pub trait ProcessedJobsRepository {
     fn get_all_processed_jobs(&self) -> Result<Vec<ProcessedJob>, SomeError>;

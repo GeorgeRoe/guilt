@@ -1,7 +1,7 @@
-use std::fs::File;
-use std::io::{BufWriter, BufReader};
-use serde::{Serialize, de::DeserializeOwned};
 use crate::SomeError;
+use serde::{Serialize, de::DeserializeOwned};
+use std::fs::File;
+use std::io::{BufReader, BufWriter};
 use std::path::Path;
 
 pub fn read_json_file<T: DeserializeOwned, P: AsRef<Path>>(path: P) -> Result<T, SomeError> {

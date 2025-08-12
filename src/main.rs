@@ -1,14 +1,14 @@
 mod cli;
 mod commands;
 
-pub mod ip_info;
-pub mod users;
 pub mod guilt_dir;
+pub mod ip_info;
 pub mod models;
 pub mod repositories;
+pub mod users;
 
-use cli::{Cli, Commands};
 use clap::Parser;
+use cli::{Cli, Commands};
 
 pub type SomeError = Box<dyn std::error::Error>;
 

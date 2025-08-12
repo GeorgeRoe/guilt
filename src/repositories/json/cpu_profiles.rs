@@ -1,7 +1,7 @@
 use super::JsonUserDataRepository;
-use crate::repositories::CpuProfilesRepository;
-use crate::models::CpuProfile;
 use crate::SomeError;
+use crate::models::CpuProfile;
+use crate::repositories::CpuProfilesRepository;
 
 impl CpuProfilesRepository for JsonUserDataRepository {
     fn get_all_cpu_profiles(&self) -> Result<Vec<CpuProfile>, SomeError> {
@@ -13,8 +13,9 @@ impl CpuProfilesRepository for JsonUserDataRepository {
     }
 
     fn upsert_cpu_profile(&mut self, profile: &CpuProfile) -> Result<(), SomeError> {
-       self.cpu_profiles.insert(profile.name.clone(), profile.clone());
-       Ok(())
+        self.cpu_profiles
+            .insert(profile.name.clone(), profile.clone());
+        Ok(())
     }
 
     fn delete_cpu_profile(&mut self, name: &str) -> Result<(), SomeError> {
