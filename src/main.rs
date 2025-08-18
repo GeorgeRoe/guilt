@@ -5,6 +5,9 @@ pub mod guilt_dir;
 pub mod ip_info;
 pub mod models;
 pub mod repositories;
+pub mod safe_command;
+pub mod slurm;
+pub mod structured_json;
 pub mod users;
 
 use clap::Parser;
