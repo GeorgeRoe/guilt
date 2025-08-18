@@ -16,7 +16,7 @@ use cli::{Cli, Commands};
 pub type SomeError = Box<dyn std::error::Error>;
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), SomeError> {
     let cli = Cli::parse();
 
     let data = ip_info::fetch_ip_info().await.unwrap();
@@ -25,7 +25,7 @@ async fn main() {
     let current_user = users::get_current_user().unwrap();
     println!("Current user: {}", current_user.name);
 
-    let result = match &cli.command {
+    match &cli.command {
         Commands::Backfill => commands::backfill::run(),
         Commands::Batch => commands::batch::run(),
         Commands::Forecast => commands::forecast::run(),
@@ -34,10 +34,7 @@ async fn main() {
         Commands::Report => commands::report::run(),
         Commands::Setup => commands::setup::run(),
         Commands::Teardown => commands::teardown::run(),
-    };
+    }?;
 
-    if let Err(e) = result {
-        eprintln!("Error: {}", e);
-        std::process::exit(1);
-    }
+    Ok(())
 }
