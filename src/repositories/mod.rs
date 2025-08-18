@@ -5,7 +5,7 @@ mod processed_jobs;
 pub use processed_jobs::{ProcessedJobsRepository, ProcessedJobsRepositoryError};
 
 mod unprocessed_jobs;
-pub use unprocessed_jobs::UnprocessedJobsRepository;
+pub use unprocessed_jobs::{UnprocessedJobsRepository, UnprocessedJobsRepositoryError};
 
 mod user_data;
 pub use user_data::UserDataRepository;
