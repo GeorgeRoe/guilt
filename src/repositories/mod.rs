@@ -1,5 +1,5 @@
 mod cpu_profiles;
-pub use cpu_profiles::CpuProfilesRepository;
+pub use cpu_profiles::{CpuProfilesRepository, CpuProfilesRepositoryError};
 
 mod unprocessed_jobs;
 pub use unprocessed_jobs::UnprocessedJobsRepository;
