@@ -1,10 +1,9 @@
 use super::{JsonUserDataRepository, UnresolvedProcessedJob};
-use crate::SomeError;
 use crate::models::ProcessedJob;
-use crate::repositories::ProcessedJobsRepository;
+use crate::repositories::{ProcessedJobsRepository, ProcessedJobsRepositoryError};
 
 impl ProcessedJobsRepository for JsonUserDataRepository {
-    fn get_all_processed_jobs(&self) -> Result<Vec<ProcessedJob>, SomeError> {
+    fn get_all_processed_jobs(&self) -> Result<Vec<ProcessedJob>, ProcessedJobsRepositoryError> {
         self.unresolved_processed_jobs
             .values()
             .into_iter()
@@ -20,16 +19,15 @@ impl ProcessedJobsRepository for JsonUserDataRepository {
                         generation_mix: job.generation_mix.clone(),
                     })
                 } else {
-                    Err(Box::<dyn std::error::Error>::from(std::io::Error::new(
-                        std::io::ErrorKind::NotFound,
-                        format!("Cpu profile '{}' not found", job.cpu_profile_name),
-                    )))
+                    Err(ProcessedJobsRepositoryError::MissingCpuProfile(
+                        job.cpu_profile_name.clone()
+                    ))
                 }
             })
             .collect()
     }
 
-    fn get_processed_job_by_id(&self, id: &str) -> Result<Option<ProcessedJob>, SomeError> {
+    fn get_processed_job_by_id(&self, id: &str) -> Result<Option<ProcessedJob>, ProcessedJobsRepositoryError> {
         if let Some(job) = self.unresolved_processed_jobs.get(id) {
             if let Some(profile) = self.cpu_profiles.get(&job.cpu_profile_name) {
                 Ok(Some(ProcessedJob {
@@ -42,17 +40,16 @@ impl ProcessedJobsRepository for JsonUserDataRepository {
                     generation_mix: job.generation_mix.clone(),
                 }))
             } else {
-                Err(Box::<dyn std::error::Error>::from(std::io::Error::new(
-                    std::io::ErrorKind::NotFound,
-                    format!("CPU profile '{}' not found", job.cpu_profile_name),
-                )))
+                Err(ProcessedJobsRepositoryError::MissingCpuProfile(
+                    job.cpu_profile_name.clone()
+                ))
             }
         } else {
             Ok(None)
         }
     }
 
-    fn upsert_processed_job(&mut self, job: &ProcessedJob) -> Result<(), SomeError> {
+    fn upsert_processed_job(&mut self, job: &ProcessedJob) -> Result<(), ProcessedJobsRepositoryError> {
         self.cpu_profiles
             .insert(job.cpu_profile.name.clone(), job.cpu_profile.clone());
         let unresolved_job = UnresolvedProcessedJob {
@@ -69,7 +66,7 @@ impl ProcessedJobsRepository for JsonUserDataRepository {
         Ok(())
     }
 
-    fn delete_processed_job(&mut self, id: &str) -> Result<(), SomeError> {
+    fn delete_processed_job(&mut self, id: &str) -> Result<(), ProcessedJobsRepositoryError> {
         self.unresolved_processed_jobs.remove(id);
         Ok(())
     }
