@@ -3,4 +3,4 @@ mod parsing;
 mod types;
 
 pub use commands::{SlurmAccountingCommandError, get_all_historical_jobs_for_user};
-pub use types::{SlurmAccountingResources, SlurmAccountingResult};
+pub use types::{SlurmAccountingResources, StartTime, EndTime, SlurmAccountingResult};
