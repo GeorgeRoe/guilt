@@ -19,12 +19,6 @@ pub type SomeError = Box<dyn std::error::Error>;
 async fn main() -> Result<(), SomeError> {
     let cli = Cli::parse();
 
-    let data = ip_info::fetch_ip_info().await.unwrap();
-    println!("Your postcode is {}", data.postal);
-
-    let current_user = users::get_current_user().unwrap();
-    println!("Current user: {}", current_user.name);
-
     match &cli.command {
         Commands::Backfill => commands::backfill::run(),
         Commands::Batch => commands::batch::run(),
