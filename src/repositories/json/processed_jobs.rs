@@ -20,14 +20,17 @@ impl ProcessedJobsRepository for JsonUserDataRepository {
                     })
                 } else {
                     Err(ProcessedJobsRepositoryError::MissingCpuProfile(
-                        job.cpu_profile_name.clone()
+                        job.cpu_profile_name.clone(),
                     ))
                 }
             })
             .collect()
     }
 
-    fn get_processed_job_by_id(&self, id: &str) -> Result<Option<ProcessedJob>, ProcessedJobsRepositoryError> {
+    fn get_processed_job_by_id(
+        &self,
+        id: &str,
+    ) -> Result<Option<ProcessedJob>, ProcessedJobsRepositoryError> {
         if let Some(job) = self.unresolved_processed_jobs.get(id) {
             if let Some(profile) = self.cpu_profiles.get(&job.cpu_profile_name) {
                 Ok(Some(ProcessedJob {
@@ -41,7 +44,7 @@ impl ProcessedJobsRepository for JsonUserDataRepository {
                 }))
             } else {
                 Err(ProcessedJobsRepositoryError::MissingCpuProfile(
-                    job.cpu_profile_name.clone()
+                    job.cpu_profile_name.clone(),
                 ))
             }
         } else {
@@ -49,7 +52,10 @@ impl ProcessedJobsRepository for JsonUserDataRepository {
         }
     }
 
-    fn upsert_processed_job(&mut self, job: &ProcessedJob) -> Result<(), ProcessedJobsRepositoryError> {
+    fn upsert_processed_job(
+        &mut self,
+        job: &ProcessedJob,
+    ) -> Result<(), ProcessedJobsRepositoryError> {
         self.cpu_profiles
             .insert(job.cpu_profile.name.clone(), job.cpu_profile.clone());
         let unresolved_job = UnresolvedProcessedJob {

@@ -7,11 +7,17 @@ impl CpuProfilesRepository for JsonUserDataRepository {
         Ok(self.cpu_profiles.values().cloned().collect())
     }
 
-    fn get_cpu_profile_by_name(&self, name: &str) -> Result<Option<CpuProfile>, CpuProfilesRepositoryError> {
+    fn get_cpu_profile_by_name(
+        &self,
+        name: &str,
+    ) -> Result<Option<CpuProfile>, CpuProfilesRepositoryError> {
         Ok(self.cpu_profiles.get(name).cloned())
     }
 
-    fn upsert_cpu_profile(&mut self, profile: &CpuProfile) -> Result<(), CpuProfilesRepositoryError> {
+    fn upsert_cpu_profile(
+        &mut self,
+        profile: &CpuProfile,
+    ) -> Result<(), CpuProfilesRepositoryError> {
         self.cpu_profiles
             .insert(profile.name.clone(), profile.clone());
         Ok(())

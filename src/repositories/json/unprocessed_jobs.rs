@@ -3,7 +3,9 @@ use crate::models::UnprocessedJob;
 use crate::repositories::{UnprocessedJobsRepository, UnprocessedJobsRepositoryError};
 
 impl UnprocessedJobsRepository for JsonUserDataRepository {
-    fn get_all_unprocessed_jobs(&self) -> Result<Vec<UnprocessedJob>, UnprocessedJobsRepositoryError> {
+    fn get_all_unprocessed_jobs(
+        &self,
+    ) -> Result<Vec<UnprocessedJob>, UnprocessedJobsRepositoryError> {
         self.unresolved_unprocessed_jobs
             .values()
             .into_iter()
@@ -15,14 +17,17 @@ impl UnprocessedJobsRepository for JsonUserDataRepository {
                     })
                 } else {
                     Err(UnprocessedJobsRepositoryError::MissingCpuProfile(
-                        job.cpu_profile_name.clone()
+                        job.cpu_profile_name.clone(),
                     ))
                 }
             })
             .collect()
     }
 
-    fn get_unprocessed_job_by_id(&self, job_id: &str) -> Result<Option<UnprocessedJob>, UnprocessedJobsRepositoryError> {
+    fn get_unprocessed_job_by_id(
+        &self,
+        job_id: &str,
+    ) -> Result<Option<UnprocessedJob>, UnprocessedJobsRepositoryError> {
         if let Some(job) = self.unresolved_unprocessed_jobs.get(job_id) {
             if let Some(profile) = self.cpu_profiles.get(&job.cpu_profile_name) {
                 Ok(Some(UnprocessedJob {
@@ -31,7 +36,7 @@ impl UnprocessedJobsRepository for JsonUserDataRepository {
                 }))
             } else {
                 Err(UnprocessedJobsRepositoryError::MissingCpuProfile(
-                    job.cpu_profile_name.clone()
+                    job.cpu_profile_name.clone(),
                 ))
             }
         } else {
@@ -39,7 +44,10 @@ impl UnprocessedJobsRepository for JsonUserDataRepository {
         }
     }
 
-    fn upsert_unprocessed_job(&mut self, job: &UnprocessedJob) -> Result<(), UnprocessedJobsRepositoryError> {
+    fn upsert_unprocessed_job(
+        &mut self,
+        job: &UnprocessedJob,
+    ) -> Result<(), UnprocessedJobsRepositoryError> {
         self.cpu_profiles
             .insert(job.cpu_profile.name.clone(), job.cpu_profile.clone());
         let unresolved_job = UnresolvedUnprocessedJob {
