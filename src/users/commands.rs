@@ -1,9 +1,9 @@
 use super::parsing::ParseGetentPasswdError;
 use super::types::User;
 use crate::safe_command::{SafeCommandError, safe_get_stdout};
+use std::env;
 use std::process::Command;
 use thiserror::Error;
-use std::env;
 
 #[derive(Debug, Error)]
 pub enum UserCommandError {
@@ -14,7 +14,7 @@ pub enum UserCommandError {
     Parse(#[from] ParseGetentPasswdError),
 
     #[error("Environment variable not set: {0}")]
-    EnvironmentVariableNotSet(String)
+    EnvironmentVariableNotSet(String),
 }
 
 pub fn get_all_users() -> Result<Vec<User>, UserCommandError> {
@@ -32,17 +32,14 @@ pub fn get_all_users() -> Result<Vec<User>, UserCommandError> {
 }
 
 pub fn get_current_user() -> Result<User, UserCommandError> {
-    let username = env::var("USER").map_err(|_| UserCommandError::EnvironmentVariableNotSet("USER".to_string()))?;
+    let username = env::var("USER")
+        .map_err(|_| UserCommandError::EnvironmentVariableNotSet("USER".to_string()))?;
 
-    let output = Command::new("getent")
-        .arg("passwd")
-        .arg(&username)
-        .output();
+    let output = Command::new("getent").arg("passwd").arg(&username).output();
 
     let stdout = safe_get_stdout(output).map_err(UserCommandError::SafeCommand)?;
 
-    let user = User::from_getent_passwd_line(&stdout)
-        .map_err(UserCommandError::Parse)?;
+    let user = User::from_getent_passwd_line(&stdout).map_err(UserCommandError::Parse)?;
 
     Ok(user)
 }

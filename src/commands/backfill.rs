@@ -1,9 +1,9 @@
 use crate::SomeError;
-use crate::slurm::accounting::{get_all_historical_jobs_for_user, EndTime};
-use crate::repositories::json::{JsonUserDataRepository};
-use crate::repositories::{UnprocessedJobsRepository, UserDataRepository};
-use crate::users::get_current_user;
 use crate::models::{CpuProfile, UnprocessedJob};
+use crate::repositories::json::JsonUserDataRepository;
+use crate::repositories::{UnprocessedJobsRepository, UserDataRepository};
+use crate::slurm::accounting::{EndTime, get_all_historical_jobs_for_user};
+use crate::users::get_current_user;
 
 pub fn run() -> Result<(), SomeError> {
     let current_user = get_current_user()?;
@@ -15,7 +15,7 @@ pub fn run() -> Result<(), SomeError> {
     let default_cpu_profile = CpuProfile {
         name: "Default".to_string(),
         cores: 1,
-        tdp: 10.0
+        tdp: 10.0,
     };
 
     let mut unfinished_jobs_count = 0;
@@ -29,7 +29,7 @@ pub fn run() -> Result<(), SomeError> {
                 };
 
                 user_data_repo.upsert_unprocessed_job(&unprocessed_job)?;
-            },
+            }
             EndTime::NotFinished => {
                 unfinished_jobs_count += 1;
             }
@@ -37,7 +37,10 @@ pub fn run() -> Result<(), SomeError> {
     }
 
     if unfinished_jobs_count > 0 {
-        println!("There are {} unfinished jobs yet to be backfilled.", unfinished_jobs_count);
+        println!(
+            "There are {} unfinished jobs yet to be backfilled.",
+            unfinished_jobs_count
+        );
     } else {
         println!("All jobs have been processed.");
     }
