@@ -1,4 +1,4 @@
-static DATE_TIME_FORMAT: &str = "%Y-%m-%dT%H:%M:%S%z";
+static DATE_TIME_FORMAT: &str = "%Y-%m-%dT%H:%MZ";
 
 mod api_types;
 
