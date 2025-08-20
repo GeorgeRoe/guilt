@@ -3,14 +3,6 @@ use crate::carbon_intensity_api::CarbonIntensityAggregator;
 use crate::ip_info::fetch_ip_info;
 use chrono::{DateTime, Duration, Local, Utc};
 
-static DATE_TIME_FORMAT: &str = "%Y-%m-%d %H:%M %:z";
-
-fn format_utc_datetime(dt: DateTime<Utc>) -> String {
-    dt.with_timezone(&Local)
-        .format(DATE_TIME_FORMAT)
-        .to_string()
-}
-
 pub async fn run() -> Result<(), SomeError> {
     let ip_info = fetch_ip_info().await?;
     let mut aggregator = CarbonIntensityAggregator::new(ip_info.postal);
