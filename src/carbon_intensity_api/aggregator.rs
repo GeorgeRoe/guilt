@@ -15,7 +15,7 @@ impl CarbonIntensityAggregator {
         }
     }
 
-    async fn get_segments(&mut self, from: DateTime<Utc>, to: DateTime<Utc>) -> Result<&[CarbonIntensityTimeSegment], CarbonIntensityApiFetchError> {
+    pub async fn get_segments(&mut self, from: DateTime<Utc>, to: DateTime<Utc>) -> Result<&[CarbonIntensityTimeSegment], CarbonIntensityApiFetchError> {
         let mut expected_start = from;
         let mut missing_ranges = Vec::new();
 
@@ -34,6 +34,7 @@ impl CarbonIntensityAggregator {
                 missing_ranges.push((start_missing, expected_start));
             }
         }
+        println!("Found missing ranges");
 
         for (mut start, end) in missing_ranges {
             while start < end {
@@ -43,6 +44,8 @@ impl CarbonIntensityAggregator {
                 start = chunk_end;
             }
         }
+
+        println!("Fetched missing segments");
 
         self.segments.sort_by_key(|segment| segment.from);
         self.segments.dedup_by(|a, b| a.from == b.from && a.to == b.to);

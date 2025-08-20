@@ -1,5 +1,5 @@
-use super::DATE_TIME_FORMAT;
 use super::api_types::{ApiError, RegionData};
+use super::DATE_TIME_FORMAT;
 use crate::carbon_intensity_api::CarbonIntensityTimeSegment;
 use chrono::{DateTime, Utc};
 use reqwest;
@@ -36,6 +36,8 @@ pub async fn fetch_carbon_intensity(
         postcode
     );
 
+    println!("Fetching carbon intensity data from: {}", url);
+
     let response = reqwest::get(&url).await?;
 
     let response = response.error_for_status()?;
@@ -44,6 +46,8 @@ pub async fn fetch_carbon_intensity(
 
     if let Some(data) = json.get("data") {
         let data: RegionData = serde_json::from_value(data.clone())?;
+
+        println!("successful response: {:?}", data);
 
         Ok(data
             .data
