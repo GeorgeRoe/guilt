@@ -1,5 +1,5 @@
-use serde::Deserialize;
 use reqwest;
+use serde::Deserialize;
 
 #[derive(Deserialize, Debug)]
 pub struct IpInfo {
