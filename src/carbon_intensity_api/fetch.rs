@@ -1,5 +1,5 @@
-use super::api_types::{ApiError, RegionData};
 use super::DATE_TIME_FORMAT;
+use super::api_types::{ApiError, RegionData};
 use crate::carbon_intensity_api::CarbonIntensityTimeSegment;
 use chrono::{DateTime, Utc};
 use reqwest;
