@@ -62,7 +62,9 @@ pub async fn run() -> Result<(), SomeError> {
 
     chart.configure_mesh()
         .x_labels(10)
-        .x_label_formatter(&|dt| dt.format("%Y-%m-%d %H:%M %:z").to_string())
+        .x_label_formatter(&|dt| dt.format("%H:%M").to_string())
+        .x_desc("Time (UTC)")
+        .x_labels(12)
         .y_desc("Intensity (gCO2eq/kWh)")
         .draw()?;
 
