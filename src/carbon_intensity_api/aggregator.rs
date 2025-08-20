@@ -19,7 +19,7 @@ impl CarbonIntensityAggregator {
         &mut self,
         from: DateTime<Utc>,
         to: DateTime<Utc>,
-    ) -> Result<&[CarbonIntensityTimeSegment], CarbonIntensityApiFetchError> {
+    ) -> Result<Vec<CarbonIntensityTimeSegment>, CarbonIntensityApiFetchError> {
         let mut expected_start = from;
         let mut missing_ranges = Vec::new();
 
@@ -70,7 +70,7 @@ impl CarbonIntensityAggregator {
             .map(|i| i + 1)
             .unwrap_or(0);
 
-        Ok(&self.segments[start..end])
+        Ok(self.segments[start..end].to_vec())
     }
 
     pub async fn get_average_intensity(

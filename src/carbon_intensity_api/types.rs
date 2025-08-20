@@ -1,6 +1,7 @@
 use chrono::{DateTime, Utc};
 use std::collections::HashMap;
 
+#[derive(Clone)]
 pub struct CarbonIntensityTimeSegment {
     pub from: DateTime<Utc>,
     pub to: DateTime<Utc>,
