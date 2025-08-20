@@ -1,6 +1,7 @@
 mod cli;
 mod commands;
 
+pub mod carbon_intensity_api;
 pub mod guilt_dir;
 pub mod ip_info;
 pub mod models;
