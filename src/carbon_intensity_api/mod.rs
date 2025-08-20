@@ -9,3 +9,6 @@ mod parsing;
 
 mod fetch;
 pub use fetch::{CarbonIntensityApiFetchError, fetch_carbon_intensity};
+
+mod aggregator;
+pub use aggregator::CarbonIntensityAggregator;
