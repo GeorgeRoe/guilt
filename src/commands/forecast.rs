@@ -1,7 +1,7 @@
 use crate::SomeError;
 use crate::carbon_intensity_api::CarbonIntensityAggregator;
 use crate::ip_info::fetch_ip_info;
-use chrono::{DateTime, Duration, Local, Utc};
+use chrono::{DateTime, Duration, Utc};
 
 pub async fn run() -> Result<(), SomeError> {
     let ip_info = fetch_ip_info().await?;
@@ -13,7 +13,10 @@ pub async fn run() -> Result<(), SomeError> {
 
     let forecast = aggregator.get_segments(now, finish).await?;
     if forecast.is_empty() {
-        println!("No forecast data available for the next {} day(s).", duration.num_days());
+        println!(
+            "No forecast data available for the next {} day(s).",
+            duration.num_days()
+        );
         return Ok(());
     }
 
