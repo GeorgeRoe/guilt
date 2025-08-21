@@ -26,7 +26,7 @@ async fn main() -> Result<(), SomeError> {
         Commands::Batch => commands::batch::run(),
         Commands::Forecast => commands::forecast::run().await,
         Commands::Friends => commands::friends::run(),
-        Commands::Process => commands::process::run(),
+        Commands::Process => commands::process::run().await,
         Commands::Report => commands::report::run(),
         Commands::Setup => commands::setup::run(),
         Commands::Teardown => commands::teardown::run(),

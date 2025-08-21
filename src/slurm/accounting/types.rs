@@ -6,6 +6,7 @@ pub struct SlurmAccountingResources {
     pub cpu: Option<f64>,
 }
 
+#[derive(Clone, Copy)]
 pub enum StartTime {
     Started(DateTime<Utc>),
     NotStarted,
@@ -20,6 +21,7 @@ impl fmt::Display for StartTime {
     }
 }
 
+#[derive(Clone, Copy)]
 pub enum EndTime {
     Finished(DateTime<Utc>),
     NotFinished,
