@@ -60,7 +60,6 @@ impl Plotter for KittyPlotter {
         bar_chart.y_axis_configs[0].axis_width = Some(55.0);
         bar_chart.title_text = "Generation Mix".to_string();
         bar_chart.legend_show = Some(false);
-        // TODO: allow user to configure this setting later
         bar_chart.font_family = "Roboto".to_string();
 
         self.display_svg(&bar_chart.svg()?)?;
