@@ -10,6 +10,7 @@ pub mod safe_command;
 pub mod slurm;
 pub mod structured_json;
 pub mod users;
+pub mod plotting;
 
 use clap::Parser;
 use cli::{Cli, Commands};
