@@ -2,7 +2,7 @@ use crate::SomeError;
 use crate::carbon_intensity_api::CarbonIntensityAggregator;
 use crate::ip_info::fetch_ip_info;
 use chrono::{DateTime, Duration, Utc};
-use plotters::prelude::*;
+use crate::plotting::get_plotter;
 
 pub async fn run() -> Result<(), SomeError> {
     let ip_info = fetch_ip_info().await?;
@@ -34,53 +34,9 @@ pub async fn run() -> Result<(), SomeError> {
     let average_intensity = aggregator.get_average_intensity(now, finish).await?;
     println!("  Average Intensity: {:.3} gCO2eq/kWh", average_intensity);
 
-    println!("");
-
-    let data: Vec<(DateTime<Utc>, i32)> = forecast
-        .into_iter()
-        .map(|segment| (segment.from, segment.intensity))
-        .collect();
-
-    let root = BitMapBackend::new("barchart.png", (800, 500)).into_drawing_area();
-    root.fill(&WHITE)?;
-
-    let (min_time, max_time) = (
-        data.first().unwrap().0,
-        data.last().unwrap().0 + Duration::minutes(30)
-    );
-
-    let max_val = data.iter().map(|(_, intensity)| *intensity).max().unwrap_or(400);
-    let min_val = data.iter().map(|(_, intensity)| *intensity).min().unwrap_or(0);
-    let buffer = 20;
-
-    let mut chart = ChartBuilder::on(&root)
-        .caption("Carbon Intensity Forecast", ("sans-serif", 20))
-        .margin(10)
-        .x_label_area_size(40)
-        .y_label_area_size(50)
-        .build_cartesian_2d(min_time..max_time, (min_val - buffer)..(max_val + buffer))?;
-
-    chart.configure_mesh()
-        .x_labels(10)
-        .x_label_formatter(&|dt| dt.format("%H:%M").to_string())
-        .x_desc("Time (UTC)")
-        .x_labels(12)
-        .y_desc("Intensity (gCO2eq/kWh)")
-        .draw()?;
-
-    chart.draw_series(
-        data.iter().map(|(time, intensity)| {
-            let start = *time;
-            let end = *time + Duration::minutes(30);
-            Rectangle::new(
-                [
-                    (start, 0),
-                    (end, *intensity)
-                ],
-                BLUE.filled()
-            )
-        }),
-    )?;
+    let generation_mix = aggregator.get_average_generation_mix(now, finish).await?;
+    let plotter = get_plotter();
+    plotter.draw_generation_mix(generation_mix)?;
 
     Ok(())
 }
