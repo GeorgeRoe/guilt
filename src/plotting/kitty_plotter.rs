@@ -18,6 +18,12 @@ pub enum KittyPlottingError {
 pub struct KittyPlotter;
 
 impl KittyPlotter {
+    pub fn new() -> Self {
+        let data = include_bytes!("../../assets/Roboto.ttf") as &[u8];
+        get_or_try_init_fonts(Some(vec![data])).unwrap();
+        Self
+    }
+
     fn display_png(&self, file_name: &str) -> Result<(), KittyPlottingError> {
         let status = Command::new("kitty")
             .args(&["+kitten", "icat", file_name])
@@ -49,9 +55,6 @@ impl KittyPlotter {
 
 impl Plotter for KittyPlotter {
     fn draw_generation_mix(&self, generation_mix: std::collections::HashMap<String, f64>) -> Result<(), SomeError> {
-        let data = include_bytes!("../../assets/Roboto.ttf") as &[u8];
-        get_or_try_init_fonts(Some(vec![data])).unwrap();
-
         let series = Series::new("Generation Mix".to_string(), generation_mix.values().cloned().map(|v| v as f32).collect());
         let labels: Vec<String> = generation_mix.keys().cloned().collect();
 
