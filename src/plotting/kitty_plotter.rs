@@ -3,7 +3,7 @@ use crate::SomeError;
 use std::process::Command;
 use std::fs::remove_file;
 use thiserror::Error;
-use charts_rs::{BarChart, Series, svg_to_png, get_or_try_init_fonts};
+use charts_rs::{BarChart, Series, svg_to_png, get_or_try_init_fonts, DEFAULT_FONT_DATA};
 use std::fs;
 
 #[derive(Debug, Error)]
@@ -19,8 +19,7 @@ pub struct KittyPlotter;
 
 impl KittyPlotter {
     pub fn new() -> Self {
-        let data = include_bytes!("../../assets/Roboto.ttf") as &[u8];
-        get_or_try_init_fonts(Some(vec![data])).unwrap();
+        get_or_try_init_fonts(Some(vec![DEFAULT_FONT_DATA])).unwrap();
         Self
     }
 
