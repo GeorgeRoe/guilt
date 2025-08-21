@@ -37,6 +37,7 @@ pub async fn run() -> Result<(), SomeError> {
     let generation_mix = aggregator.get_average_generation_mix(now, finish).await?;
     let plotter = get_plotter();
     plotter.draw_generation_mix(generation_mix)?;
+    plotter.draw_intensity_forecast(forecast)?;
 
     Ok(())
 }
