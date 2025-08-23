@@ -14,3 +14,4 @@ chrono = { version = "0.4.41", features = ["serde"] }
 thiserror = "2.0.15"
 terminal_size = "0.4.3"
 charts-rs = { version = "0.3.24", features = ["image-encoder"] }
+regex = "1.11.1"
