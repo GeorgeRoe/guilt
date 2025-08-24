@@ -1,7 +1,7 @@
 use chrono::{NaiveDateTime};
 use thiserror::Error;
 use std::process::Command;
-use crate::safe_command::{SafeCommandError, safe_get_stdout};
+use crate::safe_command::{SafeCommandError, safe_get_stdout, safe_get_stderr};
 use super::types::SlurmBatchTest;
 use super::parsing::SlurmBatchParsingError;
 
@@ -29,7 +29,27 @@ pub fn test(file: &str, begin: Option<NaiveDateTime>) -> Result<SlurmBatchTest, 
         .args(&args)
         .output();
 
+    let stderr = safe_get_stderr(output)?;
+
+    Ok(SlurmBatchTest::from_line(&stderr)?)
+}
+
+pub fn submit(file: &str, begin: Option<NaiveDateTime>) -> Result<String, SlurmBatchCommandError> {
+    let mut args: Vec<String> = vec!["--parsable".to_string()];
+
+    if let Some(begin_time) = begin {
+        let begin_str = begin_time.format("%Y-%m-%dT%H:%M:%S").to_string();
+        args.push("--begin".to_string());
+        args.push(begin_str);
+    }
+
+    args.push(file.to_string());
+
+    let output = Command::new("sbatch")
+        .args(&args)
+        .output();
+
     let stdout = safe_get_stdout(output)?;
 
-    Ok(SlurmBatchTest::from_line(&stdout)?)
+    Ok(stdout.trim().to_string())
 }

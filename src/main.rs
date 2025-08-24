@@ -11,6 +11,10 @@ pub mod slurm;
 pub mod structured_json;
 pub mod users;
 pub mod plotting;
+pub mod script_directives;
+
+mod parse_duration_string;
+pub use parse_duration_string::parse_duration_string;
 
 use clap::Parser;
 use cli::{Cli, Commands};
@@ -23,7 +27,7 @@ async fn main() -> Result<(), SomeError> {
 
     match &cli.command {
         Commands::Backfill => commands::backfill::run(),
-        Commands::Batch => commands::batch::run(),
+        Commands::Batch { job } => commands::batch::run(&job).await,
         Commands::Forecast => commands::forecast::run().await,
         Commands::Friends => commands::friends::run(),
         Commands::Process => commands::process::run().await,
