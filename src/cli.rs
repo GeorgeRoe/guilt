@@ -14,7 +14,10 @@ pub enum Commands {
     Backfill,
 
     #[command(about = "Submit a slurm job")]
-    Batch,
+    Batch {
+        #[arg(value_name = "JOB_SCRIPT", help = "The slurm job script to submit")]
+        job: String,
+    },
 
     #[command(about = "Disply a carbon intensity forecast")]
     Forecast,
