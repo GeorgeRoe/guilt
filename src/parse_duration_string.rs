@@ -25,7 +25,7 @@ pub fn parse_duration_string(time_str: &str) -> Result<Duration, String> {
                 let hours = parts[0]
                     .parse::<i64>()
                     .map_err(|_| format!("Invalid hours: {}", parts[0]))?;
-                    
+
                 let minutes = parts[1]
                     .parse::<i64>()
                     .map_err(|_| format!("Invalid minutes: {}", parts[1]))?;

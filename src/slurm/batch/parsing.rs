@@ -1,9 +1,9 @@
 use super::types::SlurmBatchTest;
-use regex::Regex;
-use chrono::{DateTime, Local, NaiveDateTime, TimeZone, Utc};
-use thiserror::Error;
-use std::num::ParseIntError;
 use chrono::ParseError;
+use chrono::{DateTime, Local, NaiveDateTime, TimeZone, Utc};
+use regex::Regex;
+use std::num::ParseIntError;
+use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum SlurmBatchParsingError {
@@ -23,10 +23,11 @@ pub enum SlurmBatchParsingError {
 impl SlurmBatchTest {
     pub fn from_line(line: &str) -> Result<Self, SlurmBatchParsingError> {
         let pattern = Regex::new(
-            r"sbatch: Job (\d+) to start at ([\d\-T:]+) using (\d+) processors on nodes (.*?) in partition (\w+)"
+            r"sbatch: Job (\d+) to start at ([\d\-T:]+) using (\d+) processors on nodes (.*?) in partition (\w+)",
         )?;
 
-        let caps = pattern.captures(line)
+        let caps = pattern
+            .captures(line)
             .ok_or_else(|| SlurmBatchParsingError::Format(line.to_string()))?;
 
         let job_id = caps.get(1).unwrap().as_str().to_string();
@@ -37,9 +38,13 @@ impl SlurmBatchTest {
 
         let naive_dt = NaiveDateTime::parse_from_str(start_time_str, "%Y-%m-%dT%H:%M:%S")?;
 
-        let local_dt = Local.from_local_datetime(&naive_dt)
-            .single()
-            .ok_or(SlurmBatchParsingError::Format("Ambiguous or non-existent local time".to_string()))?;
+        let local_dt =
+            Local
+                .from_local_datetime(&naive_dt)
+                .single()
+                .ok_or(SlurmBatchParsingError::Format(
+                    "Ambiguous or non-existent local time".to_string(),
+                ))?;
 
         let start_time: DateTime<Utc> = local_dt.with_timezone(&Utc);
 

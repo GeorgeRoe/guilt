@@ -51,7 +51,7 @@ pub fn safe_get_stderr(output: Result<Output, std::io::Error>) -> Result<String,
                     .map(|s| s.to_string())
                     .map_err(SafeCommandError::Utf8)
             }
-        },
+        }
         Err(e) => Err(SafeCommandError::Io(e)),
     }
 }

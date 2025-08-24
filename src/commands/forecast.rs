@@ -1,8 +1,8 @@
 use crate::SomeError;
 use crate::carbon_intensity_api::CarbonIntensityAggregator;
 use crate::ip_info::fetch_ip_info;
-use chrono::{DateTime, Duration, Utc};
 use crate::plotting::get_plotter;
+use chrono::{DateTime, Duration, Utc};
 
 pub async fn run() -> Result<(), SomeError> {
     let ip_info = fetch_ip_info().await?;
