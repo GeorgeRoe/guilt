@@ -1,6 +1,6 @@
 use crate::SomeError;
 use crate::repositories::json::JsonUserDataRepository;
-use crate::repositories::{UserDataRepository, ProcessedJobsRepository};
+use crate::repositories::{ProcessedJobsRepository, UserDataRepository};
 use crate::users::get_current_user;
 use colored::Colorize;
 

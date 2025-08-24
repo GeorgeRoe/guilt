@@ -5,5 +5,5 @@ pub struct SlurmBatchTest {
     pub start_time: DateTime<Utc>,
     pub processor_count: i32,
     pub nodes: String,
-    pub partition: String 
+    pub partition: String,
 }

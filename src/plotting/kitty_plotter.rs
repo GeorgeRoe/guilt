@@ -1,10 +1,12 @@
 use super::Plotter;
 use crate::SomeError;
-use std::process::Command;
-use std::fs::remove_file;
-use thiserror::Error;
-use charts_rs::{BarChart, LineChart, Series, svg_to_png, get_or_try_init_fonts, DEFAULT_FONT_DATA};
+use charts_rs::{
+    BarChart, DEFAULT_FONT_DATA, LineChart, Series, get_or_try_init_fonts, svg_to_png,
+};
 use std::fs;
+use std::fs::remove_file;
+use std::process::Command;
+use thiserror::Error;
 
 static CHART_WIDTH: f32 = 800.0;
 static CHART_HEIGHT: f32 = 600.0;
@@ -32,7 +34,7 @@ impl KittyPlotter {
             .status();
 
         remove_file(file_name)?;
-        
+
         match status {
             Ok(status) => {
                 if status.success() {
@@ -40,9 +42,8 @@ impl KittyPlotter {
                 } else {
                     Err(KittyPlottingError::Display(format!("status {}", status)))
                 }
-
-            },
-            Err(e) => Err(KittyPlottingError::Display(e.to_string()))
+            }
+            Err(e) => Err(KittyPlottingError::Display(e.to_string())),
         }
     }
 
@@ -56,8 +57,14 @@ impl KittyPlotter {
 }
 
 impl Plotter for KittyPlotter {
-    fn draw_generation_mix(&self, generation_mix: std::collections::HashMap<String, f64>) -> Result<(), SomeError> {
-        let series = Series::new("Generation Mix".to_string(), generation_mix.values().cloned().map(|v| v as f32).collect());
+    fn draw_generation_mix(
+        &self,
+        generation_mix: std::collections::HashMap<String, f64>,
+    ) -> Result<(), SomeError> {
+        let series = Series::new(
+            "Generation Mix".to_string(),
+            generation_mix.values().cloned().map(|v| v as f32).collect(),
+        );
         let labels: Vec<String> = generation_mix.keys().cloned().collect();
 
         let mut chart = BarChart::new(vec![series], labels);
@@ -74,9 +81,21 @@ impl Plotter for KittyPlotter {
         Ok(())
     }
 
-    fn draw_intensity_forecast(&self, intensity_forecast: Vec<crate::carbon_intensity_api::CarbonIntensityTimeSegment>) -> Result<(), SomeError> {
-        let series = Series::new("Intensity Forecast".to_string(), intensity_forecast.iter().map(|segment| segment.intensity as f32).collect());
-        let labels: Vec<String> = intensity_forecast.iter().map(|segment| segment.from.format("%H:%M").to_string()).collect();
+    fn draw_intensity_forecast(
+        &self,
+        intensity_forecast: Vec<crate::carbon_intensity_api::CarbonIntensityTimeSegment>,
+    ) -> Result<(), SomeError> {
+        let series = Series::new(
+            "Intensity Forecast".to_string(),
+            intensity_forecast
+                .iter()
+                .map(|segment| segment.intensity as f32)
+                .collect(),
+        );
+        let labels: Vec<String> = intensity_forecast
+            .iter()
+            .map(|segment| segment.from.format("%H:%M").to_string())
+            .collect();
 
         let mut chart = LineChart::new(vec![series], labels);
 
@@ -88,7 +107,14 @@ impl Plotter for KittyPlotter {
         chart.legend_show = Some(false);
         chart.width = CHART_WIDTH;
         chart.height = CHART_HEIGHT;
-        chart.y_axis_configs[0].axis_min = Some((intensity_forecast.iter().map(|s| s.intensity).min().unwrap_or(min_buffer) - min_buffer) as f32);
+        chart.y_axis_configs[0].axis_min = Some(
+            (intensity_forecast
+                .iter()
+                .map(|s| s.intensity)
+                .min()
+                .unwrap_or(min_buffer)
+                - min_buffer) as f32,
+        );
 
         self.display_svg(&chart.svg()?)?;
 

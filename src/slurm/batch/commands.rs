@@ -1,9 +1,9 @@
-use chrono::{NaiveDateTime};
-use thiserror::Error;
-use std::process::Command;
-use crate::safe_command::{SafeCommandError, safe_get_stdout, safe_get_stderr};
-use super::types::SlurmBatchTest;
 use super::parsing::SlurmBatchParsingError;
+use super::types::SlurmBatchTest;
+use crate::safe_command::{SafeCommandError, safe_get_stderr, safe_get_stdout};
+use chrono::NaiveDateTime;
+use std::process::Command;
+use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum SlurmBatchCommandError {
@@ -14,7 +14,10 @@ pub enum SlurmBatchCommandError {
     Parsing(#[from] SlurmBatchParsingError),
 }
 
-pub fn test(file: &str, begin: Option<NaiveDateTime>) -> Result<SlurmBatchTest, SlurmBatchCommandError> {
+pub fn test(
+    file: &str,
+    begin: Option<NaiveDateTime>,
+) -> Result<SlurmBatchTest, SlurmBatchCommandError> {
     let mut args: Vec<String> = vec!["--test-only".to_string()];
 
     if let Some(begin_time) = begin {
@@ -25,9 +28,7 @@ pub fn test(file: &str, begin: Option<NaiveDateTime>) -> Result<SlurmBatchTest, 
 
     args.push(file.to_string());
 
-    let output = Command::new("sbatch")
-        .args(&args)
-        .output();
+    let output = Command::new("sbatch").args(&args).output();
 
     let stderr = safe_get_stderr(output)?;
 
@@ -45,9 +46,7 @@ pub fn submit(file: &str, begin: Option<NaiveDateTime>) -> Result<String, SlurmB
 
     args.push(file.to_string());
 
-    let output = Command::new("sbatch")
-        .args(&args)
-        .output();
+    let output = Command::new("sbatch").args(&args).output();
 
     let stdout = safe_get_stdout(output)?;
 
