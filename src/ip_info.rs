@@ -11,5 +11,5 @@ pub async fn fetch_ip_info() -> reqwest::Result<IpInfo> {
 
     let response = response.error_for_status()?;
 
-    Ok(response.json().await?)
+    response.json().await
 }

@@ -16,7 +16,7 @@ use std::result::Result;
 impl UserDataRepository for JsonUserDataRepository {
     fn setup(user: User) -> Result<(), SomeError> {
         let guilt_dir = guilt_dir_given_home(&user.home_dir);
-        fs::create_dir_all(&user_data_dir_given_guilt_dir(&guilt_dir))?;
+        fs::create_dir_all(user_data_dir_given_guilt_dir(&guilt_dir))?;
 
         let empty: Vec<serde_json::Value> = Vec::new();
 

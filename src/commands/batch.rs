@@ -134,7 +134,7 @@ pub async fn run(job: &str) -> Result<(), SomeError> {
                     earliest_possible_emissions - emissions
                 );
 
-                Some(start.clone())
+                Some(start)
             }
             None => {
                 println!(

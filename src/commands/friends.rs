@@ -5,10 +5,7 @@ use colored::Colorize;
 use crate::SomeError;
 
 pub fn run() -> Result<(), SomeError> {
-    let friends: Vec<User> = get_all_users()?
-        .into_iter()
-        .filter(|user| has_guilt_dir(user))
-        .collect();
+    let friends: Vec<User> = get_all_users()?.into_iter().filter(has_guilt_dir).collect();
 
     if friends.is_empty() {
         println!("{}", "You are the only GUILT user on this system :(".red());

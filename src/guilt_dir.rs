@@ -1,10 +1,8 @@
 use crate::users::User;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
-pub fn guilt_dir_given_home(home: &PathBuf) -> PathBuf {
-    let mut guilt_dir = home.clone();
-    guilt_dir.push(".guilt");
-    guilt_dir
+pub fn guilt_dir_given_home(home: &Path) -> PathBuf {
+    home.join(".guilt")
 }
 
 pub fn has_guilt_dir(user: &User) -> bool {

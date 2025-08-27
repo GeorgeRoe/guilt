@@ -8,7 +8,6 @@ impl UnprocessedJobsRepository for JsonUserDataRepository {
     ) -> Result<Vec<UnprocessedJob>, UnprocessedJobsRepositoryError> {
         self.unresolved_unprocessed_jobs
             .values()
-            .into_iter()
             .map(|job| {
                 if let Some(profile) = self.cpu_profiles.get(&job.cpu_profile_name) {
                     Ok(UnprocessedJob {
