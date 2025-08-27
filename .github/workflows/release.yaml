@@ -48,6 +48,10 @@ jobs:
           git tag -a "v${{ steps.get_version.outputs.version }}" -m "Release v${{ steps.get_version.outputs.version }}"
           git push origin "v${{ steps.get_version.outputs.version }}"
 
+      - name: Build binary
+        if: steps.tag_check.outputs.exists == 'false'
+        run: cargo build --release --locked --target x86_64-unknown-linux-gnu
+
       - name: Create GitHub Release
         if: steps.tag_check.outputs.exists == 'false'
         uses: actions/create-release@v1
@@ -58,3 +62,14 @@ jobs:
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload binary to release
+        if: steps.tag_check.outputs.exists == 'false'
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: target/x86_64-unknown-linux-gnu/guilt
+          asset_name: guilt
+          asset_content_type: application/octet-stream

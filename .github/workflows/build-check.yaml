@@ -16,4 +16,4 @@ jobs:
         with:
           toolchain: stable
           override: true
-      - run: cargo build --release --target x86_64-unknown-linux-gnu
+      - run: cargo build --release --locked --target x86_64-unknown-linux-gnu
