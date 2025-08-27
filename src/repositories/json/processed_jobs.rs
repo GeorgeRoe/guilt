@@ -6,7 +6,6 @@ impl ProcessedJobsRepository for JsonUserDataRepository {
     fn get_all_processed_jobs(&self) -> Result<Vec<ProcessedJob>, ProcessedJobsRepositoryError> {
         self.unresolved_processed_jobs
             .values()
-            .into_iter()
             .map(|job| {
                 if let Some(profile) = self.cpu_profiles.get(&job.cpu_profile_name) {
                     Ok(ProcessedJob {

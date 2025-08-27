@@ -27,7 +27,7 @@ async fn main() -> Result<(), SomeError> {
 
     match &cli.command {
         Commands::Backfill => commands::backfill::run(),
-        Commands::Batch { job } => commands::batch::run(&job).await,
+        Commands::Batch { job } => commands::batch::run(job).await,
         Commands::Forecast => commands::forecast::run().await,
         Commands::Friends => commands::friends::run(),
         Commands::Process => commands::process::run().await,

@@ -35,43 +35,43 @@ pub async fn run() -> Result<(), SomeError> {
     let mut aggregator = CarbonIntensityAggregator::new(ip_info.postal);
 
     for unprocessed_job in unprocessed_jobs {
-        if let Some(sacct_result) = sacct_results.get(&unprocessed_job.job_id) {
-            if let (StartTime::Started(start_time), EndTime::Finished(end_time), Some(cores_used)) = (
+        if let Some(sacct_result) = sacct_results.get(&unprocessed_job.job_id)
+            && let (StartTime::Started(start_time), EndTime::Finished(end_time), Some(cores_used)) = (
                 sacct_result.start_time,
                 sacct_result.end_time,
                 sacct_result.resources.cpu,
-            ) {
-                let tdp_per_core = unprocessed_job.cpu_profile.tdp as f64
-                    / unprocessed_job.cpu_profile.cores as f64;
-                let duration = end_time - start_time;
-                let hours = duration.num_seconds() as f64 / 3600.0;
-                let energy = (tdp_per_core * cores_used as f64 * hours) / 1000.0;
+            )
+        {
+            let tdp_per_core =
+                unprocessed_job.cpu_profile.tdp as f64 / unprocessed_job.cpu_profile.cores as f64;
+            let duration = end_time - start_time;
+            let hours = duration.num_seconds() as f64 / 3600.0;
+            let energy = (tdp_per_core * cores_used * hours) / 1000.0;
 
-                let intensity = aggregator
-                    .get_average_intensity(start_time, end_time)
-                    .await?;
-                let emissions = energy * intensity;
+            let intensity = aggregator
+                .get_average_intensity(start_time, end_time)
+                .await?;
+            let emissions = energy * intensity;
 
-                println!(
-                    "Processed job {}: {:.2} kWh, {:.2} gCO2",
-                    unprocessed_job.job_id, energy, emissions
-                );
+            println!(
+                "Processed job {}: {:.2} kWh, {:.2} gCO2",
+                unprocessed_job.job_id, energy, emissions
+            );
 
-                let processed_job = ProcessedJob {
-                    job_id: unprocessed_job.job_id,
-                    start_time: start_time.clone(),
-                    end_time: end_time.clone(),
-                    cpu_profile: unprocessed_job.cpu_profile.clone(),
-                    energy: energy,
-                    emissions: emissions,
-                    generation_mix: aggregator
-                        .get_average_generation_mix(start_time, end_time)
-                        .await?,
-                };
+            let processed_job = ProcessedJob {
+                job_id: unprocessed_job.job_id,
+                start_time,
+                end_time,
+                cpu_profile: unprocessed_job.cpu_profile.clone(),
+                energy,
+                emissions,
+                generation_mix: aggregator
+                    .get_average_generation_mix(start_time, end_time)
+                    .await?,
+            };
 
-                user_data_repo.upsert_processed_job(&processed_job)?;
-                user_data_repo.delete_unprocessed_job(&processed_job.job_id)?;
-            }
+            user_data_repo.upsert_processed_job(&processed_job)?;
+            user_data_repo.delete_unprocessed_job(&processed_job.job_id)?;
         }
     }
 

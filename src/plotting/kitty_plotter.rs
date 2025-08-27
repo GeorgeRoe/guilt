@@ -22,15 +22,17 @@ pub enum KittyPlottingError {
 
 pub struct KittyPlotter;
 
-impl KittyPlotter {
-    pub fn new() -> Self {
+impl Default for KittyPlotter {
+    fn default() -> Self {
         get_or_try_init_fonts(Some(vec![DEFAULT_FONT_DATA])).unwrap();
         Self
     }
+}
 
+impl KittyPlotter {
     fn display_png(&self, file_name: &str) -> Result<(), KittyPlottingError> {
         let status = Command::new("kitty")
-            .args(&["+kitten", "icat", file_name])
+            .args(["+kitten", "icat", file_name])
             .status();
 
         remove_file(file_name)?;

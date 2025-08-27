@@ -14,7 +14,7 @@ pub fn run() -> Result<(), SomeError> {
     let confirmation = "I am guilty";
 
     println!("{}", "Feeling too guilty?".red());
-    println!("");
+    println!();
     println!(
         "This command will permanently delete your GUILT data by removing the directory at: {}",
         guilt_dir.display().to_string().red()

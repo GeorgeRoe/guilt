@@ -25,7 +25,7 @@ impl User {
         }
 
         let name = fields
-            .get(0)
+            .first()
             .ok_or_else(|| ParseGetentPasswdError::MissingField(line.to_string(), 0))?
             .to_string();
         let gecos = fields
