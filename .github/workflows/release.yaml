@@ -16,9 +16,9 @@ jobs:
   setup:
     runs-on: ubuntu-latest
     outputs:
-      version: &{{ steps.get_version.outputs.version }}
-      tag_exists: &{{ steps.tag_check.outputs.exists }}
-      upload_url: &{{ steps.create_release.outputs.upload_url }}
+      version: ${{ steps.get_version.outputs.version }}
+      tag_exists: ${{ steps.tag_check.outputs.exists }}
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
