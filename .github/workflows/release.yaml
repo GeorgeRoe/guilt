@@ -53,6 +53,7 @@ jobs:
         run: cargo build --release --locked --target x86_64-unknown-linux-gnu
 
       - name: Create GitHub Release
+        id: create_release
         if: steps.tag_check.outputs.exists == 'false'
         uses: actions/create-release@v1
         with:
