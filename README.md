@@ -4,7 +4,13 @@ Green Usage Impact Logging Tool allows users to keep track of their carbon emiss
 
 ## Installation
 
-To install GUILT for use: IDK!
+To install GUILT (on x86_64 linux) you can simply use the `install.sh` script:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/GeorgeRoe/guilt/main/install-guilt.sh | sh
+```
+
+For a custom install, GUILT binaries can be found in the releases section of the repository.
 
 ## Getting Started
 
