@@ -4,34 +4,28 @@ Green Usage Impact Logging Tool allows users to keep track of their carbon emiss
 
 ## Installation
 
-To install GUILT (on x86_64 linux) you can simply use the `install.sh` script:
+When installing GUILT, compiling from source is recommended to reduce compatibility issues.
+This repo provides shell scripts to improve the installation process, please ensure that
+you have read these scripts before you execute them.
+
+You can use the `install-compile.sh` shell script to automatically compile and install GUILT.
+You must have `cargo` installed for this script to work, if you dont you can set it up in a
+manner of seconds by following the instructions at https://rustup.rs/.
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/GeorgeRoe/guilt/main/install.sh | sh
+cargo version # must not error
+curl -sSL https://raw.githubusercontent.com/GeorgeRoe/guilt/main/install-compile.sh | sh
 ```
 
-Note! If any of the following categories describe your system, this install script will not work.
-
-- Your system uses any architecture other than `aarch64` or `x86_64`
-- Your system is not running linux
-- Your system doesn't use glibc
-
-If these categories do describe you, follow the steps in the compilation section to build from source.
-
-## Compilation
-
-To build guilt from source, you must first ensure that you have the rust toolchain installed. You can
-install this by following the instructions at https://rustup.rs/.
-
-After this, run the following commands:
+If you want to avoid installing rust on your machine, you can attempt to install from a
+release using `install-release.sh`. This should work for linux users on x86 and ARM systems.
+Be warned, this project relies on openssl and there are sometimes incompatibility problems
+between the openssl version used for compilation and your systems openssl versions. Again,
+it is heavily recommended to compile from source.
 
 ```bash
-git clone https://github.com/GeorgeRoe/guilt.git
-cd guilt
-cargo build
+curl -sSL https://raw.githubusercontent.com/GeorgeRoe/guilt/main/install-release.sh | sh
 ```
-
-The built binary should be at the path `./target/release/guilt`.
 
 ## Getting Started
 
@@ -42,10 +36,12 @@ Once you have installed GUILT there a few commands you should run:
 guilt setup
 
 # modify your cpu profiles config to match the hardware of your machines
+# [ { "name": "profile name", "cores": 1, "tdp": 10 }]
 vim ~/.guilt/cpu_profiles.json
 
 # add all historical slurm jobs to the list of jobs to process for the report
-# this command will assume jobs were ran on the default cpu_profile
+# this command will assume jobs were ran on the default cpu_profile:w
+
 guilt backfill
 
 # processes all the jobs to calculate their emissions
