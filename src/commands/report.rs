@@ -7,7 +7,7 @@ use colored::Colorize;
 pub fn run() -> Result<(), SomeError> {
     let current_user = get_current_user()?;
 
-    let user_data_repo = JsonUserDataRepository::new(current_user)?;
+    let user_data_repo = JsonUserDataRepository::new(&current_user)?;
 
     let processed_jobs = user_data_repo.get_all_processed_jobs()?;
 

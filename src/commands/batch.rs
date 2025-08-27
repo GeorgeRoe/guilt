@@ -45,7 +45,7 @@ pub async fn run(job: &str) -> Result<(), SomeError> {
     let earliest_possible_start_time = test_job.start_time;
     let latest_forecast_time = Utc::now() + Duration::days(2) - Duration::minutes(30);
 
-    let mut user_data_repo = JsonUserDataRepository::new(get_current_user()?)?;
+    let mut user_data_repo = JsonUserDataRepository::new(&get_current_user()?)?;
     let cpu_profile = user_data_repo
         .get_cpu_profile_by_name(&guilt_directives.cpu_profile)?
         .ok_or(BatchCommandError::CpuProfileNotFound(

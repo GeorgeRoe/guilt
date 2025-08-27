@@ -11,7 +11,7 @@ use std::collections::HashMap;
 pub async fn run() -> Result<(), SomeError> {
     let current_user = get_current_user()?;
 
-    let mut user_data_repo = JsonUserDataRepository::new(current_user)?;
+    let mut user_data_repo = JsonUserDataRepository::new(&current_user)?;
 
     let unprocessed_jobs = user_data_repo.get_all_unprocessed_jobs()?;
 

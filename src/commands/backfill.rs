@@ -10,7 +10,7 @@ pub fn run() -> Result<(), SomeError> {
 
     let jobs = get_all_historical_jobs_for_user(&current_user.name)?;
 
-    let mut user_data_repo = JsonUserDataRepository::new(current_user)?;
+    let mut user_data_repo = JsonUserDataRepository::new(&current_user)?;
 
     let default_cpu_profile = CpuProfile {
         name: "Default".to_string(),
