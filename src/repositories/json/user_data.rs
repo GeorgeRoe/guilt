@@ -14,7 +14,7 @@ use std::fs;
 use std::result::Result;
 
 impl UserDataRepository for JsonUserDataRepository {
-    fn setup(user: User) -> Result<(), SomeError> {
+    fn setup(user: &User) -> Result<(), SomeError> {
         let guilt_dir = guilt_dir_given_home(&user.home_dir);
         fs::create_dir_all(user_data_dir_given_guilt_dir(&guilt_dir))?;
 
@@ -27,7 +27,7 @@ impl UserDataRepository for JsonUserDataRepository {
         Ok(())
     }
 
-    fn new(user: User) -> Result<Self, SomeError> {
+    fn new(user: &User) -> Result<Self, SomeError> {
         let guilt_dir = guilt_dir_given_home(&user.home_dir);
 
         let cpu_profiles: Vec<CpuProfile> =
