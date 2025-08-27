@@ -98,10 +98,16 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Build ARM binary
-        uses: cross-rs/cross@v0.2.5
+      - uses: actions-rs/toolchain@v1
         with:
-          args: build --target x86_64-unknown-linux-gnu --release
+          toolchain: stable
+          override: true
+
+      - name: Install cross
+        run: cargo install cross@0.2.5
+
+      - name: Build ARM binary
+        run: cross build --release --locked --target aarch64-unknown-linux-gnu 
 
       - name: Upload ARM binary
         uses: actions/upload-release-asset@v1
