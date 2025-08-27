@@ -1,0 +1,51 @@
+name: Version Check
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'Cargo.*'
+      - 'src/**'
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get base version
+        id: base
+        run: |
+          BASE_VERSION=$(git show origin/main:Cargo.toml | grep '^version' | sed 's/version = "\(.*\)"/\1/')
+          echo "version=$BASE_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Get PR version
+        id: pr
+        run: |
+          PR_VERSION=$(grep '^version' Cargo.toml | sed 's/version = "\(.*\)"/\1/')
+          echo "version=$PR_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Check if tag exists
+        id: tag_check
+        run: |
+          if git rev-parse "v${{ steps.get_version.outputs.version }}" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Compare versions
+        run: |
+          if [ "${{ steps.base.outputs.version }}" = "${{ steps.pr.outputs.version }}" ]; then
+            echo "❌ Cargo.toml version has not been bumped!"
+            exit 1
+          elif [ "${{ steps.tag_check.outputs.exists }}" = "true" ]; then
+            echo "❌ Version ${{ steps.pr.outputs.version }} already has a release tag!"
+            exit 1
+          else
+            echo "✅ Version bumped: ${{ steps.base.outputs.base }} -> ${{ steps.pr.outputs.pr }}"
+          fi
