@@ -1,0 +1,19 @@
+name: Build Check
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'Cargo.*'
+      - 'src/**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+      - run: cargo build --release --target x86_64-unknown-linux-gnu
