@@ -10,7 +10,28 @@ To install GUILT (on x86_64 linux) you can simply use the `install.sh` script:
 curl -sSL https://raw.githubusercontent.com/GeorgeRoe/guilt/main/install.sh | sh
 ```
 
-For a custom install, GUILT binaries can be found in the releases section of the repository.
+Note! If any of the following categories describe your system, this install script will not work.
+
+- Your system uses any architecture other than `aarch64` or `x86_64`
+- Your system is not running linux
+- Your system doesn't use glibc
+
+If these categories do describe you, follow the steps in the compilation section to build from source.
+
+## Compilation
+
+To build guilt from source, you must first ensure that you have the rust toolchain installed. You can
+install this by following the instructions at https://rustup.rs/.
+
+After this, run the following commands:
+
+```bash
+git clone https://github.com/GeorgeRoe/guilt.git
+cd guilt
+cargo build
+```
+
+The built binary should be at the path `./target/release/guilt`.
 
 ## Getting Started
 
