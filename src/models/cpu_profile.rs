@@ -95,4 +95,12 @@ impl CpuProfile {
             tdp: 250.0, // TDP is a slightly wrong, this includes the memory tdp too
         }
     }
+
+    pub fn nvidia_gh200_grace_hopper_superchip_processor() -> Self {
+        Self {
+            name: "NVIDIA GH200 Grace Hopper Superchip Processor".to_string(),
+            cores: 144,
+            tdp: 200.0, // complete estimate, as NVIDIA only provides TDP for entire superchip (including GPU tdp)
+        }
+    }
 }
