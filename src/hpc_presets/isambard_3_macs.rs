@@ -2,8 +2,8 @@ use super::HpcPreset;
 use crate::models::CpuProfile;
 use crate::safe_command::safe_get_stdout;
 use crate::slurm::partitions::get_all_partitions;
-use std::process::Command;
 use std::collections::HashSet;
+use std::process::Command;
 
 pub struct Isambard3MacsPreset;
 
@@ -14,15 +14,11 @@ impl HpcPreset for Isambard3MacsPreset {
 
     fn is_current(&self) -> bool {
         let expected_partitions: HashSet<_> = [
-            "milan",
-            "genoa",
-            "berg",
-            "spr",
-            "sprhbm",
-            "ampere",
-            "hopper",
-            "instinct",
-        ].into_iter().map(String::from).collect();
+            "milan", "genoa", "berg", "spr", "sprhbm", "ampere", "hopper", "instinct",
+        ]
+        .into_iter()
+        .map(String::from)
+        .collect();
 
         let hostname_output = Command::new("hostname").arg("-f").output();
 
@@ -44,6 +40,7 @@ impl HpcPreset for Isambard3MacsPreset {
             CpuProfile::intel_xeon_gold_6430(),
             CpuProfile::intel_xeon_max_9462(),
             CpuProfile::amd_epyc_7543p(),
-        ].to_vec()
+        ]
+        .to_vec()
     }
 }
