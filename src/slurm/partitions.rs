@@ -1,4 +1,3 @@
-
 use crate::safe_command::{SafeCommandError, safe_get_stdout};
 use std::collections::HashSet;
 use std::process::Command;
