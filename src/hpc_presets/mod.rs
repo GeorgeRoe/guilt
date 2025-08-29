@@ -7,6 +7,9 @@ pub use scarf::ScarfPreset;
 mod isambard_3_grace;
 pub use isambard_3_grace::Isambard3GracePreset;
 
+mod isambard_3_macs;
+pub use isambard_3_macs::Isambard3MacsPreset;
+
 mod archer2;
 pub use archer2::Archer2Preset;
 

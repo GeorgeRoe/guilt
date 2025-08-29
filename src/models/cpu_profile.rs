@@ -24,6 +24,22 @@ impl CpuProfile {
         }
     }
 
+    pub fn amd_epyc_7543p() -> Self {
+        Self {
+            name: "AMD Epyc 7543P".to_string(),
+            cores: 32,
+            tdp: 225.0,
+        }
+    }
+
+    pub fn amd_epyc_7713() -> Self {
+        Self {
+            name: "AMD Epyc 7713".to_string(),
+            cores: 64,
+            tdp: 225.0,
+        }
+    }
+
     pub fn amd_epyc_7742() -> Self {
         Self {
             name: "AMD Epyc 7742".to_string(),
@@ -32,11 +48,43 @@ impl CpuProfile {
         }
     }
 
+    pub fn amd_epyc_9354() -> Self {
+        Self {
+            name: "AMD Epyc 9354".to_string(),
+            cores: 32,
+            tdp: 280.0,
+        }
+    }
+
     pub fn amd_epyc_9654() -> Self {
         Self {
             name: "AMD Epyc 9654".to_string(),
             cores: 96,
             tdp: 360.0,
+        }
+    }
+
+    pub fn amd_epyc_9754() -> Self {
+        Self {
+            name: "AMD Epyc 9754".to_string(),
+            cores: 128,
+            tdp: 360.0,
+        }
+    }
+
+    pub fn intel_xeon_gold_6430() -> Self {
+        Self {
+            name: "Intel Xeon Gold 6430".to_string(),
+            cores: 32,
+            tdp: 270.0,
+        }
+    }
+
+    pub fn intel_xeon_max_9462() -> Self {
+        Self {
+            name: "Intel Xeon CPU Max 9462".to_string(),
+            cores: 32,
+            tdp: 350.0,
         }
     }
 
