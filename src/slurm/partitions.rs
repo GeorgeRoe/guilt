@@ -1,6 +1,7 @@
-    use std::collections::HashSet;
+
+use crate::safe_command::{SafeCommandError, safe_get_stdout};
+use std::collections::HashSet;
 use std::process::Command;
-use crate::safe_command::{safe_get_stdout, SafeCommandError};
 
 pub fn get_all_partitions() -> Result<HashSet<String>, SafeCommandError> {
     let output = Command::new("sinfo")
