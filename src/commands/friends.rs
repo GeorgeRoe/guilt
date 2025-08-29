@@ -2,9 +2,7 @@ use crate::guilt_dir::has_guilt_dir;
 use crate::users::{User, get_all_users};
 use colored::Colorize;
 
-use crate::SomeError;
-
-pub fn run() -> Result<(), SomeError> {
+pub fn run() -> anyhow::Result<()> {
     let friends: Vec<User> = get_all_users()?.into_iter().filter(has_guilt_dir).collect();
 
     if friends.is_empty() {

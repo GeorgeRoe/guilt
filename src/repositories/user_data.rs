@@ -1,14 +1,12 @@
 use super::{CpuProfilesRepository, ProcessedJobsRepository, UnprocessedJobsRepository};
-use crate::SomeError;
 use crate::users::User;
-use std::result::Result;
 
 pub trait UserDataRepository:
     CpuProfilesRepository + UnprocessedJobsRepository + ProcessedJobsRepository
 {
-    fn setup(user: &User) -> Result<(), SomeError>;
-    fn new(user: &User) -> Result<Self, SomeError>
+    fn setup(user: &User) -> anyhow::Result<()>;
+    fn new(user: &User) -> anyhow::Result<Self>
     where
         Self: Sized;
-    fn commit(&self) -> Result<(), SomeError>;
+    fn commit(&self) -> anyhow::Result<()>;
 }

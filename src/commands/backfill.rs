@@ -1,11 +1,10 @@
-use crate::SomeError;
 use crate::models::{CpuProfile, UnprocessedJob};
 use crate::repositories::json::JsonUserDataRepository;
 use crate::repositories::{UnprocessedJobsRepository, UserDataRepository};
 use crate::slurm::accounting::{EndTime, get_all_historical_jobs_for_user};
 use crate::users::get_current_user;
 
-pub fn run() -> Result<(), SomeError> {
+pub fn run() -> anyhow::Result<()> {
     let current_user = get_current_user()?;
 
     let jobs = get_all_historical_jobs_for_user(&current_user.name)?;
