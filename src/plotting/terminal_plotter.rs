@@ -1,5 +1,4 @@
 use super::Plotter;
-use crate::SomeError;
 use colored::Colorize;
 use std::collections::HashMap;
 use terminal_size::{Width, terminal_size};
@@ -31,7 +30,7 @@ impl TerminalPlotter {
 }
 
 impl Plotter for TerminalPlotter {
-    fn draw_generation_mix(&self, generation_mix: HashMap<String, f64>) -> Result<(), SomeError> {
+    fn draw_generation_mix(&self, generation_mix: HashMap<String, f64>) -> anyhow::Result<()> {
         println!("Generation Mix:");
         println!("-----------------");
         self.plot_map(&generation_mix);
@@ -41,7 +40,7 @@ impl Plotter for TerminalPlotter {
     fn draw_intensity_forecast(
         &self,
         intensity_forecast: Vec<crate::carbon_intensity_api::CarbonIntensityTimeSegment>,
-    ) -> Result<(), SomeError> {
+    ) -> anyhow::Result<()> {
         println!("Intensity Forecast:");
         println!("---------------------");
         self.plot_map(

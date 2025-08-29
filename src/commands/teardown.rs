@@ -4,9 +4,7 @@ use std::env;
 use std::fs;
 use std::io::{self, Write};
 
-use crate::SomeError;
-
-pub fn run() -> Result<(), SomeError> {
+pub fn run() -> anyhow::Result<()> {
     let home = env::home_dir()
         .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "Could not find home directory"))?;
     let guilt_dir = guilt_dir_given_home(&home);

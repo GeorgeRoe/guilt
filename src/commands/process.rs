@@ -1,4 +1,3 @@
-use crate::SomeError;
 use crate::carbon_intensity_api::CarbonIntensityAggregator;
 use crate::ip_info::fetch_ip_info;
 use crate::models::ProcessedJob;
@@ -8,7 +7,7 @@ use crate::slurm::accounting::{EndTime, StartTime, get_jobs_by_id};
 use crate::users::get_current_user;
 use std::collections::HashMap;
 
-pub async fn run() -> Result<(), SomeError> {
+pub async fn run() -> anyhow::Result<()> {
     let current_user = get_current_user()?;
 
     let mut user_data_repo = JsonUserDataRepository::new(&current_user)?;

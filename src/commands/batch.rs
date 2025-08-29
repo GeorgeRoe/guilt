@@ -1,4 +1,3 @@
-use crate::SomeError;
 use crate::carbon_intensity_api::CarbonIntensityAggregator;
 use crate::ip_info::fetch_ip_info;
 use crate::models::UnprocessedJob;
@@ -32,7 +31,7 @@ fn resolve_path(path_str: &str) -> std::io::Result<PathBuf> {
 
 static SEARCH_RESOLUTION: i64 = 15;
 
-pub async fn run(job: &str) -> Result<(), SomeError> {
+pub async fn run(job: &str) -> anyhow::Result<()> {
     let path = resolve_path(job)?;
 
     let contents = fs::read_to_string(&path)?;

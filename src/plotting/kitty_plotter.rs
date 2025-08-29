@@ -1,5 +1,4 @@
 use super::Plotter;
-use crate::SomeError;
 use charts_rs::{
     BarChart, DEFAULT_FONT_DATA, LineChart, Series, get_or_try_init_fonts, svg_to_png,
 };
@@ -49,7 +48,7 @@ impl KittyPlotter {
         }
     }
 
-    fn display_svg(&self, svg_data: &str) -> Result<(), SomeError> {
+    fn display_svg(&self, svg_data: &str) -> anyhow::Result<()> {
         let png_data = svg_to_png(svg_data)?;
         fs::write("temp.png", &png_data)?;
         self.display_png("temp.png")?;
@@ -62,7 +61,7 @@ impl Plotter for KittyPlotter {
     fn draw_generation_mix(
         &self,
         generation_mix: std::collections::HashMap<String, f64>,
-    ) -> Result<(), SomeError> {
+    ) -> anyhow::Result<()> {
         let series = Series::new(
             "Generation Mix".to_string(),
             generation_mix.values().cloned().map(|v| v as f32).collect(),
@@ -86,7 +85,7 @@ impl Plotter for KittyPlotter {
     fn draw_intensity_forecast(
         &self,
         intensity_forecast: Vec<crate::carbon_intensity_api::CarbonIntensityTimeSegment>,
-    ) -> Result<(), SomeError> {
+    ) -> anyhow::Result<()> {
         let series = Series::new(
             "Intensity Forecast".to_string(),
             intensity_forecast

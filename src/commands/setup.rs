@@ -1,4 +1,3 @@
-use crate::SomeError;
 use crate::guilt_dir::guilt_dir_given_home;
 use crate::hpc_presets::{HpcPreset, get_all_hpc_presets, get_current_hpc_preset};
 use crate::repositories::json::JsonUserDataRepository;
@@ -33,7 +32,7 @@ fn choose_hpc_preset() -> Option<Box<dyn HpcPreset>> {
     presets.remove(name)
 }
 
-pub fn run() -> Result<(), SomeError> {
+pub fn run() -> anyhow::Result<()> {
     let current_user = get_current_user()?;
     let guilt_dir = guilt_dir_given_home(&current_user.home_dir);
 

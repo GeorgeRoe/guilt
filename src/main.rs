@@ -20,10 +20,8 @@ pub use parse_duration_string::parse_duration_string;
 use clap::Parser;
 use cli::{Cli, Commands};
 
-pub type SomeError = Box<dyn std::error::Error>;
-
 #[tokio::main]
-async fn main() -> Result<(), SomeError> {
+async fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
 
     match &cli.command {
