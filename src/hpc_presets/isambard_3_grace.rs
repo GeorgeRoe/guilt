@@ -1,6 +1,7 @@
 use super::HpcPreset;
 use crate::models::CpuProfile;
 use crate::safe_command::safe_get_stdout;
+use crate::slurm::partitions::get_all_partitions;
 use std::process::Command;
 
 pub struct Isambard3GracePreset;
@@ -11,13 +12,15 @@ impl HpcPreset for Isambard3GracePreset {
     }
 
     fn is_current(&self) -> bool {
-        let output = Command::new("hostname").arg("-f").output();
+        let hostname_output = Command::new("hostname").arg("-f").output();
 
-        let stdout = safe_get_stdout(output);
+        let hostname_stdout = safe_get_stdout(hostname_output);
 
-        match stdout {
-            Ok(hostname) => hostname.contains("isambard"), // TODO: filter between different isambard3 systems
-            Err(_) => false,
+        match (hostname_stdout, get_all_partitions()) {
+            (Ok(hostname), Ok(partitions)) => {
+                hostname.contains("isambard") && partitions.contains("grace")
+            }
+            _ => false,
         }
     }
 
