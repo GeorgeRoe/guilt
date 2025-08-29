@@ -1,9 +1,12 @@
-use super::{Archer2Preset, HpcPreset, Isambard3GracePreset, ScarfPreset};
+use super::*;
 
 pub fn get_all_hpc_presets() -> Vec<Box<dyn HpcPreset>> {
     vec![
         Box::new(ScarfPreset),
         Box::new(Isambard3GracePreset),
+        Box::new(Isambard3MacsPreset),
+        Box::new(IsambardAiPhase1Preset),
+        Box::new(IsambardAiPhase2Preset),
         Box::new(Archer2Preset),
     ]
 }
