@@ -4,27 +4,24 @@ Green Usage Impact Logging Tool allows users to keep track of their carbon emiss
 
 ## Installation
 
-When installing GUILT, compiling from source is recommended to reduce compatibility issues.
 This repo provides shell scripts to improve the installation process, please ensure that
 you have read these scripts before you execute them.
 
-You can use the `install-compile.sh` shell script to automatically compile and install GUILT.
-You must have `cargo` installed for this script to work, if you dont you can set it up in a
-manner of seconds by following the instructions at https://rustup.rs/.
+The simplest way to install GUILT is to download the binary from the latest release. By running
+`install-release.sh` you will install GUILT to `~/.local/bin` ready for use instantly. This script
+will work for both ARM and x86 systems.
+
+```bash
+curl -sSL https://raw.githubusercontent.com/GeorgeRoe/guilt/main/install-release.sh | sh
+```
+
+Alternatively, you can use the `install-compile.sh` shell script to automatically compile and
+install GUILT. You must have `cargo` installed for this script to work, if you dont you can set
+it up in a manner of seconds by following the instructions at https://rustup.rs/.
 
 ```bash
 cargo version # must not error
 curl -sSL https://raw.githubusercontent.com/GeorgeRoe/guilt/main/install-compile.sh | sh
-```
-
-If you want to avoid installing rust on your machine, you can attempt to install from a
-release using `install-release.sh`. This should work for linux users on x86 and ARM systems.
-Be warned, this project relies on openssl and there are sometimes incompatibility problems
-between the openssl version used for compilation and your systems openssl versions. Again,
-it is heavily recommended to compile from source.
-
-```bash
-curl -sSL https://raw.githubusercontent.com/GeorgeRoe/guilt/main/install-release.sh | sh
 ```
 
 ## Getting Started
