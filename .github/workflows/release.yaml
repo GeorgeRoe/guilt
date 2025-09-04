@@ -102,11 +102,8 @@ jobs:
           toolchain: stable
           override: true
 
-      - name: Install cross
-        run: cargo install cross@0.2.5
-
       - name: Build ARM binary
-        run: cross build --release --locked --target aarch64-unknown-linux-gnu 
+        run: cargo build --release --locked --target aarch64-unknown-linux-gnu 
 
       - name: Upload ARM binary
         uses: actions/upload-release-asset@v1
