@@ -1,0 +1,35 @@
+name: "Build with cross"
+description: "Install Rust and cross, then build for the specified target"
+
+inputs:
+  target:
+    description: "The target triple to build for"
+    required: true
+    type: string
+
+outputs:
+  binary-path:
+    description: "Path to the built binary"
+    value: ${{ steps.set-output.outputs.path }}
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/checkout@v4
+
+    - uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        override: true
+
+    - name: Install cross
+      run: cargo install cross@0.2.5
+      shell: bash
+
+    - name: Build with cross
+      run: cross build --release --locked --target ${{ inputs.target }}
+      shell: bash
+
+    - id: set-output
+      run: echo "path=target/${{ inputs.target }}/release/guilt" >> $GITHUB_OUTPUT
+      shell: bash
