@@ -11,6 +11,8 @@ jobs:
   build-x86:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       - id: build
         name: Build x86 binary
         uses: ./.github/actions/build-with-cross
@@ -20,6 +22,8 @@ jobs:
   build-arm:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+
       - id: build
         name: Build ARM binary
         uses: ./.github/actions/build-with-cross
