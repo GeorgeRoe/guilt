@@ -70,6 +70,8 @@ jobs:
     needs: setup
     if: needs.setup.outputs.tag_exists == 'false'
     steps:
+      - uses: actions/checkout@v4
+
       - name: Build x86 binary
         id: build
         uses: ./.github/actions/build-with-cross
@@ -91,6 +93,8 @@ jobs:
     needs: setup
     if: needs.setup.outputs.tag_exists == 'false'
     steps:
+      - uses: actions/checkout@v4
+
       - name: Build x86 binary
         id: build
         uses: ./.github/actions/build-with-cross
