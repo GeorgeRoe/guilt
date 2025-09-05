@@ -9,11 +9,11 @@ on:
 
 jobs:
   build-x86:
-    uses: ./.github/workflows/build-with-cross.yaml
+    uses: ./.github/workflows/build-with-cross
     with:
       target: x86_64-unknown-linux-gnu
 
   build-arm:
-    uses: ./.github/workflows/build-with-cross.yaml
+    uses: ./.github/actions/build-with-cross
     with:
       target: aarch64-unknown-linux-gnu
