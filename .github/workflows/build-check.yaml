@@ -9,23 +9,11 @@ on:
 
 jobs:
   build-x86:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-      - name: Build x86
-        run: cargo build --release --locked --target x86_64-unknown-linux-gnu
+    uses: ./.github/workflows/build-with-cross.yaml
+    with:
+      target: x86_64-unknown-linux-gnu
 
   build-arm:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          override: true
-      - name: Build x86
-        run: cargo build --release --locked --target aarch64-unknown-linux-gnu 
+    uses: ./.github/workflows/build-with-cross.yaml
+    with:
+      target: aarch64-unknown-linux-gnu
