@@ -7,6 +7,7 @@ pub mod hpc_presets;
 pub mod ip_info;
 pub mod models;
 pub mod plotting;
+pub mod document;
 pub mod repositories;
 pub mod safe_command;
 pub mod script_directives;
@@ -30,7 +31,7 @@ async fn main() -> anyhow::Result<()> {
         Commands::Forecast => commands::forecast::run().await,
         Commands::Friends => commands::friends::run(),
         Commands::Process => commands::process::run().await,
-        Commands::Report => commands::report::run(),
+        Commands::Report { format } => commands::report::run(format),
         Commands::Setup => commands::setup::run(),
         Commands::Teardown => commands::teardown::run(),
     }?;
