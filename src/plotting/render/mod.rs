@@ -1,4 +1,4 @@
 use super::*;
 
-pub mod image;
 pub mod ascii;
+pub mod image;

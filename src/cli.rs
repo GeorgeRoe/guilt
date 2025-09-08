@@ -1,5 +1,5 @@
-use clap::{Parser, Subcommand};
 use crate::document::Renderer;
+use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
 #[command(name = "guilt")]
