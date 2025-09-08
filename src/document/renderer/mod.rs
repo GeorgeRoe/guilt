@@ -13,7 +13,7 @@ pub enum Renderer {
 impl Renderer {
     pub fn render(&self, document: &Document) -> anyhow::Result<()> {
         match self {
-            Renderer::Terminal => Ok(terminal::render_document_to_terminal(document)),
+            Renderer::Terminal => terminal::render_document_to_terminal(document),
             Renderer::Pdf => pdf::render_document_to_pdf(document),
         }
     }

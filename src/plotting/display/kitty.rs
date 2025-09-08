@@ -1,11 +1,16 @@
 use super::ChartDisplayer;
-use super::render::image::render;
+use super::render::image::{render, Resolution};
 use super::ChartDefinition;
 pub struct KittyChartDisplayer;
 use thiserror::Error;
 use std::fs::remove_file;
 use std::process::Command;
 use image::DynamicImage;
+
+static RESOLUTION: Resolution = Resolution {
+    width: 800,
+    height: 600,
+};
 
 #[derive(Debug, Error)]
 pub enum KittyPlottingError {
@@ -46,6 +51,6 @@ impl KittyChartDisplayer {
 
 impl ChartDisplayer for KittyChartDisplayer {
     fn display(&self, chart: &ChartDefinition) -> anyhow::Result<()> {
-        Ok(self.display_image(&render(chart)?)?)
+        Ok(self.display_image(&render(chart, &RESOLUTION)?)?)
     }
 }

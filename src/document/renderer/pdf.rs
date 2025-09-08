@@ -2,6 +2,12 @@ use super::*;
 use genpdf;
 use genpdf::fonts::{FontFamily, FontData};
 use charts_rs::DEFAULT_FONT_DATA;
+use crate::plotting::image::{render, Resolution};
+
+static RESOLUTION: Resolution = Resolution {
+    width: 1600,
+    height: 1200,
+};
 
 fn get_heading_font_size(level: &HeadingLevel) -> u8 {
     match level {
@@ -40,6 +46,12 @@ pub fn render_document_to_pdf(document: &Document) -> anyhow::Result<()> {
             Element::Paragraph(text) => {
                 let paragraph = genpdf::elements::Paragraph::new(text.clone());
                 doc.push(paragraph);
+            },
+            Element::Chart(chart) => {
+                let image_data = render(chart, &RESOLUTION)?.to_rgb8();
+                let img = genpdf::elements::Image::from_dynamic_image(image::DynamicImage::ImageRgb8(image_data))?
+                    .with_alignment(genpdf::Alignment::Center);
+                doc.push(img);
             }
         }
         doc.push(genpdf::elements::Break::new(1));
