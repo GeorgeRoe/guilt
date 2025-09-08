@@ -9,7 +9,7 @@ static CHART_WIDTH: f32 = 800.0;
 static CHART_HEIGHT: f32 = 600.0;
 
 fn prerender() -> anyhow::Result<()> {
-    let s = get_or_try_init_fonts(Some(vec![DEFAULT_FONT_DATA]));
+    let _ = get_or_try_init_fonts(Some(vec![DEFAULT_FONT_DATA]));
     Ok(())
 }
 
