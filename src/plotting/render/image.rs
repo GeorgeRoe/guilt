@@ -2,8 +2,7 @@ use charts_rs::{
     BarChart, DEFAULT_FONT_DATA, LineChart, Series, get_or_try_init_fonts, svg_to_png,
 };
 use crate::plotting::{ChartDefinition, GenerationMixData, CarbonIntensityForecastData};
-use std::path::PathBuf;
-use std::fs;
+use image::DynamicImage;
 
 static CHART_WIDTH: f32 = 800.0;
 static CHART_HEIGHT: f32 = 600.0;
@@ -13,7 +12,13 @@ fn prerender() -> anyhow::Result<()> {
     Ok(())
 }
 
-fn render_generation_mix(data: &GenerationMixData) -> anyhow::Result<PathBuf> {
+fn svg_string_to_image(svg: &str) -> anyhow::Result<DynamicImage> {
+    let png_data = svg_to_png(svg)?;
+    let img = image::load_from_memory(&png_data)?;
+    Ok(img)
+}
+
+fn render_generation_mix(data: &GenerationMixData) -> anyhow::Result<DynamicImage> {
     prerender()?;
 
     let series = Series::new(
@@ -31,17 +36,10 @@ fn render_generation_mix(data: &GenerationMixData) -> anyhow::Result<PathBuf> {
     chart.width = CHART_WIDTH;
     chart.height = CHART_HEIGHT;
 
-    let svg = chart.svg()?;
-    let png = svg_to_png(&svg)?;
-
-    let output_path = PathBuf::from("generation_mix.png");
-
-    fs::write(&output_path, &png)?;
-
-    Ok(output_path)
+    svg_string_to_image(&chart.svg()?)
 }
 
-fn render_carbon_intensity_forecast(data: &CarbonIntensityForecastData) -> anyhow::Result<PathBuf> {
+fn render_carbon_intensity_forecast(data: &CarbonIntensityForecastData) -> anyhow::Result<DynamicImage> {
     prerender()?;
 
     let series = Series::new(
@@ -75,17 +73,10 @@ fn render_carbon_intensity_forecast(data: &CarbonIntensityForecastData) -> anyho
             - min_buffer) as f32,
     );
 
-    let svg = chart.svg()?;
-    let png = svg_to_png(&svg)?;
-
-    let output_path = PathBuf::from("carbon_intensity_forecast.png");
-
-    fs::write(&output_path, &png)?;
-
-    Ok(output_path)
+    svg_string_to_image(&chart.svg()?)
 }
 
-pub fn render(chart: &ChartDefinition) -> anyhow::Result<PathBuf> {
+pub fn render(chart: &ChartDefinition) -> anyhow::Result<DynamicImage> {
     match chart {
         ChartDefinition::GenerationMix(data) => render_generation_mix(data),
         ChartDefinition::CarbonIntensityForecast(data) => render_carbon_intensity_forecast(data),

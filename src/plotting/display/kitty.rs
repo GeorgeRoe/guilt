@@ -5,7 +5,7 @@ pub struct KittyChartDisplayer;
 use thiserror::Error;
 use std::fs::remove_file;
 use std::process::Command;
-use std::path::Path;
+use image::DynamicImage;
 
 #[derive(Debug, Error)]
 pub enum KittyPlottingError {
@@ -15,14 +15,18 @@ pub enum KittyPlottingError {
     #[error("File System Error: {0}")]
     FileSystem(#[from] std::io::Error),
 
-    #[error("Path Conversion Error")]
-    PathConversion,
+    #[error("Image Processing Error: {0}")]
+    ImageProcessing(#[from] image::ImageError),
 }
 
 impl KittyChartDisplayer {
-    fn display_file(&self, path: &Path) -> Result<(), KittyPlottingError> {
+    fn display_image(&self, img: &DynamicImage) -> Result<(), KittyPlottingError> {
+        let path = "temp_chart.png";
+
+        img.save(path)?;
+
         let status = Command::new("kitty")
-            .args(["+kitten", "icat", path.to_str().ok_or_else(|| KittyPlottingError::PathConversion)?])
+            .args(["+kitten", "icat", path])
             .status();
 
         remove_file(path)?;
@@ -42,10 +46,6 @@ impl KittyChartDisplayer {
 
 impl ChartDisplayer for KittyChartDisplayer {
     fn display(&self, chart: &ChartDefinition) -> anyhow::Result<()> {
-        let path_to_image = render(chart)?;
-
-        self.display_file(path_to_image.as_path())?;
-
-        Ok(())
+        Ok(self.display_image(&render(chart)?)?)
     }
 }
