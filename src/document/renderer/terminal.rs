@@ -1,6 +1,7 @@
 use super::*;
+use crate::plotting::get_chart_displayer;
 
-pub fn render_document_to_terminal(document: &Document) -> () {
+pub fn render_document_to_terminal(document: &Document) -> anyhow::Result<()> {
     for element in &document.elements {
         match element {
             &Element::Heading(level, ref text) => {
@@ -9,9 +10,12 @@ pub fn render_document_to_terminal(document: &Document) -> () {
             }
             &Element::Paragraph(ref text) => {
                 println!("{}", text);
+            },
+            &Element::Chart(ref chart) => {
+                get_chart_displayer().display(&chart)?;
             }
         }
         println!();
     }
-
+    Ok(())
 }

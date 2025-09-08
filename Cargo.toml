@@ -17,5 +17,5 @@ charts-rs = { version = "0.3.24", features = ["image-encoder"] }
 regex = "1.11.2"
 dialoguer = "0.12.0"
 anyhow = "1.0.99"
-genpdf = "0.2.0"
-image = "0.25.8"
+genpdf = { version = "0.2.0", features = ["images"] }
+image = "0.23.12"

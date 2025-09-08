@@ -2,10 +2,12 @@ use charts_rs::{
     BarChart, DEFAULT_FONT_DATA, LineChart, Series, get_or_try_init_fonts, svg_to_png,
 };
 use crate::plotting::{ChartDefinition, GenerationMixData, CarbonIntensityForecastData};
-use image::DynamicImage;
+use ::image::DynamicImage;
 
-static CHART_WIDTH: f32 = 800.0;
-static CHART_HEIGHT: f32 = 600.0;
+pub struct Resolution {
+    pub width: u32,
+    pub height: u32,
+}
 
 fn prerender() -> anyhow::Result<()> {
     let _ = get_or_try_init_fonts(Some(vec![DEFAULT_FONT_DATA]));
@@ -18,7 +20,7 @@ fn svg_string_to_image(svg: &str) -> anyhow::Result<DynamicImage> {
     Ok(img)
 }
 
-fn render_generation_mix(data: &GenerationMixData) -> anyhow::Result<DynamicImage> {
+fn render_generation_mix(data: &GenerationMixData, resolution: &Resolution) -> anyhow::Result<DynamicImage> {
     prerender()?;
 
     let series = Series::new(
@@ -33,13 +35,13 @@ fn render_generation_mix(data: &GenerationMixData) -> anyhow::Result<DynamicImag
     chart.y_axis_configs[0].axis_formatter = Some("{c}%".to_string());
     chart.title_text = "Generation Mix".to_string();
     chart.legend_show = Some(false);
-    chart.width = CHART_WIDTH;
-    chart.height = CHART_HEIGHT;
+    chart.width = resolution.width as f32;
+    chart.height = resolution.height as f32;
 
     svg_string_to_image(&chart.svg()?)
 }
 
-fn render_carbon_intensity_forecast(data: &CarbonIntensityForecastData) -> anyhow::Result<DynamicImage> {
+fn render_carbon_intensity_forecast(data: &CarbonIntensityForecastData, resolution: &Resolution) -> anyhow::Result<DynamicImage> {
     prerender()?;
 
     let series = Series::new(
@@ -62,8 +64,8 @@ fn render_carbon_intensity_forecast(data: &CarbonIntensityForecastData) -> anyho
     chart.y_axis_configs[0].axis_formatter = Some("{c} gCO2/kWh".to_string());
     chart.title_text = "Intensity Forecast".to_string();
     chart.legend_show = Some(false);
-    chart.width = CHART_WIDTH;
-    chart.height = CHART_HEIGHT;
+    chart.width = resolution.width as f32;
+    chart.height = resolution.height as f32;
     chart.y_axis_configs[0].axis_min = Some(
         (data
             .iter()
@@ -76,9 +78,9 @@ fn render_carbon_intensity_forecast(data: &CarbonIntensityForecastData) -> anyho
     svg_string_to_image(&chart.svg()?)
 }
 
-pub fn render(chart: &ChartDefinition) -> anyhow::Result<DynamicImage> {
+pub fn render(chart: &ChartDefinition, resolution: &Resolution) -> anyhow::Result<DynamicImage> {
     match chart {
-        ChartDefinition::GenerationMix(data) => render_generation_mix(data),
-        ChartDefinition::CarbonIntensityForecast(data) => render_carbon_intensity_forecast(data),
+        ChartDefinition::GenerationMix(data) => render_generation_mix(data, resolution),
+        ChartDefinition::CarbonIntensityForecast(data) => render_carbon_intensity_forecast(data, resolution),
     }
 }

@@ -2,6 +2,7 @@ use crate::repositories::json::JsonUserDataRepository;
 use crate::repositories::{ProcessedJobsRepository, UserDataRepository};
 use crate::users::get_current_user;
 use crate::document::*;
+use crate::plotting::ChartDefinition;
 
 pub fn run(renderer: &Renderer) -> anyhow::Result<()> {
     let current_user = get_current_user()?;
@@ -22,6 +23,11 @@ pub fn run(renderer: &Renderer) -> anyhow::Result<()> {
         document.elements.push(Element::Paragraph(format!("You have emitted {:.3} grams of CO2.", total_emissions)));
     }
 
+    if let Some(first_job) = processed_jobs.first() {
+        document.elements.push(Element::Chart(ChartDefinition::GenerationMix(first_job.generation_mix.clone())));
+    }
+
+    println!("Rendering report...");
     renderer.render(&document)?;
 
     Ok(())

@@ -1,3 +1,5 @@
+use crate::plotting::ChartDefinition;
+
 #[derive(Debug, Clone, Copy)]
 pub enum HeadingLevel {
     H1,
@@ -24,4 +26,5 @@ impl HeadingLevel {
 pub enum Element {
     Heading(HeadingLevel, String),
     Paragraph(String),
+    Chart(ChartDefinition),
 }
