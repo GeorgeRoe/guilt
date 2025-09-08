@@ -7,7 +7,6 @@ pub fn render_document_to_terminal(document: &Document) -> () {
                 let hashes = "#".repeat(level.index() as usize);
                 println!("{} {}", hashes, text);
             }
-
             &Element::Paragraph(ref text) => {
                 println!("{}", text);
             }
