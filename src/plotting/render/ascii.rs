@@ -1,7 +1,7 @@
+use super::{CarbonIntensityForecastData, ChartDefinition, GenerationMixData};
 use colored::Colorize;
 use std::collections::HashMap;
 use terminal_size::{Width, terminal_size};
-use super::{ChartDefinition, GenerationMixData, CarbonIntensityForecastData};
 
 fn plot_map(map: &HashMap<String, f64>) {
     static SPLIT: &str = " | ";
@@ -28,7 +28,7 @@ fn plot_map(map: &HashMap<String, f64>) {
 pub fn render_generation_mix(data: &GenerationMixData) {
     println!("Generation Mix:");
     println!("-----------------");
-    plot_map(&data);
+    plot_map(data);
 }
 
 pub fn render_carbon_intensity_forecast(data: &CarbonIntensityForecastData) {

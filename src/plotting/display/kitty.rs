@@ -1,11 +1,11 @@
-use super::ChartDisplayer;
-use super::render::image::{render, Resolution};
 use super::ChartDefinition;
+use super::ChartDisplayer;
+use super::render::image::{Resolution, render};
 pub struct KittyChartDisplayer;
-use thiserror::Error;
+use image::DynamicImage;
 use std::fs::remove_file;
 use std::process::Command;
-use image::DynamicImage;
+use thiserror::Error;
 
 static RESOLUTION: Resolution = Resolution {
     width: 800,

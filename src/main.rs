@@ -2,12 +2,12 @@ mod cli;
 mod commands;
 
 pub mod carbon_intensity_api;
+pub mod document;
 pub mod guilt_dir;
 pub mod hpc_presets;
 pub mod ip_info;
 pub mod models;
 pub mod plotting;
-pub mod document;
 pub mod repositories;
 pub mod safe_command;
 pub mod script_directives;

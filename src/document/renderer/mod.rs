@@ -1,8 +1,8 @@
 use super::*;
 use clap::ValueEnum;
 
-mod terminal;
 mod pdf;
+mod terminal;
 
 #[derive(Debug, Clone, ValueEnum)]
 pub enum Renderer {

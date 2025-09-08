@@ -8,11 +8,11 @@ pub fn render_document_to_terminal(document: &Document) -> anyhow::Result<()> {
                 let hashes = "#".repeat(level.index() as usize);
                 println!("{} {}", hashes, text);
             }
-            &Element::Paragraph(ref text) => {
+            Element::Paragraph(text) => {
                 println!("{}", text);
-            },
-            &Element::Chart(ref chart) => {
-                get_chart_displayer().display(&chart)?;
+            }
+            Element::Chart(chart) => {
+                get_chart_displayer().display(chart)?;
             }
         }
         println!();

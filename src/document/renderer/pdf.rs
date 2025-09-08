@@ -1,8 +1,8 @@
 use super::*;
-use genpdf;
-use genpdf::fonts::{FontFamily, FontData};
+use crate::plotting::image::{Resolution, render};
 use charts_rs::DEFAULT_FONT_DATA;
-use crate::plotting::image::{render, Resolution};
+use genpdf;
+use genpdf::fonts::{FontData, FontFamily};
 
 static RESOLUTION: Resolution = Resolution {
     width: 1600,
@@ -40,17 +40,22 @@ pub fn render_document_to_pdf(document: &Document) -> anyhow::Result<()> {
         match element {
             Element::Heading(level, text) => {
                 let mut paragraph = genpdf::elements::Paragraph::new("");
-                paragraph.push_styled(text.clone(), genpdf::style::Style::new().with_font_size(get_heading_font_size(level)));
+                paragraph.push_styled(
+                    text.clone(),
+                    genpdf::style::Style::new().with_font_size(get_heading_font_size(level)),
+                );
                 doc.push(paragraph);
             }
             Element::Paragraph(text) => {
                 let paragraph = genpdf::elements::Paragraph::new(text.clone());
                 doc.push(paragraph);
-            },
+            }
             Element::Chart(chart) => {
                 let image_data = render(chart, &RESOLUTION)?.to_rgb8();
-                let img = genpdf::elements::Image::from_dynamic_image(image::DynamicImage::ImageRgb8(image_data))?
-                    .with_alignment(genpdf::Alignment::Center);
+                let img = genpdf::elements::Image::from_dynamic_image(
+                    image::DynamicImage::ImageRgb8(image_data),
+                )?
+                .with_alignment(genpdf::Alignment::Center);
                 doc.push(img);
             }
         }
