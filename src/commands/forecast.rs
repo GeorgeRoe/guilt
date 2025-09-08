@@ -1,6 +1,6 @@
 use crate::carbon_intensity_api::CarbonIntensityAggregator;
 use crate::ip_info::fetch_ip_info;
-use crate::plotting::get_plotter;
+use crate::plotting::{get_chart_displayer, ChartDefinition};
 use chrono::{DateTime, Duration, Utc};
 
 pub async fn run() -> anyhow::Result<()> {
@@ -34,9 +34,10 @@ pub async fn run() -> anyhow::Result<()> {
     println!("  Average Intensity: {:.3} gCO2eq/kWh", average_intensity);
 
     let generation_mix = aggregator.get_average_generation_mix(now, finish).await?;
-    let plotter = get_plotter();
-    plotter.draw_generation_mix(generation_mix)?;
-    plotter.draw_intensity_forecast(forecast)?;
+
+    let plotter = get_chart_displayer();
+    plotter.display(&ChartDefinition::GenerationMix(generation_mix))?;
+    plotter.display(&ChartDefinition::CarbonIntensityForecast(forecast))?;
 
     Ok(())
 }
