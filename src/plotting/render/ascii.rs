@@ -8,10 +8,13 @@ fn plot_map(map: &HashMap<String, f64>) {
 
     let longest_key_length = map.keys().map(|key| key.len()).max().unwrap_or(0);
 
+    let maximum_terminal_width = 125;
+
     let size = terminal_size();
     let terminal_width = size
-        .map_or(80, |(Width(w), _)| w as usize)
-        .saturating_sub(2);
+        .map_or(maximum_terminal_width, |(Width(w), _)| w as usize)
+        .saturating_sub(2)
+        .min(maximum_terminal_width);
 
     let max_bar_width = terminal_width - longest_key_length - SPLIT.len() - 6;
     let max_value = map.values().cloned().fold(0.0, f64::max);
