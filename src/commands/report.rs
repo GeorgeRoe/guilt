@@ -32,7 +32,9 @@ pub fn run(renderer: &Renderer) -> anyhow::Result<()> {
     ]);
 
     if processed_jobs.is_empty() {
-        document.elements.push(Element::Paragraph("No processed jobs found".to_string()));
+        document
+            .elements
+            .push(Element::Paragraph("No processed jobs found".to_string()));
     } else {
         let total_emissions = processed_jobs.iter().map(|job| job.emissions).sum::<f64>();
         document.elements.push(Element::Paragraph(format!(
@@ -48,7 +50,8 @@ pub fn run(renderer: &Renderer) -> anyhow::Result<()> {
                 let duration = job.end_time - job.start_time;
 
                 for (source, percentage) in &job.generation_mix {
-                    *total_mix.entry(source.clone()).or_insert(0.0) += percentage * duration.as_seconds_f64();
+                    *total_mix.entry(source.clone()).or_insert(0.0) +=
+                        percentage * duration.as_seconds_f64();
                 }
                 total_duration += duration.as_seconds_f64();
             }
@@ -62,7 +65,11 @@ pub fn run(renderer: &Renderer) -> anyhow::Result<()> {
             total_mix
         };
 
-        document.elements.push(Element::Chart(ChartDefinition::GenerationMix(average_generation_mix)));
+        document
+            .elements
+            .push(Element::Chart(ChartDefinition::GenerationMix(
+                average_generation_mix,
+            )));
     }
 
     document.elements.extend(vec![
