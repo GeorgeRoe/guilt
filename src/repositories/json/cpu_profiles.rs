@@ -24,6 +24,7 @@ impl CpuProfilesRepository for JsonUserDataRepository {
     }
 
     fn delete_cpu_profile(&mut self, name: &str) -> Result<(), CpuProfilesRepositoryError> {
+        // TODO: need to check for references from jobs
         self.cpu_profiles.remove(name);
         Ok(())
     }
