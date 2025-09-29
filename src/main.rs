@@ -14,6 +14,8 @@ pub mod script_directives;
 pub mod slurm;
 pub mod structured_json;
 pub mod users;
+pub mod metadata;
+pub mod json_io;
 
 mod parse_duration_string;
 pub use parse_duration_string::parse_duration_string;

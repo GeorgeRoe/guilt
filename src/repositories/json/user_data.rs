@@ -1,5 +1,4 @@
 use super::JsonUserDataRepository;
-use super::io::{read_json_file, write_json_file};
 use super::paths::{
     cpu_profiles_file_given_guilt_dir, processed_jobs_file_given_guilt_dir,
     unprocessed_jobs_file_given_guilt_dir, user_data_dir_given_guilt_dir,
@@ -9,6 +8,7 @@ use crate::guilt_dir::guilt_dir_given_home;
 use crate::models::CpuProfile;
 use crate::repositories::UserDataRepository;
 use crate::users::User;
+use crate::json_io::{read_json_file, write_json_file};
 use std::fs;
 
 impl UserDataRepository for JsonUserDataRepository {
