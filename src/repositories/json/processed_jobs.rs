@@ -8,15 +8,7 @@ impl ProcessedJobsRepository for JsonUserDataRepository {
             .values()
             .map(|job| {
                 if let Some(profile) = self.cpu_profiles.get(&job.cpu_profile_name) {
-                    Ok(ProcessedJob {
-                        start_time: job.start_time,
-                        end_time: job.end_time,
-                        job_id: job.job_id.clone(),
-                        cpu_profile: profile.clone(),
-                        energy: job.energy,
-                        emissions: job.emissions,
-                        generation_mix: job.generation_mix.clone(),
-                    })
+                    Ok(job.resolve(profile))
                 } else {
                     Err(ProcessedJobsRepositoryError::MissingCpuProfile(
                         job.cpu_profile_name.clone(),
@@ -32,15 +24,7 @@ impl ProcessedJobsRepository for JsonUserDataRepository {
     ) -> Result<Option<ProcessedJob>, ProcessedJobsRepositoryError> {
         if let Some(job) = self.unresolved_processed_jobs.get(id) {
             if let Some(profile) = self.cpu_profiles.get(&job.cpu_profile_name) {
-                Ok(Some(ProcessedJob {
-                    start_time: job.start_time,
-                    end_time: job.end_time,
-                    job_id: job.job_id.clone(),
-                    cpu_profile: profile.clone(),
-                    energy: job.energy,
-                    emissions: job.emissions,
-                    generation_mix: job.generation_mix.clone(),
-                }))
+                Ok(Some(job.resolve(profile)))
             } else {
                 Err(ProcessedJobsRepositoryError::MissingCpuProfile(
                     job.cpu_profile_name.clone(),
@@ -57,15 +41,8 @@ impl ProcessedJobsRepository for JsonUserDataRepository {
     ) -> Result<(), ProcessedJobsRepositoryError> {
         self.cpu_profiles
             .insert(job.cpu_profile.name.clone(), job.cpu_profile.clone());
-        let unresolved_job = UnresolvedProcessedJob {
-            job_id: job.job_id.clone(),
-            cpu_profile_name: job.cpu_profile.name.clone(),
-            start_time: job.start_time,
-            end_time: job.end_time,
-            energy: job.energy,
-            emissions: job.emissions,
-            generation_mix: job.generation_mix.clone(),
-        };
+        let unresolved_job = UnresolvedProcessedJob::unresolve(job);
+
         self.unresolved_processed_jobs
             .insert(job.job_id.clone(), unresolved_job);
         Ok(())
