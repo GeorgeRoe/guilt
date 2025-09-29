@@ -10,10 +10,7 @@ impl UnprocessedJobsRepository for JsonUserDataRepository {
             .values()
             .map(|job| {
                 if let Some(profile) = self.cpu_profiles.get(&job.cpu_profile_name) {
-                    Ok(UnprocessedJob {
-                        job_id: job.job_id.clone(),
-                        cpu_profile: profile.clone(),
-                    })
+                    Ok(job.resolve(profile))
                 } else {
                     Err(UnprocessedJobsRepositoryError::MissingCpuProfile(
                         job.cpu_profile_name.clone(),
@@ -29,10 +26,7 @@ impl UnprocessedJobsRepository for JsonUserDataRepository {
     ) -> Result<Option<UnprocessedJob>, UnprocessedJobsRepositoryError> {
         if let Some(job) = self.unresolved_unprocessed_jobs.get(job_id) {
             if let Some(profile) = self.cpu_profiles.get(&job.cpu_profile_name) {
-                Ok(Some(UnprocessedJob {
-                    job_id: job.job_id.clone(),
-                    cpu_profile: profile.clone(),
-                }))
+                Ok(Some(job.resolve(profile)))
             } else {
                 Err(UnprocessedJobsRepositoryError::MissingCpuProfile(
                     job.cpu_profile_name.clone(),
@@ -49,10 +43,7 @@ impl UnprocessedJobsRepository for JsonUserDataRepository {
     ) -> Result<(), UnprocessedJobsRepositoryError> {
         self.cpu_profiles
             .insert(job.cpu_profile.name.clone(), job.cpu_profile.clone());
-        let unresolved_job = UnresolvedUnprocessedJob {
-            job_id: job.job_id.clone(),
-            cpu_profile_name: job.cpu_profile.name.clone(),
-        };
+        let unresolved_job = UnresolvedUnprocessedJob::unresolve(job);
         self.unresolved_unprocessed_jobs
             .insert(job.job_id.clone(), unresolved_job);
         Ok(())
