@@ -5,6 +5,7 @@ use crate::models::{
     CpuProfile,
     UnprocessedJob,
 };
+use crate::json_io::*;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct UnresolvedUnprocessedJob {
