@@ -3,7 +3,6 @@ mod commands;
 
 pub mod carbon_intensity_api;
 pub mod document;
-pub mod guilt_dir;
 pub mod hpc_presets;
 pub mod ip_info;
 pub mod models;
@@ -16,6 +15,8 @@ pub mod structured_json;
 pub mod users;
 pub mod metadata;
 pub mod json_io;
+pub mod guilt_dir;
+pub mod guilt_directory;
 
 mod parse_duration_string;
 pub use parse_duration_string::parse_duration_string;
