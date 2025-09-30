@@ -13,6 +13,9 @@ use unresolved_processed_jobs::{
     UnresolvedProcessedJobs,
 };
 
+mod last_written_version;
+use last_written_version::LastWrittenVersion;
+
 mod paths;
 
 mod manager;
