@@ -12,9 +12,7 @@ pub mod script_directives;
 pub mod slurm;
 pub mod structured_json;
 pub mod users;
-pub mod metadata;
 pub mod json_io;
-pub mod guilt_dir;
 pub mod guilt_directory;
 pub mod version;
 

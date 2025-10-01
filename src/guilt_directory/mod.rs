@@ -20,6 +20,7 @@ use last_written_version::{
 };
 
 mod paths;
+pub use paths::guilt_directory_for_user;
 
 mod manager;
 pub use manager::GuiltDirectoryManager;

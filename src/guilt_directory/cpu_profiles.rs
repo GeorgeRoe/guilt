@@ -8,6 +8,12 @@ pub struct CpuProfiles {
 }
 
 impl CpuProfiles {
+    pub fn empty() -> Self {
+        Self {
+            cache: HashMap::new(),
+        }
+    }
+
     pub fn read(path: &Path) -> Result<Self, JsonFileOperationError> {
         let profiles: Vec<CpuProfile> = read_json_file(path)?;
         let cache = profiles.into_iter().map(|p| (p.name.clone(), p)).collect();

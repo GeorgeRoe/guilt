@@ -1,6 +1,5 @@
 use crate::models::{CpuProfile, UnprocessedJob};
-use crate::repositories::json::JsonUserDataRepository;
-use crate::repositories::{UnprocessedJobsRepository, UserDataRepository};
+use crate::guilt_directory::GuiltDirectoryManager;
 use crate::slurm::accounting::{EndTime, get_all_historical_jobs_for_user};
 use crate::users::get_current_user;
 
@@ -9,7 +8,7 @@ pub fn run() -> anyhow::Result<()> {
 
     let jobs = get_all_historical_jobs_for_user(&current_user.name)?;
 
-    let mut user_data_repo = JsonUserDataRepository::new(&current_user)?;
+    let mut guilt_dir_manager = GuiltDirectoryManager::read_for_user(&current_user);
 
     let default_cpu_profile = CpuProfile {
         name: "Default".to_string(),
@@ -27,7 +26,7 @@ pub fn run() -> anyhow::Result<()> {
                     cpu_profile: default_cpu_profile.clone(),
                 };
 
-                user_data_repo.upsert_unprocessed_job(&unprocessed_job)?;
+                guilt_dir_manager.upsert_unprocessed_job(unprocessed_job)?;
             }
             EndTime::NotFinished => {
                 unfinished_jobs_count += 1;
@@ -44,7 +43,7 @@ pub fn run() -> anyhow::Result<()> {
         println!("All jobs have been processed.");
     }
 
-    user_data_repo.commit()?;
+    guilt_dir_manager.write()?;
 
     Ok(())
 }

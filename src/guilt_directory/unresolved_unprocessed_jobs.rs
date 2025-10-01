@@ -34,6 +34,12 @@ pub struct UnresolvedUnprocessedJobs {
 }
 
 impl UnresolvedUnprocessedJobs {
+    pub fn empty() -> Self {
+        Self {
+            cache: HashMap::new(),
+        }
+    }
+
     pub fn read(path: &Path) -> Result<Self, JsonFileOperationError> {
         let jobs: Vec<UnresolvedUnprocessedJob> = read_json_file(path)?;
         let cache = jobs.into_iter().map(|j| (j.job_id.clone(), j)).collect();
@@ -51,6 +57,10 @@ impl UnresolvedUnprocessedJobs {
         } else {
             None
         }
+    }
+
+    pub fn all(&self) -> Vec<UnresolvedUnprocessedJob> {
+        self.cache.values().cloned().collect()
     }
 
     pub fn upsert(&mut self, job: UnresolvedUnprocessedJob) {

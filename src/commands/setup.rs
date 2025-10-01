@@ -1,12 +1,9 @@
-use crate::guilt_dir::guilt_dir_given_home;
 use crate::hpc_presets::{HpcPreset, get_all_hpc_presets, get_current_hpc_preset};
-use crate::repositories::json::JsonUserDataRepository;
-use crate::repositories::{CpuProfilesRepository, UserDataRepository};
+use crate::guilt_directory::GuiltDirectoryManager;
 use crate::users::get_current_user;
 use colored::Colorize;
 use dialoguer::{Confirm, Select, theme::ColorfulTheme};
 use std::collections::HashMap;
-use std::fs;
 
 fn choose_hpc_preset() -> Option<Box<dyn HpcPreset>> {
     let mut presets = get_all_hpc_presets()
@@ -34,10 +31,7 @@ fn choose_hpc_preset() -> Option<Box<dyn HpcPreset>> {
 
 pub fn run() -> anyhow::Result<()> {
     let current_user = get_current_user()?;
-    let guilt_dir = guilt_dir_given_home(&current_user.home_dir);
-
-    fs::create_dir_all(&guilt_dir)?;
-    JsonUserDataRepository::setup(&current_user)?;
+    let mut guilt_dir_manager = GuiltDirectoryManager::setup_for_user(&current_user)?;
 
     let logo = r#"
  .d8888b.  888     888 8888888 888      88888888888 
@@ -56,7 +50,7 @@ Y88b  d88P Y88b. .d88P   888   888          888
 
     println!(
         "Welcome to GUILT! A directory has been created for your data at: {}",
-        guilt_dir.display().to_string().green()
+        guilt_dir_manager.path().display().to_string().green()
     );
 
     let hpc_preset = match get_current_hpc_preset() {
@@ -85,13 +79,12 @@ Y88b  d88P Y88b. .d88P   888   888          888
     };
 
     if let Some(preset) = hpc_preset {
-        let mut user_data_repo = JsonUserDataRepository::new(&current_user)?;
         println!("Setting up default CPU profiles. The following profiles will be added:");
         for profile in preset.get_cpu_profiles() {
             println!("{}", profile.name);
-            user_data_repo.upsert_cpu_profile(&profile)?;
+            guilt_dir_manager.upsert_cpu_profile(profile)?;
         }
-        user_data_repo.commit()?;
+        guilt_dir_manager.write()?;
     }
 
     println!(

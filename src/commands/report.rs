@@ -1,15 +1,14 @@
 use crate::document::*;
 use crate::plotting::ChartDefinition;
-use crate::repositories::json::JsonUserDataRepository;
-use crate::repositories::{ProcessedJobsRepository, UserDataRepository};
+use crate::guilt_directory::GuiltDirectoryManager;
 use crate::users::get_current_user;
 
 pub fn run(renderer: &Renderer) -> anyhow::Result<()> {
     let current_user = get_current_user()?;
 
-    let user_data_repo = JsonUserDataRepository::new(&current_user)?;
+    let mut guilt_dir_manager = GuiltDirectoryManager::read_for_user(&current_user);
 
-    let processed_jobs = user_data_repo.get_all_processed_jobs()?;
+    let processed_jobs = guilt_dir_manager.get_all_processed_jobs()?;
 
     let mut document = Document {
         name: "GUILT Report".to_string(),
