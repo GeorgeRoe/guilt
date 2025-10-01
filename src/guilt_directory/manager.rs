@@ -7,7 +7,8 @@ use super::{
     CpuProfiles,
     UnresolvedProcessedJobs,
     UnresolvedUnprocessedJobs,
-    paths
+    paths,
+    LastWrittenVersion,
 };
 use std::path::{Path, PathBuf};
 use crate::json_io::JsonFileOperationError;
@@ -80,15 +81,31 @@ impl GuiltDirectoryManager {
         Ok(self.unresolved_processed_jobs.as_mut().unwrap())
     }
 
+    fn get_last_written_version(&mut self) -> std::io::Result<LastWrittenVersion> {
+        LastWrittenVersion::read(&self.path.join(paths::LAST_WRITTEN_VERSION_FILE))
+    }
+
+    fn update_last_written_version(&self) -> std::io::Result<()> {
+        LastWrittenVersion::new().write(&self.path.join(paths::LAST_WRITTEN_VERSION_FILE))
+    }
+
     pub fn write(&self) -> Result<(), JsonFileOperationError> {
+        let mut has_updated_last_written_version = false;
+
         if let Some(cpu_profiles) = &self.cpu_profiles {
             cpu_profiles.write(&self.cpu_profiles_path())?;
+            self.update_last_written_version()?;
+            has_updated_last_written_version = true;
         }
         if let Some(unresolved_unprocessed_jobs) = &self.unresolved_unprocessed_jobs {
             unresolved_unprocessed_jobs.write(&self.unprocessed_jobs_path())?;
+            self.update_last_written_version()?;
+            has_updated_last_written_version = true;
         }
         if let Some(unresolved_processed_jobs) = &self.unresolved_processed_jobs {
             unresolved_processed_jobs.write(&self.processed_jobs_path())?;
+            self.update_last_written_version()?;
+            has_updated_last_written_version = true;
         }
 
         Ok(())

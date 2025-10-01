@@ -3,7 +3,7 @@ use std::path::Path;
 pub struct LastWrittenVersion(String);
 
 impl LastWrittenVersion {
-    pub fn new(version: String) -> Self {
+    pub fn new() -> Self {
         Self(env!("CARGO_PKG_VERSION").to_string())
     }
 
