@@ -1,8 +1,7 @@
 use crate::carbon_intensity_api::CarbonIntensityAggregator;
 use crate::ip_info::fetch_ip_info;
 use crate::models::ProcessedJob;
-use crate::repositories::json::JsonUserDataRepository;
-use crate::repositories::{ProcessedJobsRepository, UnprocessedJobsRepository, UserDataRepository};
+use crate::guilt_directory::GuiltDirectoryManager;
 use crate::slurm::accounting::{EndTime, StartTime, get_jobs_by_id};
 use crate::users::get_current_user;
 use std::collections::HashMap;
@@ -10,9 +9,9 @@ use std::collections::HashMap;
 pub async fn run() -> anyhow::Result<()> {
     let current_user = get_current_user()?;
 
-    let mut user_data_repo = JsonUserDataRepository::new(&current_user)?;
+    let mut guilt_dir_manager = GuiltDirectoryManager::read_for_user(&current_user);
 
-    let unprocessed_jobs = user_data_repo.get_all_unprocessed_jobs()?;
+    let unprocessed_jobs = guilt_dir_manager.get_all_unprocessed_jobs()?;
 
     if unprocessed_jobs.is_empty() {
         println!("No jobs to be processed.");
@@ -69,12 +68,12 @@ pub async fn run() -> anyhow::Result<()> {
                     .await?,
             };
 
-            user_data_repo.upsert_processed_job(&processed_job)?;
-            user_data_repo.delete_unprocessed_job(&processed_job.job_id)?;
+            guilt_dir_manager.remove_unprocessed_job(&processed_job.job_id)?;
+            guilt_dir_manager.upsert_processed_job(processed_job)?;
         }
     }
 
-    user_data_repo.commit()?;
+    guilt_dir_manager.write()?;
 
     Ok(())
 }

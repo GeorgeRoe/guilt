@@ -1,8 +1,7 @@
 use crate::carbon_intensity_api::CarbonIntensityAggregator;
 use crate::ip_info::fetch_ip_info;
 use crate::models::UnprocessedJob;
-use crate::repositories::json::JsonUserDataRepository;
-use crate::repositories::{CpuProfilesRepository, UnprocessedJobsRepository, UserDataRepository};
+use crate::guilt_directory::GuiltDirectoryManager;
 use crate::script_directives::{GuiltScriptDirectives, SlurmScriptDirectives};
 use crate::slurm::batch;
 use crate::users::get_current_user;
@@ -44,9 +43,9 @@ pub async fn run(job: &str) -> anyhow::Result<()> {
     let earliest_possible_start_time = test_job.start_time;
     let latest_forecast_time = Utc::now() + Duration::days(2) - Duration::minutes(30);
 
-    let mut user_data_repo = JsonUserDataRepository::new(&get_current_user()?)?;
-    let cpu_profile = user_data_repo
-        .get_cpu_profile_by_name(&guilt_directives.cpu_profile)?
+    let mut guilt_dir_manager = GuiltDirectoryManager::read_for_user(&get_current_user()?);
+    let cpu_profile = guilt_dir_manager
+        .get_cpu_profile(&guilt_directives.cpu_profile)?
         .ok_or(BatchCommandError::CpuProfileNotFound(
             guilt_directives.cpu_profile,
         ))?;
@@ -155,8 +154,8 @@ pub async fn run(job: &str) -> anyhow::Result<()> {
         cpu_profile,
     };
 
-    user_data_repo.upsert_unprocessed_job(&unprocessed_job)?;
-    user_data_repo.commit()?;
+    guilt_dir_manager.upsert_unprocessed_job(unprocessed_job)?;
+    guilt_dir_manager.write()?;
 
     Ok(())
 }

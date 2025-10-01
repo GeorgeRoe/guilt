@@ -1,13 +1,12 @@
-use crate::guilt_dir::guilt_dir_given_home;
+use crate::users::get_current_user;
+use crate::guilt_directory::GuiltDirectoryManager;
 use colored::Colorize;
-use std::env;
-use std::fs;
 use std::io::{self, Write};
 
 pub fn run() -> anyhow::Result<()> {
-    let home = env::home_dir()
-        .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "Could not find home directory"))?;
-    let guilt_dir = guilt_dir_given_home(&home);
+    let current_user = get_current_user()?;
+
+    let guilt_dir_manager = GuiltDirectoryManager::read_for_user(&current_user);
 
     let confirmation = "I am guilty";
 
@@ -15,7 +14,7 @@ pub fn run() -> anyhow::Result<()> {
     println!();
     println!(
         "This command will permanently delete your GUILT data by removing the directory at: {}",
-        guilt_dir.display().to_string().red()
+        guilt_dir_manager.path().display().to_string().red()
     );
     print!("Confirm by typing the following: '{}': ", confirmation);
     io::stdout().flush().unwrap();
@@ -34,7 +33,7 @@ pub fn run() -> anyhow::Result<()> {
                 .green()
         );
     } else {
-        fs::remove_dir_all(&guilt_dir)?;
+        guilt_dir_manager.teardown()?;
         println!(
             "{}",
             "GUILT has been successfully removed from your system :(".red()
