@@ -1,22 +1,34 @@
 use std::path::Path;
+use crate::version::{Version, VersionFromStringError};
+use thiserror::Error;
+use std::fs::read_to_string;
 
-pub struct LastWrittenVersion(String);
+#[derive(Error, Debug)]
+pub enum LastWrittenVersionReadError {
+    #[error("IO error: {0}")]
+    Io(#[from] std::io::Error),
+    #[error("Invalid version string: {0}")]
+    InvalidVersionString(#[from] VersionFromStringError),
+}
+
+pub struct LastWrittenVersion(Version);
 
 impl LastWrittenVersion {
     pub fn new() -> Self {
-        Self(env!("CARGO_PKG_VERSION").to_string())
+        Self(Version::current())
     }
 
-    pub fn read(path: &Path) -> std::io::Result<Self> {
-        let version = std::fs::read_to_string(path)?.trim().to_string();
+    pub fn read(path: &Path) -> Result<Self, LastWrittenVersionReadError> {
+        let version_str = read_to_string(path)?.trim().to_string();
+        let version = Version::from_str(&version_str)?;
         Ok(Self(version))
     }
 
     pub fn write(&self, path: &Path) -> std::io::Result<()> {
-        std::fs::write(path, &self.0)
+        std::fs::write(path, &self.0.to_string())
     }
 
-    pub fn get(&self) -> &str {
+    pub fn get(&self) -> &Version {
         &self.0
     }
 }
