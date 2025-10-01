@@ -7,7 +7,6 @@ pub mod hpc_presets;
 pub mod ip_info;
 pub mod models;
 pub mod plotting;
-pub mod repositories;
 pub mod safe_command;
 pub mod script_directives;
 pub mod slurm;
