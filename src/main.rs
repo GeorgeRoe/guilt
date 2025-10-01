@@ -17,6 +17,7 @@ pub mod metadata;
 pub mod json_io;
 pub mod guilt_dir;
 pub mod guilt_directory;
+pub mod version;
 
 mod parse_duration_string;
 pub use parse_duration_string::parse_duration_string;

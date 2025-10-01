@@ -14,7 +14,10 @@ use unresolved_processed_jobs::{
 };
 
 mod last_written_version;
-use last_written_version::LastWrittenVersion;
+use last_written_version::{
+    LastWrittenVersion,
+    LastWrittenVersionReadError,
+};
 
 mod paths;
 
