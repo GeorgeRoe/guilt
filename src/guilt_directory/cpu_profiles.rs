@@ -26,11 +26,7 @@ impl CpuProfiles {
     }
 
     pub fn get(&self, name: &str) -> Option<CpuProfile> {
-        if let Some(cpu_profile) = self.cache.get(name) {
-            Some(cpu_profile.clone())
-        } else {
-            None
-        }
+        self.cache.get(name).cloned()
     }
 
     pub fn upsert(&mut self, profile: CpuProfile) {

@@ -19,14 +19,14 @@ fn migrate_user(user: &User, backup_dir: &Path) -> Result<MigrationStatus, Migra
 
     let mut status = MigrationStatus::NotNeeded;
     for migration in all_migrations() {
-        if migration.detect_applicable(&user) {
-            if has_been_backed_up == false {
-                copy(&guilt_dir, &backup_dir, &copy_options)
+        if migration.detect_applicable(user) {
+            if !has_been_backed_up {
+                copy(&guilt_dir, backup_dir, &copy_options)
                     .map_err(|_| MigrationError::BackupError())?;
                 has_been_backed_up = true;
             }
 
-            match migration.migrate(&user) {
+            match migration.migrate(user) {
                 Ok(_) => {
                     status = MigrationStatus::Success;
                 }

@@ -1,5 +1,6 @@
 use std::cmp::Ordering;
 use thiserror::Error;
+use std::cmp::Ord;
 
 #[derive(Debug, Clone)]
 pub struct Version {
@@ -19,7 +20,7 @@ pub enum VersionFromStringError {
 
 impl Version {
     pub fn current() -> Self {
-        Self::from_str(env!("CARGO_PKG_VERSION")).expect("Current version is invalid") // should never fail
+        Self::parse_str(env!("CARGO_PKG_VERSION")).expect("Current version is invalid") // should never fail
     }
 
     pub fn new(major: u32, minor: u32, patch: u32) -> Self {
@@ -30,7 +31,7 @@ impl Version {
         }
     }
 
-    pub fn from_str(version_str: &str) -> Result<Self, VersionFromStringError> {
+    pub fn parse_str(version_str: &str) -> Result<Self, VersionFromStringError> {
         let parts: Vec<&str> = version_str.split('.').collect();
         match parts.len() {
             3 => {
@@ -74,7 +75,7 @@ impl Eq for Version {}
 
 impl PartialOrd for Version {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
+        Some(Ord::cmp(self, other))
     }
 }
 
