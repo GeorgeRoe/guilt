@@ -1,4 +1,4 @@
-use crate::guilt_directory::{migrate_current_user, MigrationStatus};
+use crate::guilt_directory::{MigrationStatus, migrate_current_user};
 use crate::users::get_current_user;
 
 pub fn run() -> anyhow::Result<()> {
@@ -10,7 +10,10 @@ pub fn run() -> anyhow::Result<()> {
         }
         MigrationStatus::Success => {
             println!("Migration completed successfully.");
-            println!("Your old data has been backed up to: {}", backup_dir.display());
+            println!(
+                "Your old data has been backed up to: {}",
+                backup_dir.display()
+            );
         }
     }
 

@@ -1,7 +1,7 @@
 use crate::carbon_intensity_api::CarbonIntensityAggregator;
+use crate::guilt_directory::GuiltDirectoryManager;
 use crate::ip_info::fetch_ip_info;
 use crate::models::UnprocessedJob;
-use crate::guilt_directory::GuiltDirectoryManager;
 use crate::script_directives::{GuiltScriptDirectives, SlurmScriptDirectives};
 use crate::slurm::batch;
 use crate::users::get_current_user;

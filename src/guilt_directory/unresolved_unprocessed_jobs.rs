@@ -1,11 +1,8 @@
+use crate::json_io::*;
+use crate::models::{CpuProfile, UnprocessedJob};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::Path;
-use serde::{Deserialize, Serialize};
-use crate::models::{
-    CpuProfile,
-    UnprocessedJob,
-};
-use crate::json_io::*;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct UnresolvedUnprocessedJob {
@@ -43,7 +40,7 @@ impl UnresolvedUnprocessedJobs {
     pub fn read(path: &Path) -> Result<Self, JsonFileOperationError> {
         let jobs: Vec<UnresolvedUnprocessedJob> = read_json_file(path)?;
         let cache = jobs.into_iter().map(|j| (j.job_id.clone(), j)).collect();
-        Ok(Self{ cache })
+        Ok(Self { cache })
     }
 
     pub fn write(&self, path: &Path) -> Result<(), JsonFileOperationError> {

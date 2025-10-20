@@ -1,5 +1,5 @@
-use crate::hpc_presets::{HpcPreset, get_all_hpc_presets, get_current_hpc_preset};
 use crate::guilt_directory::GuiltDirectoryManager;
+use crate::hpc_presets::{HpcPreset, get_all_hpc_presets, get_current_hpc_preset};
 use crate::users::get_current_user;
 use colored::Colorize;
 use dialoguer::{Confirm, Select, theme::ColorfulTheme};

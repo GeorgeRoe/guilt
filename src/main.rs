@@ -3,8 +3,10 @@ mod commands;
 
 pub mod carbon_intensity_api;
 pub mod document;
+pub mod guilt_directory;
 pub mod hpc_presets;
 pub mod ip_info;
+pub mod json_io;
 pub mod models;
 pub mod plotting;
 pub mod safe_command;
@@ -12,8 +14,6 @@ pub mod script_directives;
 pub mod slurm;
 pub mod structured_json;
 pub mod users;
-pub mod json_io;
-pub mod guilt_directory;
 pub mod version;
 
 mod parse_duration_string;

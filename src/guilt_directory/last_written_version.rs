@@ -1,7 +1,7 @@
-use std::path::Path;
 use crate::version::{Version, VersionFromStringError};
-use thiserror::Error;
 use std::fs::read_to_string;
+use std::path::Path;
+use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum LastWrittenVersionReadError {

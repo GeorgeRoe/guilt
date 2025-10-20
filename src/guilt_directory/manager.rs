@@ -1,23 +1,13 @@
-use crate::models::{
-    CpuProfile,
-    ProcessedJob,
-    UnprocessedJob,
-};
 use super::{
-    CpuProfiles,
-    UnresolvedProcessedJobs,
-    UnresolvedUnprocessedJobs,
-    paths,
-    LastWrittenVersion,
-    LastWrittenVersionReadError,
-    UnresolvedProcessedJob,
-    UnresolvedUnprocessedJob,
+    CpuProfiles, LastWrittenVersion, LastWrittenVersionReadError, UnresolvedProcessedJob,
+    UnresolvedProcessedJobs, UnresolvedUnprocessedJob, UnresolvedUnprocessedJobs, paths,
 };
-use std::path::{Path, PathBuf};
 use crate::json_io::JsonFileOperationError;
-use thiserror::Error;
+use crate::models::{CpuProfile, ProcessedJob, UnprocessedJob};
 use crate::users::User;
 use crate::version::Version;
+use std::path::{Path, PathBuf};
+use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum GuiltDirectorySetupError {
@@ -119,7 +109,11 @@ impl GuiltDirectoryManager {
     }
 
     pub fn get_last_written_version(&mut self) -> Result<Version, LastWrittenVersionReadError> {
-        Ok(LastWrittenVersion::read(&self.get_last_written_version_path())?.get().clone())
+        Ok(
+            LastWrittenVersion::read(&self.get_last_written_version_path())?
+                .get()
+                .clone(),
+        )
     }
 
     fn update_last_written_version(&self) -> std::io::Result<()> {
@@ -145,12 +139,18 @@ impl GuiltDirectoryManager {
         Ok(self.cpu_profiles.as_mut().unwrap())
     }
 
-    pub fn get_cpu_profile(&mut self, name: &str) -> Result<Option<CpuProfile>, JsonFileOperationError> {
+    pub fn get_cpu_profile(
+        &mut self,
+        name: &str,
+    ) -> Result<Option<CpuProfile>, JsonFileOperationError> {
         let cpu_profiles = self.get_cpu_profiles()?;
         Ok(cpu_profiles.get(name))
     }
 
-    pub fn upsert_cpu_profile(&mut self, profile: CpuProfile) -> Result<(), JsonFileOperationError> {
+    pub fn upsert_cpu_profile(
+        &mut self,
+        profile: CpuProfile,
+    ) -> Result<(), JsonFileOperationError> {
         let cpu_profiles = self.get_cpu_profiles()?;
         cpu_profiles.upsert(profile);
         Ok(())
@@ -169,24 +169,32 @@ impl GuiltDirectoryManager {
     }
 
     fn load_unprocessed_jobs(&mut self) -> Result<(), JsonFileOperationError> {
-        let unresolved_unprocessed_jobs = UnresolvedUnprocessedJobs::read(&self.unprocessed_jobs_path())?;
+        let unresolved_unprocessed_jobs =
+            UnresolvedUnprocessedJobs::read(&self.unprocessed_jobs_path())?;
         self.unresolved_unprocessed_jobs = Some(unresolved_unprocessed_jobs);
         Ok(())
     }
 
-    fn get_unresolved_unprocessed_jobs(&mut self) -> Result<&mut UnresolvedUnprocessedJobs, JsonFileOperationError> {
+    fn get_unresolved_unprocessed_jobs(
+        &mut self,
+    ) -> Result<&mut UnresolvedUnprocessedJobs, JsonFileOperationError> {
         if self.unresolved_unprocessed_jobs.is_none() {
             self.load_unprocessed_jobs()?;
         }
         Ok(self.unresolved_unprocessed_jobs.as_mut().unwrap())
     }
 
-    pub fn get_unprocessed_job(&mut self, job_id: &str) -> Result<Option<UnprocessedJob>, GetJobError> {
+    pub fn get_unprocessed_job(
+        &mut self,
+        job_id: &str,
+    ) -> Result<Option<UnprocessedJob>, GetJobError> {
         if let Some(unresolved_job) = self.get_unresolved_unprocessed_jobs()?.get(job_id) {
             if let Some(cpu_profile) = self.get_cpu_profile(&unresolved_job.cpu_profile_name)? {
                 Ok(Some(unresolved_job.resolve(&cpu_profile)))
             } else {
-               Err(GetJobError::CpuProfileNotFoundError(unresolved_job.cpu_profile_name.clone())) 
+                Err(GetJobError::CpuProfileNotFoundError(
+                    unresolved_job.cpu_profile_name.clone(),
+                ))
             }
         } else {
             Ok(None)
@@ -195,21 +203,29 @@ impl GuiltDirectoryManager {
 
     pub fn get_all_unprocessed_jobs(&mut self) -> Result<Vec<UnprocessedJob>, GetJobError> {
         let unresolved_jobs = self.get_unresolved_unprocessed_jobs()?.all();
-        unresolved_jobs.into_iter().map(|job| {
-            if let Some(cpu_profile) = self.get_cpu_profile(&job.cpu_profile_name)? {
-                Ok(job.resolve(&cpu_profile))
-            } else {
-                Err(GetJobError::CpuProfileNotFoundError(job.cpu_profile_name.clone()))
-            }
-        }).collect()
+        unresolved_jobs
+            .into_iter()
+            .map(|job| {
+                if let Some(cpu_profile) = self.get_cpu_profile(&job.cpu_profile_name)? {
+                    Ok(job.resolve(&cpu_profile))
+                } else {
+                    Err(GetJobError::CpuProfileNotFoundError(
+                        job.cpu_profile_name.clone(),
+                    ))
+                }
+            })
+            .collect()
     }
 
     pub fn upsert_unprocessed_job(&mut self, job: UnprocessedJob) -> Result<(), UpsertJobError> {
-        if let Some(existing_profile) = self.get_cpu_profile(&job.cpu_profile.name)? && existing_profile != job.cpu_profile {
+        if let Some(existing_profile) = self.get_cpu_profile(&job.cpu_profile.name)?
+            && existing_profile != job.cpu_profile
+        {
             Err(UpsertJobError::CpuProfileAlreadyExistsError)
         } else {
             let unresolved_job = UnresolvedUnprocessedJob::unresolve(&job);
-            self.get_unresolved_unprocessed_jobs()?.upsert(unresolved_job);
+            self.get_unresolved_unprocessed_jobs()?
+                .upsert(unresolved_job);
             self.upsert_cpu_profile(job.cpu_profile)?;
             Ok(())
         }
@@ -232,7 +248,9 @@ impl GuiltDirectoryManager {
         Ok(())
     }
 
-    fn get_processed_jobs(&mut self) -> Result<&mut UnresolvedProcessedJobs, JsonFileOperationError> {
+    fn get_processed_jobs(
+        &mut self,
+    ) -> Result<&mut UnresolvedProcessedJobs, JsonFileOperationError> {
         if self.unresolved_processed_jobs.is_none() {
             self.load_processed_jobs()?;
         }
@@ -241,13 +259,18 @@ impl GuiltDirectoryManager {
 
     pub fn get_all_processed_jobs(&mut self) -> Result<Vec<ProcessedJob>, GetJobError> {
         let unresolved_jobs = self.get_processed_jobs()?.all();
-        unresolved_jobs.into_iter().map(|job| {
-            if let Some(cpu_profile) = self.get_cpu_profile(&job.cpu_profile_name)? {
-                Ok(job.resolve(&cpu_profile))
-            } else {
-                Err(GetJobError::CpuProfileNotFoundError(job.cpu_profile_name.clone()))
-            }
-        }).collect()
+        unresolved_jobs
+            .into_iter()
+            .map(|job| {
+                if let Some(cpu_profile) = self.get_cpu_profile(&job.cpu_profile_name)? {
+                    Ok(job.resolve(&cpu_profile))
+                } else {
+                    Err(GetJobError::CpuProfileNotFoundError(
+                        job.cpu_profile_name.clone(),
+                    ))
+                }
+            })
+            .collect()
     }
 
     pub fn get_processed_job(&mut self, job_id: &str) -> Result<Option<ProcessedJob>, GetJobError> {
@@ -255,7 +278,9 @@ impl GuiltDirectoryManager {
             if let Some(cpu_profile) = self.get_cpu_profile(&unresolved_job.cpu_profile_name)? {
                 Ok(Some(unresolved_job.resolve(&cpu_profile)))
             } else {
-                Err(GetJobError::CpuProfileNotFoundError(unresolved_job.cpu_profile_name.clone()))
+                Err(GetJobError::CpuProfileNotFoundError(
+                    unresolved_job.cpu_profile_name.clone(),
+                ))
             }
         } else {
             Ok(None)
@@ -263,7 +288,9 @@ impl GuiltDirectoryManager {
     }
 
     pub fn upsert_processed_job(&mut self, job: ProcessedJob) -> Result<(), UpsertJobError> {
-        if let Some(existing_profile) = self.get_cpu_profile(&job.cpu_profile.name)? && existing_profile != job.cpu_profile {
+        if let Some(existing_profile) = self.get_cpu_profile(&job.cpu_profile.name)?
+            && existing_profile != job.cpu_profile
+        {
             Err(UpsertJobError::CpuProfileAlreadyExistsError)
         } else {
             let unresolved_job = UnresolvedProcessedJob::unresolve(&job);

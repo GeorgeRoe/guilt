@@ -1,5 +1,5 @@
-use crate::models::{CpuProfile, UnprocessedJob};
 use crate::guilt_directory::GuiltDirectoryManager;
+use crate::models::{CpuProfile, UnprocessedJob};
 use crate::slurm::accounting::{EndTime, get_all_historical_jobs_for_user};
 use crate::users::get_current_user;
 

@@ -1,5 +1,5 @@
-use crate::users::get_current_user;
 use crate::guilt_directory::GuiltDirectoryManager;
+use crate::users::get_current_user;
 use colored::Colorize;
 use std::io::{self, Write};
 

@@ -1,6 +1,6 @@
 use crate::document::*;
-use crate::plotting::ChartDefinition;
 use crate::guilt_directory::GuiltDirectoryManager;
+use crate::plotting::ChartDefinition;
 use crate::users::get_current_user;
 
 pub fn run(renderer: &Renderer) -> anyhow::Result<()> {

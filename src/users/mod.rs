@@ -1,8 +1,5 @@
 mod types;
-pub use types::{
-    User,
-    TestingUser,
-};
+pub use types::{TestingUser, User};
 
 mod parsing;
 

@@ -7,14 +7,8 @@ pub const PROCESSED_JOBS_FILE: &str = "processed_jobs.json";
 pub const LAST_WRITTEN_VERSION_FILE: &str = "last_written_version";
 
 pub const GUILT_DIR: &str = ".guilt";
-pub const BACKUP_DIR: &str = ".guilt_backup";
 
 pub fn guilt_directory_for_user(user: &User) -> PathBuf {
     let home_dir = user.home_dir.as_path();
     home_dir.join(GUILT_DIR)
-}
-
-pub fn backup_guilt_directory_for_user(user: &User) -> PathBuf {
-    let home_dir = user.home_dir.as_path();
-    home_dir.join(BACKUP_DIR)
 }

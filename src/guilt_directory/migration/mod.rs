@@ -1,5 +1,5 @@
 use crate::users::{User, get_current_user};
-use fs_extra::dir::{copy, CopyOptions};
+use fs_extra::dir::{CopyOptions, copy};
 use std::path::Path;
 
 mod types;
@@ -20,16 +20,16 @@ fn migrate_user(user: &User, backup_dir: &Path) -> Result<MigrationStatus, Migra
     let mut status = MigrationStatus::NotNeeded;
     for migration in all_migrations() {
         if migration.detect_applicable(&user) {
-
             if has_been_backed_up == false {
-                copy(&guilt_dir, &backup_dir, &copy_options).map_err(|_| MigrationError::BackupError())?;
+                copy(&guilt_dir, &backup_dir, &copy_options)
+                    .map_err(|_| MigrationError::BackupError())?;
                 has_been_backed_up = true;
             }
 
             match migration.migrate(&user) {
                 Ok(_) => {
                     status = MigrationStatus::Success;
-                },
+                }
                 Err(e) => {
                     return Err(MigrationError::MigrationFailed(e));
                 }
@@ -40,6 +40,8 @@ fn migrate_user(user: &User, backup_dir: &Path) -> Result<MigrationStatus, Migra
     Ok(status)
 }
 
-pub fn migrate_current_user(backup_dir: &Path) -> Result<MigrationStatus, CurrentUserMigrationError> {
+pub fn migrate_current_user(
+    backup_dir: &Path,
+) -> Result<MigrationStatus, CurrentUserMigrationError> {
     Ok(migrate_user(&get_current_user()?, backup_dir)?)
 }
