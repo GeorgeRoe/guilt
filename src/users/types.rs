@@ -1,5 +1,5 @@
 use std::path::PathBuf;
-use tempfile::{tempdir, TempDir};
+use tempfile::{TempDir, tempdir};
 
 pub struct User {
     pub name: String,

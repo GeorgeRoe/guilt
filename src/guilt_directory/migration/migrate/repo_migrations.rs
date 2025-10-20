@@ -9,9 +9,18 @@ impl Migration for MigrateToRepoMigrations {
         let guilt_dir = user.home_dir.join(".guilt");
         let user_data_dir = guilt_dir.join("user_data");
 
-        fs::rename(user_data_dir.join("cpu_profiles.json"), guilt_dir.join("cpu_profiles.json"))?;
-        fs::rename(user_data_dir.join("processed_jobs.json"), guilt_dir.join("processed_jobs.json"))?;
-        fs::rename(user_data_dir.join("unprocessed_jobs.json"), guilt_dir.join("unprocessed_jobs.json"))?;
+        fs::rename(
+            user_data_dir.join("cpu_profiles.json"),
+            guilt_dir.join("cpu_profiles.json"),
+        )?;
+        fs::rename(
+            user_data_dir.join("processed_jobs.json"),
+            guilt_dir.join("processed_jobs.json"),
+        )?;
+        fs::rename(
+            user_data_dir.join("unprocessed_jobs.json"),
+            guilt_dir.join("unprocessed_jobs.json"),
+        )?;
         fs::remove_dir_all(user_data_dir)?;
 
         Ok(())

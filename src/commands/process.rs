@@ -1,7 +1,7 @@
 use crate::carbon_intensity_api::CarbonIntensityAggregator;
+use crate::guilt_directory::GuiltDirectoryManager;
 use crate::ip_info::fetch_ip_info;
 use crate::models::ProcessedJob;
-use crate::guilt_directory::GuiltDirectoryManager;
 use crate::slurm::accounting::{EndTime, StartTime, get_jobs_by_id};
 use crate::users::get_current_user;
 use std::collections::HashMap;

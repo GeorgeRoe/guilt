@@ -1,12 +1,9 @@
-use std::collections::HashMap;
-use std::path::Path;
+use crate::json_io::*;
+use crate::models::{CpuProfile, ProcessedJob};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
-use crate::models::{
-    CpuProfile,
-    ProcessedJob,
-};
-use crate::json_io::*;
+use std::collections::HashMap;
+use std::path::Path;
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct UnresolvedProcessedJob {
@@ -20,10 +17,7 @@ pub struct UnresolvedProcessedJob {
 }
 
 impl UnresolvedProcessedJob {
-    pub fn resolve(
-        &self,
-        cpu_profile: &CpuProfile,
-    ) -> ProcessedJob {
+    pub fn resolve(&self, cpu_profile: &CpuProfile) -> ProcessedJob {
         ProcessedJob {
             start_time: self.start_time,
             end_time: self.end_time,
@@ -35,9 +29,7 @@ impl UnresolvedProcessedJob {
         }
     }
 
-    pub fn unresolve(
-        job: &ProcessedJob,
-    ) -> Self {
+    pub fn unresolve(job: &ProcessedJob) -> Self {
         Self {
             start_time: job.start_time,
             end_time: job.end_time,
@@ -64,7 +56,7 @@ impl UnresolvedProcessedJobs {
     pub fn read(path: &Path) -> Result<Self, JsonFileOperationError> {
         let jobs: Vec<UnresolvedProcessedJob> = read_json_file(path)?;
         let cache = jobs.into_iter().map(|j| (j.job_id.clone(), j)).collect();
-        Ok(Self{ cache })
+        Ok(Self { cache })
     }
 
     pub fn write(&self, path: &Path) -> Result<(), JsonFileOperationError> {

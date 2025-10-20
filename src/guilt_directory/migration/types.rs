@@ -12,7 +12,7 @@ pub enum MigrationError {
     MigrationFailed(#[from] anyhow::Error),
 
     #[error("Failed to backup .guilt directory")]
-    BackupError()
+    BackupError(),
 }
 
 #[derive(Error, Debug)]
@@ -26,5 +26,5 @@ pub enum CurrentUserMigrationError {
 
 pub enum MigrationStatus {
     NotNeeded,
-    Success
+    Success,
 }
