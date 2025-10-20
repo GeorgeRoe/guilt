@@ -26,6 +26,9 @@ pub enum Commands {
     #[command(about = "Display the other GUILT users on the system")]
     Friends,
 
+    #[command(about = "Migrate GUILT configuration/data to the latest version")]
+    Migrate,
+
     #[command(about = "Calculate the carbon impact of your jobs")]
     Process,
 
