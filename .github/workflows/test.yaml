@@ -1,0 +1,22 @@
+name: Build Check
+
+on:
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'Cargo.*'
+      - 'src/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - run: cargo test --all --locked --verbose
