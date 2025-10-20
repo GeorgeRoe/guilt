@@ -1,6 +1,6 @@
+use std::cmp::Ord;
 use std::cmp::Ordering;
 use thiserror::Error;
-use std::cmp::Ord;
 
 #[derive(Debug, Clone)]
 pub struct Version {
