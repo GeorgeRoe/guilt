@@ -65,11 +65,7 @@ impl UnresolvedProcessedJobs {
     }
 
     pub fn get(&self, job_id: &str) -> Option<UnresolvedProcessedJob> {
-        if let Some(job) = self.cache.get(job_id) {
-            Some(job.clone())
-        } else {
-            None
-        }
+        self.cache.get(job_id).cloned()
     }
 
     pub fn all(&self) -> Vec<UnresolvedProcessedJob> {

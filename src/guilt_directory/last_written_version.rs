@@ -20,12 +20,12 @@ impl LastWrittenVersion {
 
     pub fn read(path: &Path) -> Result<Self, LastWrittenVersionReadError> {
         let version_str = read_to_string(path)?.trim().to_string();
-        let version = Version::from_str(&version_str)?;
+        let version = Version::parse_str(&version_str)?;
         Ok(Self(version))
     }
 
     pub fn write(&self, path: &Path) -> std::io::Result<()> {
-        std::fs::write(path, &self.0.to_string())
+        std::fs::write(path, self.0.to_string())
     }
 
     pub fn get(&self) -> &Version {

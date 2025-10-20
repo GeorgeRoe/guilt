@@ -38,7 +38,7 @@ mod tests {
     use std::fs;
 
     fn setup_testing_user_with_previous_structure() -> anyhow::Result<TestingUser> {
-        let testing_user = TestingUser::default()?;
+        let testing_user = TestingUser::test_user()?;
 
         let guilt_dir = testing_user.user.home_dir.join(".guilt");
 

@@ -28,7 +28,7 @@ impl TestingUser {
         })
     }
 
-    pub fn default() -> anyhow::Result<Self> {
+    pub fn test_user() -> anyhow::Result<Self> {
         Self::new("testuser", "Test User")
     }
 }
