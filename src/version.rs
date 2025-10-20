@@ -1,6 +1,7 @@
 use thiserror::Error;
 use std::cmp::Ordering;
 
+#[derive(Debug, Clone)]
 pub struct Version {
     pub major: u32,
     pub minor: u32,

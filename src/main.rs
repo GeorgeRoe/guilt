@@ -31,6 +31,7 @@ async fn main() -> anyhow::Result<()> {
         Commands::Batch { job } => commands::batch::run(job).await,
         Commands::Forecast => commands::forecast::run().await,
         Commands::Friends => commands::friends::run(),
+        Commands::Migrate => commands::migrate::run(),
         Commands::Process => commands::process::run().await,
         Commands::Report { format } => commands::report::run(format),
         Commands::Setup => commands::setup::run(),

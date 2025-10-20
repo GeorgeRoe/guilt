@@ -22,5 +22,12 @@ use last_written_version::{
 mod paths;
 pub use paths::guilt_directory_for_user;
 
+mod migration;
+pub use migration::{
+    migrate_current_user,
+    MigrationStatus,
+    MigrationError,
+};
+
 mod manager;
 pub use manager::GuiltDirectoryManager;

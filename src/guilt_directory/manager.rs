@@ -17,6 +17,7 @@ use std::path::{Path, PathBuf};
 use crate::json_io::JsonFileOperationError;
 use thiserror::Error;
 use crate::users::User;
+use crate::version::Version;
 
 #[derive(Debug, Error)]
 pub enum GuiltDirectorySetupError {
@@ -117,8 +118,8 @@ impl GuiltDirectoryManager {
         self.path.join(paths::LAST_WRITTEN_VERSION_FILE)
     }
 
-    fn get_last_written_version(&mut self) -> Result<LastWrittenVersion, LastWrittenVersionReadError> {
-        LastWrittenVersion::read(&self.get_last_written_version_path())
+    pub fn get_last_written_version(&mut self) -> Result<Version, LastWrittenVersionReadError> {
+        Ok(LastWrittenVersion::read(&self.get_last_written_version_path())?.get().clone())
     }
 
     fn update_last_written_version(&self) -> std::io::Result<()> {
