@@ -1,4 +1,4 @@
-use crate::users::User;
+use crate::users::{User, UserCommandError};
 use thiserror::Error;
 
 pub trait Migration {
@@ -13,6 +13,15 @@ pub enum MigrationError {
 
     #[error("Failed to backup .guilt directory")]
     BackupError()
+}
+
+#[derive(Error, Debug)]
+pub enum CurrentUserMigrationError {
+    #[error("Failed to get current user: {0}")]
+    UserError(#[from] UserCommandError),
+
+    #[error("Migration failed: {0}")]
+    MigrationError(#[from] MigrationError),
 }
 
 pub enum MigrationStatus {
