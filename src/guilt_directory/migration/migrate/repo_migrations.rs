@@ -80,6 +80,7 @@ mod tests {
         assert!(guilt_dir.join("cpu_profiles.json").exists());
         assert!(guilt_dir.join("processed_jobs.json").exists());
         assert!(guilt_dir.join("unprocessed_jobs.json").exists());
+        assert!(guilt_dir.join("last_written_version").exists());
         assert!(!guilt_dir.join("user_data").exists());
 
         Ok(())
