@@ -6,7 +6,7 @@ mod types;
 pub use types::*;
 
 mod migrate;
-use migrate::all_migrations;
+use migrate::all_migrations_in_order;
 
 fn migrate_user(user: &User, backup_dir: &Path) -> Result<MigrationStatus, MigrationError> {
     let mut copy_options = CopyOptions::new();
@@ -18,7 +18,7 @@ fn migrate_user(user: &User, backup_dir: &Path) -> Result<MigrationStatus, Migra
     let mut has_been_backed_up = false;
 
     let mut status = MigrationStatus::NotNeeded;
-    for migration in all_migrations() {
+    for migration in all_migrations_in_order() {
         if migration.detect_applicable(user) {
             if !has_been_backed_up {
                 copy(&guilt_dir, backup_dir, &copy_options)
