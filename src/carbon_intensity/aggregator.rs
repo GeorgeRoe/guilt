@@ -1,7 +1,7 @@
 use super::{CarbonIntensityTimeSegment, FetchCarbonIntensity};
+use anyhow;
 use chrono::{DateTime, Duration, Utc};
 use std::collections::HashMap;
-use anyhow;
 
 pub struct CarbonIntensityAggregator<F: FetchCarbonIntensity> {
     postcode: String,

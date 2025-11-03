@@ -1,7 +1,4 @@
-use crate::carbon_intensity::{
-    CarbonIntensityAggregator,
-    api::ApiFetchCarbonIntensity,
-};
+use crate::carbon_intensity::{CarbonIntensityAggregator, api::ApiFetchCarbonIntensity};
 use crate::guilt_directory::GuiltDirectoryManager;
 use crate::ip_info::fetch_ip_info;
 use crate::models::ProcessedJob;
