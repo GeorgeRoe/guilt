@@ -1,4 +1,7 @@
-use crate::carbon_intensity::CarbonIntensityAggregator;
+use crate::carbon_intensity::{
+    CarbonIntensityAggregator,
+    api::ApiFetchCarbonIntensity,
+};
 use crate::guilt_directory::GuiltDirectoryManager;
 use crate::ip_info::fetch_ip_info;
 use crate::models::ProcessedJob;
@@ -30,7 +33,7 @@ pub async fn run() -> anyhow::Result<()> {
 
     let ip_info = fetch_ip_info().await?;
 
-    let mut aggregator = CarbonIntensityAggregator::new(ip_info.postal);
+    let mut aggregator = CarbonIntensityAggregator::new(ip_info.postal, ApiFetchCarbonIntensity {});
 
     for unprocessed_job in unprocessed_jobs {
         if let Some(sacct_result) = sacct_results.get(&unprocessed_job.job_id)
