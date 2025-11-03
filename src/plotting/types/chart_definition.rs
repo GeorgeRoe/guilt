@@ -1,4 +1,4 @@
-use crate::carbon_intensity_api::CarbonIntensityTimeSegment;
+use crate::carbon_intensity::CarbonIntensityTimeSegment;
 use std::collections::HashMap;
 
 pub type GenerationMixData = HashMap<String, f64>;

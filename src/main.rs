@@ -1,7 +1,7 @@
 mod cli;
 mod commands;
 
-pub mod carbon_intensity_api;
+pub mod carbon_intensity;
 pub mod document;
 pub mod guilt_directory;
 pub mod hpc_presets;

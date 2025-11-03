@@ -1,4 +1,4 @@
-use crate::carbon_intensity_api::CarbonIntensityAggregator;
+use crate::carbon_intensity::CarbonIntensityAggregator;
 use crate::ip_info::fetch_ip_info;
 use crate::plotting::{ChartDefinition, get_chart_displayer};
 use chrono::{DateTime, Duration, Utc};
