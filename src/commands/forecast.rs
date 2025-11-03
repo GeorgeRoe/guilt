@@ -1,11 +1,14 @@
-use crate::carbon_intensity::CarbonIntensityAggregator;
+use crate::carbon_intensity::{
+    CarbonIntensityAggregator,
+    api::ApiFetchCarbonIntensity,
+};
 use crate::ip_info::fetch_ip_info;
 use crate::plotting::{ChartDefinition, get_chart_displayer};
 use chrono::{DateTime, Duration, Utc};
 
 pub async fn run() -> anyhow::Result<()> {
     let ip_info = fetch_ip_info().await?;
-    let mut aggregator = CarbonIntensityAggregator::new(ip_info.postal);
+    let mut aggregator = CarbonIntensityAggregator::new(ip_info.postal, ApiFetchCarbonIntensity {});
 
     let duration = Duration::days(1);
     let now: DateTime<Utc> = Utc::now();

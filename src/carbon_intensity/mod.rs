@@ -4,6 +4,7 @@ pub use fetch::FetchCarbonIntensity;
 mod types;
 pub use types::CarbonIntensityTimeSegment;
 
-mod api;
+pub mod api;
 
 mod aggregator;
+pub use aggregator::CarbonIntensityAggregator;

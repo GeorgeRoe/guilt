@@ -1,4 +1,7 @@
-use crate::carbon_intensity::CarbonIntensityAggregator;
+use crate::carbon_intensity::{
+    CarbonIntensityAggregator,
+    api::ApiFetchCarbonIntensity,
+};
 use crate::guilt_directory::GuiltDirectoryManager;
 use crate::ip_info::fetch_ip_info;
 use crate::models::UnprocessedJob;
@@ -65,7 +68,7 @@ pub async fn run(job: &str) -> anyhow::Result<()> {
             / 1000.0;
 
         let ip_info = fetch_ip_info().await?;
-        let mut aggregator = CarbonIntensityAggregator::new(ip_info.postal);
+        let mut aggregator = CarbonIntensityAggregator::new(ip_info.postal, ApiFetchCarbonIntensity {});
 
         // initialise the cache (make all requests at start, instead of many small requests later)
         aggregator
