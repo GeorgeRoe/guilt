@@ -21,7 +21,7 @@ impl Migration for MigrateToRepoMigrations {
             user_data_dir.join("unprocessed_jobs.json"),
             guilt_dir.join("unprocessed_jobs.json"),
         )?;
-        fs::write(guilt_dir.join("last_written_version"), b"1.1.1")?;
+        fs::write(guilt_dir.join("last_written_version"), b"1.2.0")?;
         fs::remove_dir_all(user_data_dir)?;
 
         Ok(())
