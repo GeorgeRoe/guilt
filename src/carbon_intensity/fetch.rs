@@ -1,7 +1,7 @@
 use super::CarbonIntensityTimeSegment;
-use chrono::{DateTime, Utc};
 use anyhow;
 use async_trait::async_trait;
+use chrono::{DateTime, Utc};
 
 #[async_trait]
 pub trait FetchCarbonIntensity {

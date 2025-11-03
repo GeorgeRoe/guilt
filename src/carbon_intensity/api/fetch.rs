@@ -1,15 +1,13 @@
 use super::{
-    DATE_TIME_FORMAT,
-    CarbonIntensityTimeSegment,
-    FetchCarbonIntensity,
-    types::{ApiError, RegionData},
+    CarbonIntensityTimeSegment, DATE_TIME_FORMAT, FetchCarbonIntensity,
     parsing::parse_api_data,
+    types::{ApiError, RegionData},
 };
+use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use reqwest;
 use std::result::Result;
 use thiserror::Error;
-use async_trait::async_trait;
 
 #[derive(Error, Debug)]
 pub enum CarbonIntensityApiFetchError {
@@ -32,14 +30,16 @@ pub enum CarbonIntensityApiFetchError {
 pub struct ApiFetchCarbonIntensity;
 
 #[async_trait]
-impl FetchCarbonIntensity for ApiFetchCarbonIntensity{
+impl FetchCarbonIntensity for ApiFetchCarbonIntensity {
     async fn fetch(
         &self,
         from: DateTime<Utc>,
         to: DateTime<Utc>,
         postcode: &str,
     ) -> Result<Vec<CarbonIntensityTimeSegment>, anyhow::Error> {
-        fetch_carbon_intensity_with_api(from, to, postcode).await.map_err(anyhow::Error::from)
+        fetch_carbon_intensity_with_api(from, to, postcode)
+            .await
+            .map_err(anyhow::Error::from)
     }
 }
 
@@ -68,14 +68,16 @@ pub async fn fetch_carbon_intensity_with_api(
                 .map(parse_api_data)
                 .collect::<Result<Vec<_>, _>>()?;
             Ok(segments)
-        },
+        }
         (None, Some(error)) => {
             let error: ApiError = serde_json::from_value(error.to_owned())?;
             Err(CarbonIntensityApiFetchError::ApiError(
                 error.code,
                 error.message,
             ))
-        },
+        }
         _ => Err(CarbonIntensityApiFetchError::UnexpectedResponseFormat),
     }
 }
+
+mod tests {}
