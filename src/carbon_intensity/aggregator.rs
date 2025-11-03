@@ -1,17 +1,20 @@
-use super::{CarbonIntensityApiFetchError, CarbonIntensityTimeSegment, fetch_carbon_intensity};
+use super::{CarbonIntensityTimeSegment, FetchCarbonIntensity};
 use chrono::{DateTime, Duration, Utc};
 use std::collections::HashMap;
+use anyhow;
 
-pub struct CarbonIntensityAggregator {
+pub struct CarbonIntensityAggregator<F: FetchCarbonIntensity> {
     postcode: String,
     segments: Vec<CarbonIntensityTimeSegment>,
+    fetcher: F,
 }
 
-impl CarbonIntensityAggregator {
-    pub fn new(postcode: String) -> Self {
+impl<F: FetchCarbonIntensity> CarbonIntensityAggregator<F> {
+    pub fn new(postcode: String, fetcher: F) -> Self {
         Self {
             postcode,
             segments: Vec::new(),
+            fetcher,
         }
     }
 
@@ -19,7 +22,7 @@ impl CarbonIntensityAggregator {
         &mut self,
         from: DateTime<Utc>,
         to: DateTime<Utc>,
-    ) -> Result<Vec<CarbonIntensityTimeSegment>, CarbonIntensityApiFetchError> {
+    ) -> Result<Vec<CarbonIntensityTimeSegment>, anyhow::Error> {
         let mut expected_start = from;
         let mut missing_ranges = Vec::new();
 
@@ -48,7 +51,7 @@ impl CarbonIntensityAggregator {
         for (mut start, end) in missing_ranges {
             while start < end {
                 let chunk_end = std::cmp::min(start + Duration::days(1), end);
-                let new_segments = fetch_carbon_intensity(start, chunk_end, &self.postcode).await?;
+                let new_segments = self.fetcher.fetch(start, chunk_end, &self.postcode).await?;
                 self.segments.extend(new_segments);
                 start = chunk_end;
             }
@@ -77,7 +80,7 @@ impl CarbonIntensityAggregator {
         &mut self,
         from: DateTime<Utc>,
         to: DateTime<Utc>,
-    ) -> Result<f64, CarbonIntensityApiFetchError> {
+    ) -> Result<f64, anyhow::Error> {
         let segments = self.get_segments(from, to).await?;
         if segments.is_empty() {
             return Ok(0.0);
@@ -103,7 +106,7 @@ impl CarbonIntensityAggregator {
         &mut self,
         from: DateTime<Utc>,
         to: DateTime<Utc>,
-    ) -> Result<HashMap<String, f64>, CarbonIntensityApiFetchError> {
+    ) -> Result<HashMap<String, f64>, anyhow::Error> {
         let segments = self.get_segments(from, to).await?;
         if segments.is_empty() {
             return Ok(HashMap::new());
