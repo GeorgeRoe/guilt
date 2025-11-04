@@ -19,6 +19,7 @@ pub fn parse_api_data(data: Data) -> Result<CarbonIntensityTimeSegment, ParseErr
     })
 }
 
+#[cfg(test)]
 mod tests {
     use super::{
         super::types::{Data, GenerationMix, Intensity},
