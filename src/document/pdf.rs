@@ -64,3 +64,11 @@ pub fn render_document_to_pdf(document: &Document) -> anyhow::Result<()> {
 
     Ok(doc.render_to_file(format!("{}.pdf", document.name))?)
 }
+
+pub struct PdfDocumentRenderer;
+
+impl DocumentRenderer for PdfDocumentRenderer {
+    fn render(&self, document: &Document) -> anyhow::Result<()> {
+        render_document_to_pdf(document)
+    }
+}

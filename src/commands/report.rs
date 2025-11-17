@@ -3,7 +3,7 @@ use crate::guilt_directory::GuiltDirectoryManager;
 use crate::plotting::ChartDefinition;
 use crate::users::get_current_user;
 
-pub fn run(renderer: &Renderer) -> anyhow::Result<()> {
+pub fn run(renderer_type: &DocumentRendererType) -> anyhow::Result<()> {
     let current_user = get_current_user()?;
 
     let mut guilt_dir_manager = GuiltDirectoryManager::read_for_user(&current_user);
@@ -84,7 +84,7 @@ pub fn run(renderer: &Renderer) -> anyhow::Result<()> {
         Element::Paragraph("4. Inspired by the CATS project - https://github.com/GreenScheduler/cats".to_string())
     ]);
 
-    renderer.render(&document)?;
+    renderer_type.get_renderer().render(&document)?;
 
     Ok(())
 }

@@ -28,3 +28,9 @@ pub enum Element {
     Paragraph(String),
     Chart(ChartDefinition),
 }
+
+#[derive(Default)]
+pub struct Document {
+    pub name: String,
+    pub elements: Vec<Element>,
+}
