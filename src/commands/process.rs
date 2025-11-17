@@ -30,7 +30,7 @@ pub async fn run() -> anyhow::Result<()> {
 
     let ip_info = fetch_ip_info().await?;
 
-    let mut aggregator = CarbonIntensityAggregator::new(ip_info.postal, ApiFetchCarbonIntensity {});
+    let mut aggregator = CarbonIntensityAggregator::new(ApiFetchCarbonIntensity::new(ip_info.postal));
 
     for unprocessed_job in unprocessed_jobs {
         if let Some(sacct_result) = sacct_results.get(&unprocessed_job.job_id)

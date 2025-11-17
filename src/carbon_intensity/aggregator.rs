@@ -4,15 +4,13 @@ use chrono::{DateTime, Duration, Utc};
 use std::collections::HashMap;
 
 pub struct CarbonIntensityAggregator<F: FetchCarbonIntensity> {
-    postcode: String,
     segments: Vec<CarbonIntensityTimeSegment>,
     fetcher: F,
 }
 
 impl<F: FetchCarbonIntensity> CarbonIntensityAggregator<F> {
-    pub fn new(postcode: String, fetcher: F) -> Self {
+    pub fn new(fetcher: F) -> Self {
         Self {
-            postcode,
             segments: Vec::new(),
             fetcher,
         }
@@ -51,7 +49,7 @@ impl<F: FetchCarbonIntensity> CarbonIntensityAggregator<F> {
         for (mut start, end) in missing_ranges {
             while start < end {
                 let chunk_end = std::cmp::min(start + Duration::days(1), end);
-                let new_segments = self.fetcher.fetch(start, chunk_end, &self.postcode).await?;
+                let new_segments = self.fetcher.fetch(start, chunk_end).await?;
                 self.segments.extend(new_segments);
                 start = chunk_end;
             }
@@ -133,5 +131,170 @@ impl<F: FetchCarbonIntensity> CarbonIntensityAggregator<F> {
         }
 
         Ok(total_mix)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{CarbonIntensityTimeSegment, FetchCarbonIntensity, CarbonIntensityAggregator};
+    use async_trait::async_trait;
+    use chrono::{DateTime, Duration, TimeZone, Timelike, Utc};
+    use tokio;
+    use std::collections::HashMap;
+
+    fn floor_to_half_hour(dt: DateTime<Utc>) -> DateTime<Utc> {
+        let minute = if dt.minute() < 30 { 0 } else { 30 };
+        let naive = dt.naive_local()
+            .with_minute(minute).unwrap()
+            .with_second(0).unwrap()
+            .with_nanosecond(0).unwrap();
+        Utc.from_local_datetime(&naive).unwrap()
+    }
+
+    #[test]
+    fn test_floor_to_half_hour() {
+        let dt = Utc.with_ymd_and_hms(2024, 1, 1, 10, 45, 0).unwrap();
+        let floored = floor_to_half_hour(dt);
+        assert_eq!(floored, Utc.with_ymd_and_hms(2024, 1, 1, 10, 30, 0).unwrap());
+    }
+
+    struct MockFetchCarbonIntensity {
+        intensity: i32,
+        generation_mix: HashMap<String, f64>,
+    }
+
+    impl MockFetchCarbonIntensity {
+        fn new(intensity: i32, generation_mix: HashMap<String, f64>) -> Self {
+            Self {
+                intensity,
+                generation_mix,
+            }
+        }
+    }
+
+    #[async_trait]
+    impl FetchCarbonIntensity for MockFetchCarbonIntensity {
+        async fn fetch(
+            &self,
+            from: DateTime<Utc>,
+            to: DateTime<Utc>,
+        ) -> Result<Vec<CarbonIntensityTimeSegment>, anyhow::Error> {
+            let mut segments = Vec::new();
+            let mut current = floor_to_half_hour(from);
+            while current < to {
+                segments.push(CarbonIntensityTimeSegment {
+                    from: current,
+                    to: current + Duration::minutes(30),
+                    intensity: self.intensity,
+                    generation_mix: self.generation_mix.clone(),
+                });
+                current += Duration::minutes(30);
+            }
+            Ok(segments)
+        }
+    }
+
+    #[tokio::test]
+    async fn test_mock_fetch() {
+        let fetcher = MockFetchCarbonIntensity::new(100, HashMap::new());
+        let result = fetcher.fetch(
+            Utc.with_ymd_and_hms(2024, 1, 1, 0, 10, 0).unwrap(),
+            Utc.with_ymd_and_hms(2024, 1, 1, 0, 20, 0).unwrap(),
+        ).await;
+
+        match result {
+            Ok(segments) => {
+                assert_eq!(segments.len(), 1);
+                match segments.first() {
+                    Some(segment) => {
+                        assert_eq!(segment.from, Utc.with_ymd_and_hms(2024, 1, 1, 0, 0, 0).unwrap());
+                        assert_eq!(segment.to, Utc.with_ymd_and_hms(2024, 1, 1, 0, 30, 0).unwrap());
+                        assert_eq!(segment.intensity, 100.0 as i32);
+                        assert_eq!(segment.generation_mix.len(), 0);
+                    }
+                    None => {
+                        panic!("No segments returned");
+                    }
+                }
+            },
+            Err(e) => {
+                panic!("Fetch failed: {:?}", e);
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn test_aggregator_get_segments() {
+        let fetcher = MockFetchCarbonIntensity::new(100, HashMap::new());
+        let mut aggregator = CarbonIntensityAggregator::new(fetcher);
+        let result = aggregator.get_segments(
+            Utc.with_ymd_and_hms(2024, 1, 1, 0, 10, 0).unwrap(),
+            Utc.with_ymd_and_hms(2024, 1, 1, 0, 20, 0).unwrap(),
+        ).await;
+
+        match result {
+            Ok(segments) => {
+                assert_eq!(segments.len(), 1);
+                match segments.first() {
+                    Some(segment) => {
+                        assert_eq!(segment.from, Utc.with_ymd_and_hms(2024, 1, 1, 0, 0, 0).unwrap());
+                        assert_eq!(segment.to, Utc.with_ymd_and_hms(2024, 1, 1, 0, 30, 0).unwrap());
+                        assert_eq!(segment.intensity, 100.0 as i32);
+                        assert_eq!(segment.generation_mix.len(), 0);
+
+                    }, None => {
+                        panic!("No segments returned");
+                    }
+                }
+            },
+            Err(e) => {
+                panic!("Aggregator get_segments failed: {:?}", e);
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn test_aggregator_get_average_intensity() {
+        let fetcher = MockFetchCarbonIntensity::new(100, HashMap::new());
+        let mut aggregator = CarbonIntensityAggregator::new(fetcher);
+        let result = aggregator.get_average_intensity(
+            Utc.with_ymd_and_hms(2024, 1, 1, 0, 0, 0).unwrap(),
+            Utc.with_ymd_and_hms(2024, 1, 1, 1, 0, 0).unwrap(),
+        ).await;
+
+        match result {
+            Ok(avg_intensity) => {
+                assert_eq!(avg_intensity, 100.0);
+            },
+            Err(e) => {
+                panic!("Aggregator get_average_intensity failed: {:?}", e);
+            }
+        }
+    }
+
+    #[tokio::test]
+    async fn test_aggregator_get_average_generation_mix() {
+        let fetcher = MockFetchCarbonIntensity::new(100, {
+            let mut mix = HashMap::new();
+            mix.insert("solar".to_string(), 50.0);
+            mix.insert("wind".to_string(), 50.0);
+            mix
+        });
+        let mut aggregator = CarbonIntensityAggregator::new(fetcher);
+        let result = aggregator.get_average_generation_mix(
+            Utc.with_ymd_and_hms(2024, 1, 1, 0, 0, 0).unwrap(),
+            Utc.with_ymd_and_hms(2024, 1, 1, 1, 0, 0).unwrap(),
+        ).await;
+
+        match result {
+            Ok(avg_mix) => {
+                assert_eq!(avg_mix.len(), 2);
+                assert_eq!(*avg_mix.get("solar").unwrap(), 50.0);
+                assert_eq!(*avg_mix.get("wind").unwrap(), 50.0);
+            },
+            Err(e) => {
+                panic!("Aggregator get_average_generation_mix failed: {:?}", e);
+            }
+        }
     }
 }

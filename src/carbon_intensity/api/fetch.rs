@@ -78,7 +78,15 @@ async fn api_fetch_carbon_intensity(
     Ok(parse_json_response(json)?)
 }
 
-pub struct ApiFetchCarbonIntensity;
+pub struct ApiFetchCarbonIntensity {
+    postcode: String,
+}
+
+impl ApiFetchCarbonIntensity {
+    pub fn new(postcode: String) -> Self {
+        Self { postcode }
+    }
+}
 
 #[async_trait]
 impl FetchCarbonIntensity for ApiFetchCarbonIntensity {
@@ -86,9 +94,8 @@ impl FetchCarbonIntensity for ApiFetchCarbonIntensity {
         &self,
         from: DateTime<Utc>,
         to: DateTime<Utc>,
-        postcode: &str,
     ) -> Result<Vec<CarbonIntensityTimeSegment>, anyhow::Error> {
-        api_fetch_carbon_intensity(from, to, postcode)
+        api_fetch_carbon_intensity(from, to, &self.postcode)
             .await
             .map_err(anyhow::Error::from)
     }
@@ -96,9 +103,8 @@ impl FetchCarbonIntensity for ApiFetchCarbonIntensity {
 
 #[cfg(test)]
 mod tests {
-    use super::{parse_json_response, api_fetch_carbon_intensity, CarbonIntensityApiParseError};
+    use super::{parse_json_response, CarbonIntensityApiParseError};
     use chrono::{TimeZone, Utc};
-    use tokio;
 
     fn sample_success() -> serde_json::Value {
         serde_json::json!({
