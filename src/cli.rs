@@ -1,4 +1,4 @@
-use crate::document::Renderer;
+use crate::document::DocumentRendererType;
 use clap::{Parser, Subcommand};
 
 #[derive(Parser)]
@@ -34,8 +34,8 @@ pub enum Commands {
 
     #[command(about = "Display a report of your carbon impact")]
     Report {
-        #[arg(long, value_enum, default_value_t = Renderer::Terminal)]
-        format: Renderer,
+        #[arg(long, value_enum, default_value_t = DocumentRendererType::Terminal)]
+        format: DocumentRendererType,
     },
 
     #[command(about = "Setup GUILT for use")]
