@@ -37,3 +37,66 @@ impl CpuProfiles {
         self.cache.remove(name);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_read_cpu_profiles() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let file_path = temp_dir.path().join("cpu_profiles.json");
+
+        let profiles = vec![
+            CpuProfile {
+                name: "test_profile".to_string(),
+                cores: 6,
+                tdp: 60.0
+            },
+        ];
+
+        write_json_file(&file_path, &profiles).unwrap();
+
+        let cpu_profiles = CpuProfiles::read(&file_path).unwrap();
+
+        assert_eq!(cpu_profiles.get("test_profile").unwrap().cores, 6);
+        assert_eq!(cpu_profiles.get("test_profile").unwrap().tdp, 60.0);
+    }
+    
+    #[test]
+    fn test_write_cpu_profiles() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let file_path = temp_dir.path().join("cpu_profiles.json");
+
+        let mut cpu_profiles = CpuProfiles::empty();
+        cpu_profiles.upsert(CpuProfile {
+            name: "test_profile".to_string(),
+            cores: 8,
+            tdp: 95.0
+        });
+
+        cpu_profiles.write(&file_path).unwrap();
+
+        let read_profiles = CpuProfiles::read(&file_path).unwrap();
+        assert_eq!(read_profiles.get("test_profile").unwrap().cores, 8);
+        assert_eq!(read_profiles.get("test_profile").unwrap().tdp, 95.0);
+    }
+
+    #[test]
+    fn test_upsert_and_remove_cpu_profiles() {
+        let mut cpu_profiles = CpuProfiles::empty();
+
+        cpu_profiles.upsert(CpuProfile {
+            name: "test_profile".to_string(),
+            cores: 4,
+            tdp: 40.0
+        });
+
+        assert_eq!(cpu_profiles.get("test_profile").unwrap().cores, 4);
+        assert_eq!(cpu_profiles.get("test_profile").unwrap().tdp, 40.0);
+
+        cpu_profiles.remove("test_profile");
+        
+        assert!(cpu_profiles.get("test_profile").is_none());
+    }
+}
