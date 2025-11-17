@@ -9,6 +9,5 @@ pub trait FetchCarbonIntensity {
         &self,
         from: DateTime<Utc>,
         to: DateTime<Utc>,
-        postcode: &str,
     ) -> Result<Vec<CarbonIntensityTimeSegment>, anyhow::Error>;
 }

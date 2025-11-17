@@ -66,7 +66,7 @@ pub async fn run(job: &str) -> anyhow::Result<()> {
 
         let ip_info = fetch_ip_info().await?;
         let mut aggregator =
-            CarbonIntensityAggregator::new(ip_info.postal, ApiFetchCarbonIntensity {});
+            CarbonIntensityAggregator::new(ApiFetchCarbonIntensity::new(ip_info.postal));
 
         // initialise the cache (make all requests at start, instead of many small requests later)
         aggregator
