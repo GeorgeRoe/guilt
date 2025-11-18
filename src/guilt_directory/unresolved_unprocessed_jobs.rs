@@ -111,11 +111,9 @@ mod tests {
 
         let unresolved_unprocessed_jobs = UnresolvedUnprocessedJobs::read(&file_path).unwrap();
 
-        if let Some(unresolved_job) = unresolved_unprocessed_jobs.get("1") {
-            assert_eq!(unresolved_job.cpu_profile_name, "TestProfile");
-        } else {
-            panic!("Unprocessed job not found");
-        }
+        let unresolved_unprocessed_job = unresolved_unprocessed_jobs.get("1").unwrap();
+
+        assert_eq!(unresolved_unprocessed_job.cpu_profile_name, "TestProfile");
     }
 
     #[test]
@@ -132,11 +130,10 @@ mod tests {
         unresolved_unprocessed_jobs.write(&file_path).unwrap();
 
         let read_jobs = UnresolvedUnprocessedJobs::read(&file_path).unwrap();
-        if let Some(unresolved_job) = read_jobs.get("1") {
-            assert_eq!(unresolved_job.cpu_profile_name, "TestProfile");
-        } else {
-            panic!("Unprocessed job not found");
-        }
+
+        let unresolved_unprocessed_job = read_jobs.get("1").unwrap();
+
+        assert_eq!(unresolved_unprocessed_job.cpu_profile_name, "TestProfile");
     }
 
     #[test]
@@ -148,11 +145,9 @@ mod tests {
             cpu_profile_name: "TestProfile".to_string(),
         });
 
-        if let Some(unresolved_job) = unresolved_unprocessed_jobs.get("1") {
-            assert_eq!(unresolved_job.cpu_profile_name, "TestProfile");
-        } else {
-            panic!("Unprocessed job not found after upsert");
-        }
+        let unresolved_unprocessed_job = read_jobs.get("1").unwrap();
+
+        assert_eq!(unresolved_unprocessed_job.cpu_profile_name, "TestProfile");
 
         unresolved_unprocessed_jobs.remove("1");
 

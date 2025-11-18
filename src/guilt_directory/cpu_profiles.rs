@@ -59,8 +59,10 @@ mod tests {
 
         let cpu_profiles = CpuProfiles::read(&file_path).unwrap();
 
-        assert_eq!(cpu_profiles.get("test_profile").unwrap().cores, 6);
-        assert_eq!(cpu_profiles.get("test_profile").unwrap().tdp, 60.0);
+        let cpu_profile = cpu_profiles.get("test_profile").unwrap();
+
+        assert_eq!(cpu_profile.cores, 6);
+        assert_eq!(cpu_profile.tdp, 60.0);
     }
     
     #[test]
@@ -78,8 +80,11 @@ mod tests {
         cpu_profiles.write(&file_path).unwrap();
 
         let read_profiles = CpuProfiles::read(&file_path).unwrap();
-        assert_eq!(read_profiles.get("test_profile").unwrap().cores, 8);
-        assert_eq!(read_profiles.get("test_profile").unwrap().tdp, 95.0);
+
+        let cpu_profile = read_profiles.get("test_profile").unwrap();
+
+        assert_eq!(cpu_profile.cores, 8);
+        assert_eq!(cpu_profile.tdp, 95.0);
     }
 
     #[test]
@@ -92,8 +97,10 @@ mod tests {
             tdp: 40.0
         });
 
-        assert_eq!(cpu_profiles.get("test_profile").unwrap().cores, 4);
-        assert_eq!(cpu_profiles.get("test_profile").unwrap().tdp, 40.0);
+        let cpu_profile = cpu_profiles.get("test_profile").unwrap();
+
+        assert_eq!(cpu_profile.cores, 4);
+        assert_eq!(cpu_profile.tdp, 40.0);
 
         cpu_profiles.remove("test_profile");
         
