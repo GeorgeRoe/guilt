@@ -147,16 +147,14 @@ mod tests {
 
         let unresolved_processed_jobs = UnresolvedProcessedJobs::read(&file_path).unwrap();
 
-        if let Some(unresolved_job) = unresolved_processed_jobs.get("1") {
-            assert_eq!(unresolved_job.start_time, time);
-            assert_eq!(unresolved_job.end_time, time);
-            assert_eq!(unresolved_job.cpu_profile_name, "TestProfile");
-            assert_eq!(unresolved_job.energy, 100.0);
-            assert_eq!(unresolved_job.emissions, 50.0);
-            assert_eq!(unresolved_job.generation_mix.len(), 0);
-        } else {
-            panic!("Processed job not found");
-        }
+        let unresolved_processed_job = unresolved_processed_jobs.get("1").unwrap();
+
+        assert_eq!(unresolved_processed_job.start_time, time);
+        assert_eq!(unresolved_processed_job.end_time, time);
+        assert_eq!(unresolved_processed_job.cpu_profile_name, "TestProfile");
+        assert_eq!(unresolved_processed_job.energy, 100.0);
+        assert_eq!(unresolved_processed_job.emissions, 50.0);
+        assert_eq!(unresolved_processed_job.generation_mix.len(), 0);
     }
 
     #[test]
@@ -180,16 +178,15 @@ mod tests {
         unresolved_processed_jobs.write(&file_path).unwrap();
 
         let read_jobs = UnresolvedProcessedJobs::read(&file_path).unwrap();
-        if let Some(unresolved_job) = read_jobs.get("1") {
-            assert_eq!(unresolved_job.start_time, time);
-            assert_eq!(unresolved_job.end_time, time);
-            assert_eq!(unresolved_job.cpu_profile_name, "TestProfile");
-            assert_eq!(unresolved_job.energy, 100.0);
-            assert_eq!(unresolved_job.emissions, 50.0);
-            assert_eq!(unresolved_job.generation_mix.len(), 0);
-        } else {
-            panic!("Processed job not found");
-        }
+
+        let unresolved_processed_job = read_jobs.get("1").unwrap();
+
+        assert_eq!(unresolved_processed_job.start_time, time);
+        assert_eq!(unresolved_processed_job.end_time, time);
+        assert_eq!(unresolved_processed_job.cpu_profile_name, "TestProfile");
+        assert_eq!(unresolved_processed_job.energy, 100.0);
+        assert_eq!(unresolved_processed_job.emissions, 50.0);
+        assert_eq!(unresolved_processed_job.generation_mix.len(), 0);
     }
 
     #[test]
@@ -207,16 +204,14 @@ mod tests {
             generation_mix: HashMap::new(),
         });
 
-        if let Some(unresolved_job) = unresolved_processed_jobs.get("1") {
-            assert_eq!(unresolved_job.start_time, time);
-            assert_eq!(unresolved_job.end_time, time);
-            assert_eq!(unresolved_job.cpu_profile_name, "TestProfile");
-            assert_eq!(unresolved_job.energy, 100.0);
-            assert_eq!(unresolved_job.emissions, 50.0);
-            assert_eq!(unresolved_job.generation_mix.len(), 0);
-        } else {
-            panic!("Processed job not found");
-        }
+        let unresolved_processed_job = unresolved_processed_jobs.get("1").unwrap();
+
+        assert_eq!(unresolved_processed_job.start_time, time);
+        assert_eq!(unresolved_processed_job.end_time, time);
+        assert_eq!(unresolved_processed_job.cpu_profile_name, "TestProfile");
+        assert_eq!(unresolved_processed_job.energy, 100.0);
+        assert_eq!(unresolved_processed_job.emissions, 50.0);
+        assert_eq!(unresolved_processed_job.generation_mix.len(), 0);
 
         unresolved_processed_jobs.remove("1");
 
