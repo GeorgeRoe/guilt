@@ -124,6 +124,7 @@ mod tests {
         assert_eq!(resolved_job.generation_mix, processed_job.generation_mix);
     }
 
+    #[test]
     fn test_read_unresolved_processed_jobs() {
         let temp_dir = tempfile::tempdir().unwrap();
         let file_path = temp_dir.path().join("processed_jobs.json");
@@ -147,17 +148,18 @@ mod tests {
         let unresolved_processed_jobs = UnresolvedProcessedJobs::read(&file_path).unwrap();
 
         if let Some(unresolved_job) = unresolved_processed_jobs.get("1") {
-            assert_eq!(processed_job.start_time, time);
-            assert_eq!(processed_job.end_time, time);
-            assert_eq!(processed_job.cpu_profile_name, "TestProfile");
-            assert_eq!(processed_job.energy, 100.0);
-            assert_eq!(processed_job.emissions, 50.0);
-            assert_eq!(processed_job.generation_mix.len(), 0);
+            assert_eq!(unresolved_job.start_time, time);
+            assert_eq!(unresolved_job.end_time, time);
+            assert_eq!(unresolved_job.cpu_profile_name, "TestProfile");
+            assert_eq!(unresolved_job.energy, 100.0);
+            assert_eq!(unresolved_job.emissions, 50.0);
+            assert_eq!(unresolved_job.generation_mix.len(), 0);
         } else {
             panic!("Processed job not found");
         }
     }
 
+    #[test]
     fn test_write_unresolved_processed_jobs() {
         let temp_dir = tempfile::tempdir().unwrap();
         let file_path = temp_dir.path().join("processed_jobs.json");
@@ -190,6 +192,7 @@ mod tests {
         }
     }
 
+    #[test]
     fn test_upsert_and_remove_unresolved_processed_jobs() {
         let mut unresolved_processed_jobs = UnresolvedProcessedJobs::empty();
 
