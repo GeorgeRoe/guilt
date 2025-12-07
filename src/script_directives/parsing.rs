@@ -12,10 +12,10 @@ fn parse_directive_lines(
     directive_prefix: &str,
     lines: Vec<String>,
 ) -> HashMap<String, StringOrPresent> {
+    let prefix = format!("{directive_prefix} --");
     lines
         .iter()
-        .filter_map(|line| line.strip_prefix(directive_prefix))
-        .filter_map(|line| line.strip_prefix(" --"))
+        .filter_map(|line| line.strip_prefix(prefix.as_str()))
         .filter_map(|line| {
             let trimmed = line.trim();
 
@@ -134,5 +134,135 @@ impl SlurmScriptDirectives {
             tasks_per_node,
             cpus_per_task,
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_guilt_script_directives_parsing() {
+        let script_contents = r#"#!/bin/bash
+#GUILT --cpu-profile=AMD Epyc 7742
+#SBATCH --time=01:30:00
+#SBATCH --nodes=2
+#SBATCH --tasks-per-node=4
+#SBATCH --cpus-per-task=8
+echo "Hello, World!"
+"#;
+
+        let guilt_directives = GuiltScriptDirectives::from_file_contents(script_contents).unwrap();
+
+        assert_eq!(guilt_directives.cpu_profile, "AMD Epyc 7742");
+    }
+
+    #[test]
+    fn test_guilt_script_diretives_parsing_missing_cpu_profile() {
+        let script_contents = r#"#!/bin/bash
+#SBATCH --time=01:30:00
+#SBATCH --nodes=2
+#SBATCH --tasks-per-node=4
+#SBATCH --cpus-per-task=8
+echo "Hello, World!"
+"#;
+
+        let result = GuiltScriptDirectives::from_file_contents(script_contents);
+
+        assert!(matches!(
+            result,
+            Err(GuiltScriptDirectivesParsingError::MissingCpuProfile)
+        ));
+    }
+
+    #[test]
+    fn test_guilt_script_directives_parsing_with_flag() {
+        let script_contents = r#"#!/bin/bash
+#GUILT --cpu-profile
+#SBATCH --time=01:30:00
+#SBATCH --nodes=2
+#SBATCH --tasks-per-node=4
+#SBATCH --cpus-per-task=8
+echo "Hello, World!"
+"#;
+        let result = GuiltScriptDirectives::from_file_contents(script_contents);
+
+        assert!(matches!(
+            result,
+            Err(GuiltScriptDirectivesParsingError::MissingCpuProfile)
+        ));
+    }
+
+    #[test]
+    fn test_slurm_script_directives_parsing() {
+        let script_contents = r#"#!/bin/bash
+#GUILT --cpu-profile=AMD Epyc 7742
+#SBATCH --time=00:01:00
+#SBATCH --nodes=3
+#SBATCH --tasks-per-node=5
+#SBATCH --cpus-per-task=10
+echo "Hello, World!"
+"#;
+
+        let slurm_directives = SlurmScriptDirectives::from_file_contents(script_contents).unwrap();
+
+        assert_eq!(slurm_directives.time.as_seconds_f32(), 60.0);
+        assert_eq!(slurm_directives.nodes, 3);
+        assert_eq!(slurm_directives.tasks_per_node, 5);
+        assert_eq!(slurm_directives.cpus_per_task, 10);
+    }
+
+    fn test_slurm_script_directives_parsing_missing_key() {
+        let script_contents = r#"#!/bin/bash
+#GUILT --cpu-profile=AMD Epyc 7742
+#SBATCH --nodes=3
+#SBATCH --tasks-per-node=5
+#SBATCH --cpus-per-task=10
+echo "Hello, World!"
+"#;
+
+        let result = SlurmScriptDirectives::from_file_contents(script_contents);
+
+        assert!(matches!(
+            result,
+            Err(SlurmScriptDirectivesParsingError::MissingKey(_))
+        ));
+    }
+
+    #[test]
+    fn test_slurm_script_directives_parsing_invalid_value() {
+        let script_contents = r#"#!/bin/bash
+#GUILT --cpu-profile=AMD Epyc 7742
+#SBATCH --time=01:30:00
+#SBATCH --nodes=invalid_nodes
+#SBATCH --tasks-per-node=5
+#SBATCH --cpus-per-task=10
+echo "Hello, World!"
+"#;
+        let result = SlurmScriptDirectives::from_file_contents(script_contents);
+
+        assert!(matches!(
+            result,
+            Err(SlurmScriptDirectivesParsingError::ParseError(_, _))
+        ));
+    }
+
+    #[test]
+    fn test_slurm_script_directives_parsing_invalid_date_value() {
+        let script_contents = r#"#!/bin/bash
+#GUILT --cpu-profile=AMD Epyc 7742
+#SBATCH --time=invalid_time
+#SBATCH --nodes=3
+#SBATCH --tasks-per-node=5
+#SBATCH --cpus-per-task=10
+echo "Hello, World!"
+"#;
+
+        let result = SlurmScriptDirectives::from_file_contents(script_contents);
+
+        assert!(matches!(
+            result,
+            Err(SlurmScriptDirectivesParsingError::DurationParseError(_, _))
+        ));
     }
 }
