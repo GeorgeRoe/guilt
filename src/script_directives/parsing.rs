@@ -212,6 +212,7 @@ echo "Hello, World!"
         assert_eq!(slurm_directives.cpus_per_task, 10);
     }
 
+    #[test]
     fn test_slurm_script_directives_parsing_missing_key() {
         let script_contents = r#"#!/bin/bash
 #GUILT --cpu-profile=AMD Epyc 7742

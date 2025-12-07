@@ -145,7 +145,7 @@ mod tests {
             cpu_profile_name: "TestProfile".to_string(),
         });
 
-        let unresolved_unprocessed_job = read_jobs.get("1").unwrap();
+        let unresolved_unprocessed_job = unresolved_unprocessed_jobs.get("1").unwrap();
 
         assert_eq!(unresolved_unprocessed_job.cpu_profile_name, "TestProfile");
 
