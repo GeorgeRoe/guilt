@@ -1,4 +1,4 @@
-use super::parsing::SlurmBatchParsingError;
+use super::parsing::SlurmBatchTestParsingError;
 use super::types::SlurmBatchTest;
 use crate::safe_command::{SafeCommandError, safe_get_stderr, safe_get_stdout};
 use chrono::NaiveDateTime;
@@ -11,7 +11,7 @@ pub enum SlurmBatchCommandError {
     SafeCommand(#[from] SafeCommandError),
 
     #[error("Failed to parse slurm batch output: {0}")]
-    Parsing(#[from] SlurmBatchParsingError),
+    Parsing(#[from] SlurmBatchTestParsingError),
 }
 
 pub fn test(
