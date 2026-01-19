@@ -41,7 +41,7 @@ impl SlurmBatchTest {
         let partition = caps.get(5).unwrap().as_str().to_string();
 
         let naive_dt = NaiveDateTime::parse_from_str(start_time_str, "%Y-%m-%dT%H:%M:%S")
-            .map_err(|e| SlurmBatchTestParsingError::DateTimeParse(e))?;
+            .map_err(SlurmBatchTestParsingError::DateTimeParse)?;
 
         let local_dt = Local.from_local_datetime(&naive_dt).single().ok_or(
             SlurmBatchTestParsingError::Format("Ambiguous or non-existent local time".to_string()),
@@ -51,7 +51,7 @@ impl SlurmBatchTest {
 
         let processor_count = processor_count_str
             .parse::<i32>()
-            .map_err(|e| SlurmBatchTestParsingError::IntParse(e))?;
+            .map_err(SlurmBatchTestParsingError::IntParse)?;
 
         Ok(SlurmBatchTest {
             job_id,
