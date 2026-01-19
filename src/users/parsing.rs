@@ -45,3 +45,28 @@ impl User {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_from_getent_passwd_line_success() {
+        let line = "johndoe:x:1001:1001:John Doe:/home/johndoe:/bin/bash";
+        let user = User::from_getent_passwd_line(line).unwrap();
+
+        assert_eq!(user.name, "johndoe");
+        assert_eq!(user.gecos, "John Doe");
+        assert_eq!(user.home_dir, PathBuf::from("/home/johndoe"));
+    }
+
+    #[test]
+    fn test_from_getent_passwd_line_incorrect_field_count() {
+        let line = "a:b";
+        let result = User::from_getent_passwd_line(line);
+        assert!(matches!(
+            result,
+            Err(ParseGetentPasswdError::IncorrectFieldCount(_, 2))
+        ));
+    }
+}
