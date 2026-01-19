@@ -69,8 +69,6 @@ impl JsonGetExtensions for serde_json::Map<String, Value> {
 
 #[cfg(test)]
 mod tests {
-    use std::f32::consts::PI;
-
     use super::*;
 
     #[test]
