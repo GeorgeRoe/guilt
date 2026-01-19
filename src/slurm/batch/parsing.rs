@@ -40,22 +40,18 @@ impl SlurmBatchTest {
         let nodes = caps.get(4).unwrap().as_str().to_string();
         let partition = caps.get(5).unwrap().as_str().to_string();
 
-        let naive_dt = NaiveDateTime::parse_from_str(
-            start_time_str,
-            "%Y-%m-%dT%H:%M:%S"
-        ).map_err(|e| SlurmBatchTestParsingError::DateTimeParse(e))?;
+        let naive_dt = NaiveDateTime::parse_from_str(start_time_str, "%Y-%m-%dT%H:%M:%S")
+            .map_err(|e| SlurmBatchTestParsingError::DateTimeParse(e))?;
 
-        let local_dt =
-            Local
-                .from_local_datetime(&naive_dt)
-                .single()
-                .ok_or(SlurmBatchTestParsingError::Format(
-                    "Ambiguous or non-existent local time".to_string(),
-                ))?;
+        let local_dt = Local.from_local_datetime(&naive_dt).single().ok_or(
+            SlurmBatchTestParsingError::Format("Ambiguous or non-existent local time".to_string()),
+        )?;
 
         let start_time: DateTime<Utc> = local_dt.with_timezone(&Utc);
 
-        let processor_count = processor_count_str.parse::<i32>().map_err(|e| SlurmBatchTestParsingError::IntParse(e))?;
+        let processor_count = processor_count_str
+            .parse::<i32>()
+            .map_err(|e| SlurmBatchTestParsingError::IntParse(e))?;
 
         Ok(SlurmBatchTest {
             job_id,
@@ -78,7 +74,10 @@ mod tests {
         let result = SlurmBatchTest::from_line(line).unwrap();
 
         assert_eq!(result.job_id, "100");
-        assert_eq!(result.start_time, Utc.with_ymd_and_hms(2026, 1, 1, 12, 0, 0).unwrap());
+        assert_eq!(
+            result.start_time,
+            Utc.with_ymd_and_hms(2026, 1, 1, 12, 0, 0).unwrap()
+        );
         assert_eq!(result.processor_count, 2);
         assert_eq!(result.nodes, "cn045");
         assert_eq!(result.partition, "partition1");
@@ -99,9 +98,10 @@ mod tests {
 
         let result = SlurmBatchTest::from_line(line);
 
-        assert!(matches!(
-            result, 
-            Err(SlurmBatchTestParsingError::DateTimeParse(_))
-        ), "Expected DateTimeParse error, but got {:?}", result);
+        assert!(
+            matches!(result, Err(SlurmBatchTestParsingError::DateTimeParse(_))),
+            "Expected DateTimeParse error, but got {:?}",
+            result
+        );
     }
 }

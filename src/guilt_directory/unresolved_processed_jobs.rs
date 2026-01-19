@@ -118,7 +118,10 @@ mod tests {
         assert_eq!(resolved_job.start_time, processed_job.start_time);
         assert_eq!(resolved_job.end_time, processed_job.end_time);
         assert_eq!(resolved_job.job_id, processed_job.job_id);
-        assert_eq!(resolved_job.cpu_profile.name, processed_job.cpu_profile.name);
+        assert_eq!(
+            resolved_job.cpu_profile.name,
+            processed_job.cpu_profile.name
+        );
         assert_eq!(resolved_job.energy, processed_job.energy);
         assert_eq!(resolved_job.emissions, processed_job.emissions);
         assert_eq!(resolved_job.generation_mix, processed_job.generation_mix);
@@ -131,17 +134,15 @@ mod tests {
 
         let time = Utc::now();
 
-        let processed_jobs = vec![
-            UnresolvedProcessedJob {
-                start_time: time,
-                end_time: time,
-                job_id: "1".to_string(),
-                cpu_profile_name: "TestProfile".to_string(),
-                energy: 100.0,
-                emissions: 50.0,
-                generation_mix: HashMap::new(),
-            }
-        ];
+        let processed_jobs = vec![UnresolvedProcessedJob {
+            start_time: time,
+            end_time: time,
+            job_id: "1".to_string(),
+            cpu_profile_name: "TestProfile".to_string(),
+            energy: 100.0,
+            emissions: 50.0,
+            generation_mix: HashMap::new(),
+        }];
 
         write_json_file(&file_path, &processed_jobs).unwrap();
 

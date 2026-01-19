@@ -10,10 +10,10 @@ impl DocumentRenderer for TerminalDocumentRenderer {
                 Element::Heading(level, text) => {
                     let hashes = "#".repeat(level.index() as usize);
                     println!("{} {}", hashes, text);
-                },
+                }
                 Element::Paragraph(text) => {
                     println!("{}", text);
-                },
+                }
                 Element::Chart(chart) => {
                     get_chart_displayer().display(chart)?;
                 }

@@ -44,7 +44,7 @@ mod tests {
 
         let test_data = vec!["item1", "item2", "item3"];
 
-        write_json_file(temp_file.path(), &test_data).unwrap(); 
+        write_json_file(temp_file.path(), &test_data).unwrap();
 
         let read_data: Vec<String> = read_json_file(temp_file.path()).unwrap();
 

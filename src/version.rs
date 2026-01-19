@@ -103,7 +103,10 @@ mod tests {
         assert!(matches!(result, Err(VersionFromStringError::InvalidFormat)));
 
         let result = Version::parse_str("1.a.3");
-        assert!(matches!(result, Err(VersionFromStringError::ParseIntError(_))));
+        assert!(matches!(
+            result,
+            Err(VersionFromStringError::ParseIntError(_))
+        ));
     }
 
     #[test]

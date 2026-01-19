@@ -20,12 +20,9 @@ macro_rules! get_required_type {
         $type_name:expr
     ) => {
         fn $name(&self, key: &str) -> Result<$ret, StructuredJsonError> {
-            self.get_required(key)?
-                .$accessor()
-                .ok_or_else(|| StructuredJsonError::InvalidType(
-                    key.to_string(),
-                    $type_name.to_string(),
-                ))
+            self.get_required(key)?.$accessor().ok_or_else(|| {
+                StructuredJsonError::InvalidType(key.to_string(), $type_name.to_string())
+            })
         }
     };
 }

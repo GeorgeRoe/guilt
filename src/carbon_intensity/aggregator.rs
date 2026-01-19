@@ -136,18 +136,22 @@ impl<F: FetchCarbonIntensity> CarbonIntensityAggregator<F> {
 
 #[cfg(test)]
 mod tests {
-    use super::{CarbonIntensityTimeSegment, FetchCarbonIntensity, CarbonIntensityAggregator};
+    use super::{CarbonIntensityAggregator, CarbonIntensityTimeSegment, FetchCarbonIntensity};
     use async_trait::async_trait;
     use chrono::{DateTime, Duration, TimeZone, Timelike, Utc};
-    use tokio;
     use std::collections::HashMap;
+    use tokio;
 
     fn floor_to_half_hour(dt: DateTime<Utc>) -> DateTime<Utc> {
         let minute = if dt.minute() < 30 { 0 } else { 30 };
-        let naive = dt.naive_local()
-            .with_minute(minute).unwrap()
-            .with_second(0).unwrap()
-            .with_nanosecond(0).unwrap();
+        let naive = dt
+            .naive_local()
+            .with_minute(minute)
+            .unwrap()
+            .with_second(0)
+            .unwrap()
+            .with_nanosecond(0)
+            .unwrap();
         Utc.from_local_datetime(&naive).unwrap()
     }
 
@@ -155,7 +159,10 @@ mod tests {
     fn test_floor_to_half_hour() {
         let dt = Utc.with_ymd_and_hms(2024, 1, 1, 10, 45, 0).unwrap();
         let floored = floor_to_half_hour(dt);
-        assert_eq!(floored, Utc.with_ymd_and_hms(2024, 1, 1, 10, 30, 0).unwrap());
+        assert_eq!(
+            floored,
+            Utc.with_ymd_and_hms(2024, 1, 1, 10, 30, 0).unwrap()
+        );
     }
 
     struct MockFetchCarbonIntensity {
@@ -197,18 +204,26 @@ mod tests {
     #[tokio::test]
     async fn test_mock_fetch() {
         let fetcher = MockFetchCarbonIntensity::new(100, HashMap::new());
-        let result = fetcher.fetch(
-            Utc.with_ymd_and_hms(2024, 1, 1, 0, 10, 0).unwrap(),
-            Utc.with_ymd_and_hms(2024, 1, 1, 0, 20, 0).unwrap(),
-        ).await;
+        let result = fetcher
+            .fetch(
+                Utc.with_ymd_and_hms(2024, 1, 1, 0, 10, 0).unwrap(),
+                Utc.with_ymd_and_hms(2024, 1, 1, 0, 20, 0).unwrap(),
+            )
+            .await;
 
         match result {
             Ok(segments) => {
                 assert_eq!(segments.len(), 1);
                 match segments.first() {
                     Some(segment) => {
-                        assert_eq!(segment.from, Utc.with_ymd_and_hms(2024, 1, 1, 0, 0, 0).unwrap());
-                        assert_eq!(segment.to, Utc.with_ymd_and_hms(2024, 1, 1, 0, 30, 0).unwrap());
+                        assert_eq!(
+                            segment.from,
+                            Utc.with_ymd_and_hms(2024, 1, 1, 0, 0, 0).unwrap()
+                        );
+                        assert_eq!(
+                            segment.to,
+                            Utc.with_ymd_and_hms(2024, 1, 1, 0, 30, 0).unwrap()
+                        );
                         assert_eq!(segment.intensity, 100.0 as i32);
                         assert_eq!(segment.generation_mix.len(), 0);
                     }
@@ -216,7 +231,7 @@ mod tests {
                         panic!("No segments returned");
                     }
                 }
-            },
+            }
             Err(e) => {
                 panic!("Fetch failed: {:?}", e);
             }
@@ -227,26 +242,34 @@ mod tests {
     async fn test_aggregator_get_segments() {
         let fetcher = MockFetchCarbonIntensity::new(100, HashMap::new());
         let mut aggregator = CarbonIntensityAggregator::new(fetcher);
-        let result = aggregator.get_segments(
-            Utc.with_ymd_and_hms(2024, 1, 1, 0, 10, 0).unwrap(),
-            Utc.with_ymd_and_hms(2024, 1, 1, 0, 20, 0).unwrap(),
-        ).await;
+        let result = aggregator
+            .get_segments(
+                Utc.with_ymd_and_hms(2024, 1, 1, 0, 10, 0).unwrap(),
+                Utc.with_ymd_and_hms(2024, 1, 1, 0, 20, 0).unwrap(),
+            )
+            .await;
 
         match result {
             Ok(segments) => {
                 assert_eq!(segments.len(), 1);
                 match segments.first() {
                     Some(segment) => {
-                        assert_eq!(segment.from, Utc.with_ymd_and_hms(2024, 1, 1, 0, 0, 0).unwrap());
-                        assert_eq!(segment.to, Utc.with_ymd_and_hms(2024, 1, 1, 0, 30, 0).unwrap());
+                        assert_eq!(
+                            segment.from,
+                            Utc.with_ymd_and_hms(2024, 1, 1, 0, 0, 0).unwrap()
+                        );
+                        assert_eq!(
+                            segment.to,
+                            Utc.with_ymd_and_hms(2024, 1, 1, 0, 30, 0).unwrap()
+                        );
                         assert_eq!(segment.intensity, 100.0 as i32);
                         assert_eq!(segment.generation_mix.len(), 0);
-
-                    }, None => {
+                    }
+                    None => {
                         panic!("No segments returned");
                     }
                 }
-            },
+            }
             Err(e) => {
                 panic!("Aggregator get_segments failed: {:?}", e);
             }
@@ -257,15 +280,17 @@ mod tests {
     async fn test_aggregator_get_average_intensity() {
         let fetcher = MockFetchCarbonIntensity::new(100, HashMap::new());
         let mut aggregator = CarbonIntensityAggregator::new(fetcher);
-        let result = aggregator.get_average_intensity(
-            Utc.with_ymd_and_hms(2024, 1, 1, 0, 0, 0).unwrap(),
-            Utc.with_ymd_and_hms(2024, 1, 1, 1, 0, 0).unwrap(),
-        ).await;
+        let result = aggregator
+            .get_average_intensity(
+                Utc.with_ymd_and_hms(2024, 1, 1, 0, 0, 0).unwrap(),
+                Utc.with_ymd_and_hms(2024, 1, 1, 1, 0, 0).unwrap(),
+            )
+            .await;
 
         match result {
             Ok(avg_intensity) => {
                 assert_eq!(avg_intensity, 100.0);
-            },
+            }
             Err(e) => {
                 panic!("Aggregator get_average_intensity failed: {:?}", e);
             }
@@ -281,17 +306,19 @@ mod tests {
             mix
         });
         let mut aggregator = CarbonIntensityAggregator::new(fetcher);
-        let result = aggregator.get_average_generation_mix(
-            Utc.with_ymd_and_hms(2024, 1, 1, 0, 0, 0).unwrap(),
-            Utc.with_ymd_and_hms(2024, 1, 1, 1, 0, 0).unwrap(),
-        ).await;
+        let result = aggregator
+            .get_average_generation_mix(
+                Utc.with_ymd_and_hms(2024, 1, 1, 0, 0, 0).unwrap(),
+                Utc.with_ymd_and_hms(2024, 1, 1, 1, 0, 0).unwrap(),
+            )
+            .await;
 
         match result {
             Ok(avg_mix) => {
                 assert_eq!(avg_mix.len(), 2);
                 assert_eq!(*avg_mix.get("solar").unwrap(), 50.0);
                 assert_eq!(*avg_mix.get("wind").unwrap(), 50.0);
-            },
+            }
             Err(e) => {
                 panic!("Aggregator get_average_generation_mix failed: {:?}", e);
             }

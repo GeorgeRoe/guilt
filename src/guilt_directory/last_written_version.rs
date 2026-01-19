@@ -44,8 +44,7 @@ mod tests {
         let version_file_path = temp_dir.path().join("last_written_version.txt");
         std::fs::write(&version_file_path, "1.2.3").unwrap();
 
-        let last_written_version =
-            LastWrittenVersion::read(&version_file_path).unwrap();
+        let last_written_version = LastWrittenVersion::read(&version_file_path).unwrap();
 
         assert_eq!(last_written_version.get().major, 1);
         assert_eq!(last_written_version.get().minor, 2);
@@ -87,12 +86,9 @@ mod tests {
             patch: 1,
         });
 
-        last_written_version
-            .write(&version_file_path)
-            .unwrap();
+        last_written_version.write(&version_file_path).unwrap();
 
-        let written_content =
-            std::fs::read_to_string(&version_file_path).unwrap();
+        let written_content = std::fs::read_to_string(&version_file_path).unwrap();
         assert_eq!(written_content, "2.5.1");
     }
 
