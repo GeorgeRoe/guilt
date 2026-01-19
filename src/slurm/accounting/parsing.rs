@@ -8,29 +8,38 @@ impl SlurmAccountingResources {
         let mut resources = Self { cpu: None };
 
         for entry in values {
-            let resource_type = entry
-                .get("type")
-                .ok_or(StructuredJsonError::MissingField(
-                    "resource type".to_string(),
-                ))?
-                .as_str()
-                .ok_or(StructuredJsonError::InvalidType(
-                    "resource type".to_string(),
-                    "string".to_string(),
-                ))?;
-            let count = entry
-                .get("count")
-                .ok_or(StructuredJsonError::MissingField(
-                    "resource count".to_string(),
-                ))?
-                .as_f64()
-                .ok_or(StructuredJsonError::InvalidType(
-                    "resource count".to_string(),
-                    "number".to_string(),
-                ))?;
+            match entry {
+                Value::Object(map) => {
+                    let resource_type = map
+                        .get("type")
+                        .ok_or(StructuredJsonError::MissingField("resource type".to_string()))?
+                        .as_str()
+                        .ok_or(StructuredJsonError::InvalidType(
+                            "resource type".to_string(),
+                            "string".to_string(),
+                        ))?;
+                    let count = map
+                        .get("count")
+                        .ok_or(StructuredJsonError::MissingField("resource count".to_string()))?
+                        .as_f64()
+                        .ok_or(StructuredJsonError::InvalidType(
+                            "resource count".to_string(),
+                            "number".to_string(),
+                        ))?;
 
-            if resource_type == "cpu" {
-                resources.cpu = Some(count);
+                    match resource_type {
+                        "cpu" => {
+                            resources.cpu = Some(count);
+                        }
+                        _ => {}
+                    }
+                },
+                _ => {
+                    return Err(StructuredJsonError::InvalidType(
+                        "tres entry".to_string(),
+                        "JSON object".to_string(),
+                    ))
+                }
             }
         }
 
@@ -118,4 +127,171 @@ pub fn parse_command_output(
         .collect::<Result<_, StructuredJsonParsingError>>()?;
 
     Ok(jobs)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    mod test_from_value_array {
+        use super::*;
+
+        #[test]
+        fn test_empty_array() {
+            let value_array = vec![];
+
+            let resources = SlurmAccountingResources::from_value_array(&value_array).unwrap();
+
+            assert_eq!(resources.cpu, None);
+        }
+
+        #[test]
+        fn test_array_with_invalid_value() {
+            let value_array = vec![
+                serde_json::json!("invalid entry"),
+            ];
+
+            let result = SlurmAccountingResources::from_value_array(&value_array);
+
+            assert!(matches!(
+                result,
+                Err(StructuredJsonError::InvalidType(field, _)) if field == "tres entry"
+            ));
+        }
+
+        #[test]
+        fn test_entry_without_type() {
+            let value_array = vec![
+                serde_json::json!({ "count": 8 }),
+            ];
+
+            let result = SlurmAccountingResources::from_value_array(&value_array);
+
+            assert!(matches!(
+                result,
+                Err(StructuredJsonError::MissingField(field)) if field == "resource type"
+            ));
+        }
+
+        #[test]
+        fn test_entry_with_invalid_type() {
+            let value_array = vec![
+                serde_json::json!({ "type": 42, "count": 8 }),
+            ];
+
+            let result = SlurmAccountingResources::from_value_array(&value_array);
+
+            assert!(matches!(
+                result,
+                Err(StructuredJsonError::InvalidType(field, _)) if field == "resource type"
+            ));
+        }
+
+        #[test]
+        fn test_entry_without_count() {
+            let value_array = vec![
+                serde_json::json!({ "type": "cpu" }),
+            ];
+
+            let result = SlurmAccountingResources::from_value_array(&value_array);
+
+            assert!(matches!(
+                result,
+                Err(StructuredJsonError::MissingField(field)) if field == "resource count"
+            ));
+        }
+
+        #[test]
+        fn test_valid_cpu_entry() {
+            let value_array = vec![
+                serde_json::json!({ "type": "cpu", "count": 16 }),
+            ];
+
+            let resources = SlurmAccountingResources::from_value_array(&value_array).unwrap();
+
+            assert_eq!(resources.cpu, Some(16.0));
+        }
+
+        #[test]
+        fn test_missing_cpu_entry() {
+            let value_array = vec![];
+
+            let resources = SlurmAccountingResources::from_value_array(&value_array).unwrap();
+
+            assert_eq!(resources.cpu, None);
+        }
+
+        #[test]
+        fn test_invalid_cpu_type() {
+            let value_array = vec![
+                serde_json::json!({ "type": "cpu", "count": "sixteen" }),
+            ];
+
+            let result = SlurmAccountingResources::from_value_array(&value_array);
+
+            assert!(matches!(
+                result,
+                Err(StructuredJsonError::InvalidType(field, _)) if field == "resource count"
+            ));
+        }
+    }
+
+    mod test_from_value {
+        use super::*;
+
+        #[test]
+        fn test_valid_json() {
+            let job_id = 12345;
+            let start_time = 1625079600;
+            let end_time = 1625083200;
+            let cpu_count = 8;
+
+            let obj = serde_json::json!({
+                "job_id": job_id,
+                "time": {
+                    "start": start_time,
+                    "end": end_time
+                },
+                "tres": {
+                    "allocated": [
+                        { "type": "cpu", "count": cpu_count }
+                    ]
+                }
+            }).as_object().unwrap();
+
+            let result = SlurmAccountingResult::from_value(obj).unwrap();
+
+            assert_eq!(result.job_id, job_id.to_string());
+
+            assert_matches!(result.start_time, StartTime::Started(time) if time.timestamp() == start_time);
+            assert_matches!(result.end_time, EndTime::Finished(time) if time.timestamp() == end_time);
+
+            assert_eq!(result.resources.cpu, Some(cpu_count as f64));
+        }
+
+        #[test]
+        fn test_valid_json_with_less_data() {
+            let job_id = 12345;
+
+            let obj = serde_json::json!({
+                "job_id": job_id,
+                "time": {
+                    "start": 0,
+                    "end": 0 
+                },
+                "tres": {
+                    "allocated": []
+                }
+            }).as_object().unwrap();
+
+            let result = SlurmAccountingResult::from_value(obj).unwrap();
+
+            assert_eq!(result.job_id, job_id.to_string());
+
+            assert_matches!(result.start_time, StartTime::NotStarted);
+            assert_matches!(result.end_time, EndTime::NotFinished);
+
+            assert_eq!(result.resources.cpu, None);
+        }
+    }
 }
