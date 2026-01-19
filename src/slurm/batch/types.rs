@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 
+#[derive(Debug, Clone)]
 pub struct SlurmBatchTest {
     pub job_id: String,
     pub start_time: DateTime<Utc>,

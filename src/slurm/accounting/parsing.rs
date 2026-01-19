@@ -246,7 +246,7 @@ mod tests {
             let end_time = 1625083200;
             let cpu_count = 8;
 
-            let obj = serde_json::json!({
+            let json = serde_json::json!({
                 "job_id": job_id,
                 "time": {
                     "start": start_time,
@@ -257,14 +257,16 @@ mod tests {
                         { "type": "cpu", "count": cpu_count }
                     ]
                 }
-            }).as_object().unwrap();
+            });
+
+            let obj = json.as_object().unwrap();
 
             let result = SlurmAccountingResult::from_value(obj).unwrap();
 
             assert_eq!(result.job_id, job_id.to_string());
 
-            assert_matches!(result.start_time, StartTime::Started(time) if time.timestamp() == start_time);
-            assert_matches!(result.end_time, EndTime::Finished(time) if time.timestamp() == end_time);
+            assert!(matches!(result.start_time, StartTime::Started(time) if time.timestamp() == start_time));
+            assert!(matches!(result.end_time, EndTime::Finished(time) if time.timestamp() == end_time));
 
             assert_eq!(result.resources.cpu, Some(cpu_count as f64));
         }
@@ -273,7 +275,7 @@ mod tests {
         fn test_valid_json_with_less_data() {
             let job_id = 12345;
 
-            let obj = serde_json::json!({
+            let json = serde_json::json!({
                 "job_id": job_id,
                 "time": {
                     "start": 0,
@@ -282,14 +284,16 @@ mod tests {
                 "tres": {
                     "allocated": []
                 }
-            }).as_object().unwrap();
+            });
+
+            let obj = json.as_object().unwrap();
 
             let result = SlurmAccountingResult::from_value(obj).unwrap();
 
             assert_eq!(result.job_id, job_id.to_string());
 
-            assert_matches!(result.start_time, StartTime::NotStarted);
-            assert_matches!(result.end_time, EndTime::NotFinished);
+            assert!(matches!(result.start_time, StartTime::NotStarted));
+            assert!(matches!(result.end_time, EndTime::NotFinished));
 
             assert_eq!(result.resources.cpu, None);
         }
