@@ -84,3 +84,48 @@ impl Ord for Version {
         self.cmp(other)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_version_parsing() {
+        let version = Version::parse_str("1.2.3").unwrap();
+        assert_eq!(version.major, 1);
+        assert_eq!(version.minor, 2);
+        assert_eq!(version.patch, 3);
+    }
+
+    #[test]
+    fn test_invalid_version_parsing() {
+        let result = Version::parse_str("1.2");
+        assert!(matches!(result, Err(VersionFromStringError::InvalidFormat)));
+
+        let result = Version::parse_str("1.a.3");
+        assert!(matches!(result, Err(VersionFromStringError::ParseIntError(_))));
+    }
+
+    #[test]
+    fn test_version_equality() {
+        let v1 = Version::new(1, 2, 3);
+        let v2 = Version::new(1, 2, 3);
+        let v3 = Version::new(1, 2, 4);
+
+        assert_eq!(v1, v2);
+        assert_ne!(v1, v3);
+    }
+
+    #[test]
+    fn test_version_comparison() {
+        let v1 = Version::new(1, 2, 3);
+        let v2 = Version::new(1, 2, 4);
+        let v3 = Version::new(1, 3, 0);
+        let v4 = Version::new(2, 0, 0);
+
+        assert!(v1 < v2);
+        assert!(v2 < v3);
+        assert!(v3 < v4);
+        assert!(v4 > v1);
+    }
+}
