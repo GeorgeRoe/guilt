@@ -31,6 +31,8 @@ impl SlurmAccountingResources {
                             "number".to_string(),
                         ))?;
 
+                    // allow single match here, as we may want to add more resource types in the future
+                    #[allow(clippy::single_match)]
                     match resource_type {
                         "cpu" => {
                             resources.cpu = Some(count);
