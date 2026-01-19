@@ -12,7 +12,9 @@ impl SlurmAccountingResources {
                 Value::Object(map) => {
                     let resource_type = map
                         .get("type")
-                        .ok_or(StructuredJsonError::MissingField("resource type".to_string()))?
+                        .ok_or(StructuredJsonError::MissingField(
+                            "resource type".to_string(),
+                        ))?
                         .as_str()
                         .ok_or(StructuredJsonError::InvalidType(
                             "resource type".to_string(),
@@ -20,7 +22,9 @@ impl SlurmAccountingResources {
                         ))?;
                     let count = map
                         .get("count")
-                        .ok_or(StructuredJsonError::MissingField("resource count".to_string()))?
+                        .ok_or(StructuredJsonError::MissingField(
+                            "resource count".to_string(),
+                        ))?
                         .as_f64()
                         .ok_or(StructuredJsonError::InvalidType(
                             "resource count".to_string(),
@@ -33,12 +37,12 @@ impl SlurmAccountingResources {
                         }
                         _ => {}
                     }
-                },
+                }
                 _ => {
                     return Err(StructuredJsonError::InvalidType(
                         "tres entry".to_string(),
                         "JSON object".to_string(),
-                    ))
+                    ));
                 }
             }
         }
@@ -147,9 +151,7 @@ mod tests {
 
         #[test]
         fn test_array_with_invalid_value() {
-            let value_array = vec![
-                serde_json::json!("invalid entry"),
-            ];
+            let value_array = vec![serde_json::json!("invalid entry")];
 
             let result = SlurmAccountingResources::from_value_array(&value_array);
 
@@ -161,9 +163,7 @@ mod tests {
 
         #[test]
         fn test_entry_without_type() {
-            let value_array = vec![
-                serde_json::json!({ "count": 8 }),
-            ];
+            let value_array = vec![serde_json::json!({ "count": 8 })];
 
             let result = SlurmAccountingResources::from_value_array(&value_array);
 
@@ -175,9 +175,7 @@ mod tests {
 
         #[test]
         fn test_entry_with_invalid_type() {
-            let value_array = vec![
-                serde_json::json!({ "type": 42, "count": 8 }),
-            ];
+            let value_array = vec![serde_json::json!({ "type": 42, "count": 8 })];
 
             let result = SlurmAccountingResources::from_value_array(&value_array);
 
@@ -189,9 +187,7 @@ mod tests {
 
         #[test]
         fn test_entry_without_count() {
-            let value_array = vec![
-                serde_json::json!({ "type": "cpu" }),
-            ];
+            let value_array = vec![serde_json::json!({ "type": "cpu" })];
 
             let result = SlurmAccountingResources::from_value_array(&value_array);
 
@@ -203,9 +199,7 @@ mod tests {
 
         #[test]
         fn test_valid_cpu_entry() {
-            let value_array = vec![
-                serde_json::json!({ "type": "cpu", "count": 16 }),
-            ];
+            let value_array = vec![serde_json::json!({ "type": "cpu", "count": 16 })];
 
             let resources = SlurmAccountingResources::from_value_array(&value_array).unwrap();
 
@@ -223,9 +217,7 @@ mod tests {
 
         #[test]
         fn test_invalid_cpu_type() {
-            let value_array = vec![
-                serde_json::json!({ "type": "cpu", "count": "sixteen" }),
-            ];
+            let value_array = vec![serde_json::json!({ "type": "cpu", "count": "sixteen" })];
 
             let result = SlurmAccountingResources::from_value_array(&value_array);
 
@@ -265,8 +257,12 @@ mod tests {
 
             assert_eq!(result.job_id, job_id.to_string());
 
-            assert!(matches!(result.start_time, StartTime::Started(time) if time.timestamp() == start_time));
-            assert!(matches!(result.end_time, EndTime::Finished(time) if time.timestamp() == end_time));
+            assert!(
+                matches!(result.start_time, StartTime::Started(time) if time.timestamp() == start_time)
+            );
+            assert!(
+                matches!(result.end_time, EndTime::Finished(time) if time.timestamp() == end_time)
+            );
 
             assert_eq!(result.resources.cpu, Some(cpu_count as f64));
         }
@@ -279,7 +275,7 @@ mod tests {
                 "job_id": job_id,
                 "time": {
                     "start": 0,
-                    "end": 0 
+                    "end": 0
                 },
                 "tres": {
                     "allocated": []

@@ -86,7 +86,7 @@ mod tests {
 
         assert_eq!(unresolved_job.job_id, "1");
         assert_eq!(unresolved_job.cpu_profile_name, "test_profile");
-        
+
         let resolved_job = unresolved_job.resolve(&cpu_profile);
 
         assert_eq!(resolved_job.job_id, "1");
@@ -100,12 +100,10 @@ mod tests {
         let temp_dir = tempfile::tempdir().unwrap();
         let file_path = temp_dir.path().join("unprocessed_jobs.json");
 
-        let unprocessed_jobs = vec![
-            UnresolvedUnprocessedJob {
-                job_id: "1".to_string(),
-                cpu_profile_name: "TestProfile".to_string(),
-            }
-        ];
+        let unprocessed_jobs = vec![UnresolvedUnprocessedJob {
+            job_id: "1".to_string(),
+            cpu_profile_name: "TestProfile".to_string(),
+        }];
 
         write_json_file(&file_path, &unprocessed_jobs).unwrap();
 

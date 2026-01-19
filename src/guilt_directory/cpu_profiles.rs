@@ -47,13 +47,11 @@ mod tests {
         let temp_dir = tempfile::tempdir().unwrap();
         let file_path = temp_dir.path().join("cpu_profiles.json");
 
-        let profiles = vec![
-            CpuProfile {
-                name: "test_profile".to_string(),
-                cores: 6,
-                tdp: 60.0
-            },
-        ];
+        let profiles = vec![CpuProfile {
+            name: "test_profile".to_string(),
+            cores: 6,
+            tdp: 60.0,
+        }];
 
         write_json_file(&file_path, &profiles).unwrap();
 
@@ -64,7 +62,7 @@ mod tests {
         assert_eq!(cpu_profile.cores, 6);
         assert_eq!(cpu_profile.tdp, 60.0);
     }
-    
+
     #[test]
     fn test_write_cpu_profiles() {
         let temp_dir = tempfile::tempdir().unwrap();
@@ -74,7 +72,7 @@ mod tests {
         cpu_profiles.upsert(CpuProfile {
             name: "test_profile".to_string(),
             cores: 8,
-            tdp: 95.0
+            tdp: 95.0,
         });
 
         cpu_profiles.write(&file_path).unwrap();
@@ -94,7 +92,7 @@ mod tests {
         cpu_profiles.upsert(CpuProfile {
             name: "test_profile".to_string(),
             cores: 4,
-            tdp: 40.0
+            tdp: 40.0,
         });
 
         let cpu_profile = cpu_profiles.get("test_profile").unwrap();
@@ -103,7 +101,7 @@ mod tests {
         assert_eq!(cpu_profile.tdp, 40.0);
 
         cpu_profiles.remove("test_profile");
-        
+
         assert!(cpu_profiles.get("test_profile").is_none());
     }
 }

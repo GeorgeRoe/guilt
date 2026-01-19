@@ -74,8 +74,17 @@ mod tests {
         let cases = [
             ("45", Duration::minutes(45)),
             ("2:30", Duration::minutes(2) + Duration::seconds(30)),
-            ("1:15:20", Duration::hours(1) + Duration::minutes(15) + Duration::seconds(20)),
-            ("3-04:20:10", Duration::days(3) + Duration::hours(4) + Duration::minutes(20) + Duration::seconds(10)),
+            (
+                "1:15:20",
+                Duration::hours(1) + Duration::minutes(15) + Duration::seconds(20),
+            ),
+            (
+                "3-04:20:10",
+                Duration::days(3)
+                    + Duration::hours(4)
+                    + Duration::minutes(20)
+                    + Duration::seconds(10),
+            ),
             ("5-12:00", Duration::days(5) + Duration::hours(12)),
         ];
 

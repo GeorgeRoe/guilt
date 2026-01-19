@@ -103,7 +103,7 @@ impl FetchCarbonIntensity for ApiFetchCarbonIntensity {
 
 #[cfg(test)]
 mod tests {
-    use super::{parse_json_response, CarbonIntensityApiParseError};
+    use super::{CarbonIntensityApiParseError, parse_json_response};
     use chrono::{TimeZone, Utc};
 
     fn sample_success() -> serde_json::Value {
@@ -154,24 +154,28 @@ mod tests {
         let json = sample_success();
         let result = parse_json_response(json);
         match result {
-            Ok(segments) => {
-                match segments.first() {
-                    Some(segment) => {
-                        assert_eq!(segment.from, Utc.with_ymd_and_hms(2024, 1, 1, 0, 0, 0).unwrap());
-                        assert_eq!(segment.to, Utc.with_ymd_and_hms(2024, 1, 1, 1, 0, 0).unwrap());
+            Ok(segments) => match segments.first() {
+                Some(segment) => {
+                    assert_eq!(
+                        segment.from,
+                        Utc.with_ymd_and_hms(2024, 1, 1, 0, 0, 0).unwrap()
+                    );
+                    assert_eq!(
+                        segment.to,
+                        Utc.with_ymd_and_hms(2024, 1, 1, 1, 0, 0).unwrap()
+                    );
 
-                        assert_eq!(segment.intensity, 266);
+                    assert_eq!(segment.intensity, 266);
 
-                        assert_eq!(segment.generation_mix.len(), 9);
-                        assert_eq!(segment.generation_mix.get("gas"), Some(&43.6));
-                        assert_eq!(segment.generation_mix.get("solar"), Some(&18.1));
-                        assert_eq!(segment.generation_mix.get("coal"), Some(&0.7));
-                        assert_eq!(segment.generation_mix.get("nuclear"), Some(&17.6));
-                        assert_eq!(segment.generation_mix.get("wind"), Some(&6.8));
-                        assert_eq!(segment.generation_mix.get("hydro"), Some(&2.2));
-                    }
-                    None => panic!("Expected at least one segment"),
+                    assert_eq!(segment.generation_mix.len(), 9);
+                    assert_eq!(segment.generation_mix.get("gas"), Some(&43.6));
+                    assert_eq!(segment.generation_mix.get("solar"), Some(&18.1));
+                    assert_eq!(segment.generation_mix.get("coal"), Some(&0.7));
+                    assert_eq!(segment.generation_mix.get("nuclear"), Some(&17.6));
+                    assert_eq!(segment.generation_mix.get("wind"), Some(&6.8));
+                    assert_eq!(segment.generation_mix.get("hydro"), Some(&2.2));
                 }
+                None => panic!("Expected at least one segment"),
             },
             Err(error) => panic!("Expected success, got error: {}", error),
         }
@@ -187,7 +191,7 @@ mod tests {
                 CarbonIntensityApiParseError::ApiError(code, message) => {
                     assert_eq!(code, "400 Bad Request");
                     assert_eq!(message, "Invalid postcode");
-                },
+                }
                 _ => panic!("Expected ApiError, got different error"),
             },
         }
@@ -200,7 +204,7 @@ mod tests {
         match result {
             Ok(_) => panic!("Expected error, got success"),
             Err(error) => match error {
-                CarbonIntensityApiParseError::UnexpectedResponseFormat => {},
+                CarbonIntensityApiParseError::UnexpectedResponseFormat => {}
                 _ => panic!("Expected UnexpectedResponseFormat, got different error"),
             },
         }
