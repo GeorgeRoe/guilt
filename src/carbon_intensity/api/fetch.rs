@@ -36,10 +36,8 @@ pub enum CarbonIntensityApiFetchError {
 fn parse_json_response(
     json: serde_json::Value,
 ) -> Result<Vec<CarbonIntensityTimeSegment>, CarbonIntensityApiParseError> {
-    println!("Parsing JSON response: {:?}\n", json);
     match (json.get("data"), json.get("error")) {
         (Some(data), None) => {
-            println!("Data found in JSON response: {:?}", data);
             let data: RegionData = serde_json::from_value(data.to_owned())?;
             let segments = data
                 .data
