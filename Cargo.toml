@@ -22,5 +22,4 @@ image = "0.23.14"
 fs_extra = "1.3.0"
 tempfile = "3.24.0"
 async-trait = "0.1.89"
-nom = "8.0.0"
 rhai = { version = "1.24.0", features = ["sync"] }
