@@ -1,24 +1,25 @@
 use rhai::{AST, Dynamic, Engine, EvalAltResult, Map, Scope};
 use std::path::Path;
-use crate::slurm::constraint::Constraint;
+use crate::slurm::node::Node;
 use thiserror::Error;
 
 pub struct ProfileResolutionPolicyParameters {
 	pub partition: String,
-	pub constraints: Option<Constraint>,
+	pub nodes: Vec<Node>,
 }
 
 impl ProfileResolutionPolicyParameters {
-	pub fn new(partition: &str, constraints: Option<Constraint>) -> Self {
+	pub fn new(partition: &str, nodes: Vec<Node>) -> Self {
 		Self {
 			partition: partition.to_string(),
-			constraints,
+			nodes,
 		}
 	}
 
 	pub fn to_map(&self) -> Map {
 		let mut map = Map::new();
 		map.insert("partition".into(), self.partition.clone().into());
+		map.insert("nodes".into(), self.nodes.clone().into());
 		map
 	}
 }
@@ -31,7 +32,7 @@ pub enum ProfileResolutionPolicyFromFileError {
 	#[error("script does not contain an 'identify_cpu' function")]
 	NoIdentifyCpuFunction,
 
-	#[error("The function 'idenfity_cpu' should only take 1 parameter")]
+	#[error("The function 'idenfity_cpu' should only take 2 parameter")]
 	InvalidIdentifyCpuFunction,
 }
 
@@ -48,7 +49,7 @@ impl ProfileResolutionPolicy {
 				let identify_cpu_fn = ast.iter_functions().find(|f| f.name == "identify_cpu");
 
 				match identify_cpu_fn {
-					Some(function) => if function.params.len() == 1 {
+					Some(function) => if function.params.len() == 2 {
 						Ok(Self { ast })
 					} else {
 						Err(ProfileResolutionPolicyFromFileError::InvalidIdentifyCpuFunction)
@@ -60,13 +61,16 @@ impl ProfileResolutionPolicy {
 		}
 	}
 
-	pub fn resolve_cpu_profile(&self, parameters: &ProfileResolutionPolicyParameters) -> Result<String, EvalAltResult> {
+	pub fn resolve_cpu_profile(&self, partition: String, nodes: Vec<Node>) -> Result<String, EvalAltResult> {
 		let engine = Engine::new();
 		let mut scope = Scope::new();
 
-		let job_data = parameters.to_map();
-
-		let result: Dynamic = engine.call_fn(&mut scope, &self.ast, "identify_cpu", (job_data,)).map_err(|e| *e)?;
+		let result: Dynamic = engine.call_fn(
+			&mut scope,
+			&self.ast,
+			"identify_cpu",
+			(partition, nodes, )
+		).map_err(|e| *e)?;
 		
 		Ok(result.to_string())
 	}
