@@ -8,5 +8,5 @@ pub struct SlurmScriptDirectives {
 }
 
 pub struct GuiltScriptDirectives {
-    pub cpu_profile: String,
+    pub cpu_profile: Option<String>,
 }
