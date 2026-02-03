@@ -41,4 +41,6 @@ pub struct SlurmAccountingResult {
     pub start_time: StartTime,
     pub end_time: EndTime,
     pub resources: SlurmAccountingResources,
+    pub partition: String,
+    pub nodes: Vec<String>,
 }
