@@ -46,11 +46,9 @@ impl GuiltScriptDirectives {
         );
 
         let cpu_profile = match directives.get("cpu-profile") {
-            Some(StringOrPresent::Str(s)) => s.clone(),
-            Some(StringOrPresent::Present) => {
-                return Err(GuiltScriptDirectivesParsingError::MissingCpuProfile);
-            }
-            None => return Err(GuiltScriptDirectivesParsingError::MissingCpuProfile),
+            Some(StringOrPresent::Str(s)) => Some(s.clone()),
+            Some(StringOrPresent::Present) => Err(GuiltScriptDirectivesParsingError::MissingCpuProfile)?,
+            _ => None,
         };
 
         Ok(Self { cpu_profile })
@@ -154,12 +152,34 @@ echo "Hello, World!"
 
         let guilt_directives = GuiltScriptDirectives::from_file_contents(script_contents).unwrap();
 
-        assert_eq!(guilt_directives.cpu_profile, "AMD Epyc 7742");
+        assert!(matches!(
+            guilt_directives.cpu_profile,
+            Some(name) if name == "AMD Epyc 7742"
+        ));
     }
 
     #[test]
-    fn test_guilt_script_diretives_parsing_missing_cpu_profile() {
+    fn test_guilt_script_diretives_parsing_no_cpu_profile() {
         let script_contents = r#"#!/bin/bash
+#SBATCH --time=01:30:00
+#SBATCH --nodes=2
+#SBATCH --tasks-per-node=4
+#SBATCH --cpus-per-task=8
+echo "Hello, World!"
+"#;
+
+        let guilt_directives = GuiltScriptDirectives::from_file_contents(script_contents).unwrap();
+
+        assert!(matches!(
+            guilt_directives.cpu_profile,
+            None
+        ));
+    }
+
+    #[test]
+    fn test_guilt_script_directives_parsing_missing_value() {
+        let script_contents = r#"#!/bin/bash
+#GUILT --cpu-profile=
 #SBATCH --time=01:30:00
 #SBATCH --nodes=2
 #SBATCH --tasks-per-node=4
@@ -174,6 +194,7 @@ echo "Hello, World!"
             Err(GuiltScriptDirectivesParsingError::MissingCpuProfile)
         ));
     }
+
 
     #[test]
     fn test_guilt_script_directives_parsing_with_flag() {
