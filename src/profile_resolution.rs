@@ -1,28 +1,7 @@
-use rhai::{AST, Dynamic, Engine, EvalAltResult, Map, Scope};
+use rhai::{AST, Dynamic, Engine, EvalAltResult, Scope};
 use std::path::Path;
 use crate::slurm::node::Node;
 use thiserror::Error;
-
-pub struct ProfileResolutionPolicyParameters {
-	pub partition: String,
-	pub nodes: Vec<Node>,
-}
-
-impl ProfileResolutionPolicyParameters {
-	pub fn new(partition: &str, nodes: Vec<Node>) -> Self {
-		Self {
-			partition: partition.to_string(),
-			nodes,
-		}
-	}
-
-	pub fn to_map(&self) -> Map {
-		let mut map = Map::new();
-		map.insert("partition".into(), self.partition.clone().into());
-		map.insert("nodes".into(), self.nodes.clone().into());
-		map
-	}
-}
 
 #[derive(Debug, Error)]
 pub enum ProfileResolutionPolicyFromFileError {
