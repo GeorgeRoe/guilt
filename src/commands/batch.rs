@@ -1,9 +1,11 @@
 use crate::carbon_intensity::{CarbonIntensityAggregator, api::ApiFetchCarbonIntensity};
 use crate::guilt_directory::GuiltDirectoryManager;
 use crate::ip_info::fetch_ip_info;
-use crate::models::UnprocessedJob;
+use crate::models::{CpuProfileResolutionData, UnprocessedJob};
 use crate::script_directives::{GuiltScriptDirectives, SlurmScriptDirectives};
 use crate::slurm::batch;
+use crate::slurm::node::get_node_by_name;
+use crate::slurm::node_string::parse_slurm_nodes;
 use crate::users::get_current_user;
 use chrono::{DateTime, Duration, Utc};
 use std::env;
@@ -44,11 +46,31 @@ pub async fn run(job: &str) -> anyhow::Result<()> {
     let latest_forecast_time = Utc::now() + Duration::days(2) - Duration::minutes(30);
 
     let mut guilt_dir_manager = GuiltDirectoryManager::read_for_user(&get_current_user()?);
-    let cpu_profile = guilt_dir_manager
-        .get_cpu_profile(&guilt_directives.cpu_profile)?
-        .ok_or(BatchCommandError::CpuProfileNotFound(
-            guilt_directives.cpu_profile,
-        ))?;
+
+    let cpu_profile_name: String = match guilt_directives.cpu_profile {
+        Some(name) => name,
+        None => {
+            let partition = test_job.partition;
+
+            let nodes = parse_slurm_nodes(&test_job.nodes)
+                .map_err(|message| anyhow::anyhow!(message))?
+                .ok_or(anyhow::anyhow!("Could not determine nodes to be allocated for the job"))?
+                .iter()
+                .map(|node_name| get_node_by_name(node_name))
+                .collect::<Result<Vec<_>, _>>()?;
+
+            guilt_dir_manager
+                .get_profile_resolution_policy()?
+                .resolve_cpu_profile(partition, nodes)?
+        }
+    };
+
+    let cpu_profile = match guilt_dir_manager.get_cpu_profile(&cpu_profile_name)? {
+        Some(profile) => profile,
+        None => {
+            return Err(BatchCommandError::CpuProfileNotFound(cpu_profile_name).into());
+        }
+    };
 
     let begin: Option<DateTime<Utc>> = if earliest_possible_start_time + slurm_directives.time
         > latest_forecast_time
@@ -152,7 +174,7 @@ pub async fn run(job: &str) -> anyhow::Result<()> {
 
     let unprocessed_job = UnprocessedJob {
         job_id,
-        cpu_profile,
+        cpu_profile_resolution_data: CpuProfileResolutionData::None,
     };
 
     guilt_dir_manager.upsert_unprocessed_job(unprocessed_job)?;
