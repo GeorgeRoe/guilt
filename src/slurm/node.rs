@@ -52,7 +52,7 @@ pub fn get_node_by_name(name: &str) -> Result<Node, SlurmControlShowNodeCommandE
     let nodes: Vec<Node> = serde_json::from_str(&stdout)?;
 
     match nodes.first() {
-        Some(node) => return Ok(node.clone()),
+        Some(node) => Ok(node.clone()),
         None => Err(SlurmControlShowNodeCommandError::NodeNotFound(
             name.to_string(),
         )),

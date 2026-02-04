@@ -103,7 +103,7 @@ impl SlurmAccountingResult {
 
         // parse nodes
         let nodes_string = obj.get_required_str("nodes")?;
-        let nodes = parse_slurm_nodes(&nodes_string).map_err(|e| {
+        let nodes = parse_slurm_nodes(nodes_string).map_err(|e| {
             StructuredJsonError::InvalidType(
                 "nodes".to_string(),
                 format!("valid node string: {}", e),
@@ -163,7 +163,7 @@ mod tests {
 
             let resources = SlurmAccountingResources::from_value_array(&value_array).unwrap();
 
-            assert_eq!(resources.cpu, None);
+            assert!(resources.cpu.is_none());
         }
 
         #[test]
@@ -229,7 +229,7 @@ mod tests {
 
             let resources = SlurmAccountingResources::from_value_array(&value_array).unwrap();
 
-            assert_eq!(resources.cpu, None);
+            assert!(resources.cpu.is_none());
         }
 
         #[test]
@@ -319,11 +319,11 @@ mod tests {
             assert!(matches!(result.start_time, StartTime::NotStarted));
             assert!(matches!(result.end_time, EndTime::NotFinished));
 
-            assert_eq!(result.resources.cpu, None);
+            assert!(result.resources.cpu.is_none());
 
             assert_eq!(result.partition, "test_partition".to_string());
 
-            assert_eq!(result.nodes, None);
+            assert!(result.nodes.is_none());
         }
     }
 }
