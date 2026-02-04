@@ -1,10 +1,18 @@
 use crate::carbon_intensity::{CarbonIntensityAggregator, api::ApiFetchCarbonIntensity};
 use crate::guilt_directory::GuiltDirectoryManager;
 use crate::ip_info::fetch_ip_info;
-use crate::models::ProcessedJob;
+use crate::models::{CpuProfileResolutionData, ProcessedJob};
 use crate::slurm::accounting::{EndTime, StartTime, get_jobs_by_id};
+use crate::slurm::node::get_node_by_name;
 use crate::users::get_current_user;
 use std::collections::HashMap;
+use thiserror::Error;
+
+#[derive(Error, Debug)]
+pub enum ProcessCommandError {
+    #[error("CPU profile '{0}' not found.")]
+    CpuProfileNotFound(String),
+}
 
 pub async fn run() -> anyhow::Result<()> {
     let current_user = get_current_user()?;
@@ -35,14 +43,41 @@ pub async fn run() -> anyhow::Result<()> {
 
     for unprocessed_job in unprocessed_jobs {
         if let Some(sacct_result) = sacct_results.get(&unprocessed_job.job_id)
-            && let (StartTime::Started(start_time), EndTime::Finished(end_time), Some(cores_used)) = (
+            && let (
+                StartTime::Started(start_time),
+                EndTime::Finished(end_time),
+                Some(cores_used),
+            ) = (
                 sacct_result.start_time,
                 sacct_result.end_time,
                 sacct_result.resources.cpu,
             )
         {
-            let tdp_per_core =
-                unprocessed_job.cpu_profile.tdp as f64 / unprocessed_job.cpu_profile.cores as f64;
+            let cpu_profile_name: String = match unprocessed_job.cpu_profile_resolution_data {
+                CpuProfileResolutionData::Name(name) => name,
+                CpuProfileResolutionData::None => {
+                    if let Some(nodes) = &sacct_result.nodes && !nodes.is_empty() {
+                        guilt_dir_manager
+                        .get_profile_resolution_policy()?
+                        .resolve_cpu_profile(
+                            sacct_result.partition.clone(),
+                            nodes
+                                .iter()
+                                .map(|node_name| get_node_by_name(node_name))
+                                .collect::<Result<Vec<_>, _>>()?
+                        )?
+                    } else { break; }
+                }
+            };
+
+            let cpu_profile = match guilt_dir_manager.get_cpu_profile(&cpu_profile_name)? {
+                Some(profile) => profile,
+                None => {
+                    return Err(ProcessCommandError::CpuProfileNotFound(cpu_profile_name).into());
+                }
+            };
+
+            let tdp_per_core = cpu_profile.tdp as f64 / cpu_profile.cores as f64;
             let duration = end_time - start_time;
             let hours = duration.num_seconds() as f64 / 3600.0;
             let energy = (tdp_per_core * cores_used * hours) / 1000.0;
@@ -61,7 +96,7 @@ pub async fn run() -> anyhow::Result<()> {
                 job_id: unprocessed_job.job_id,
                 start_time,
                 end_time,
-                cpu_profile: unprocessed_job.cpu_profile.clone(),
+                cpu_profile_name: cpu_profile.name.clone(),
                 energy,
                 emissions,
                 generation_mix: aggregator
