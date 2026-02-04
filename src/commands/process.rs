@@ -43,11 +43,7 @@ pub async fn run() -> anyhow::Result<()> {
 
     for unprocessed_job in unprocessed_jobs {
         if let Some(sacct_result) = sacct_results.get(&unprocessed_job.job_id)
-            && let (
-                StartTime::Started(start_time),
-                EndTime::Finished(end_time),
-                Some(cores_used),
-            ) = (
+            && let (StartTime::Started(start_time), EndTime::Finished(end_time), Some(cores_used)) = (
                 sacct_result.start_time,
                 sacct_result.end_time,
                 sacct_result.resources.cpu,
@@ -56,17 +52,21 @@ pub async fn run() -> anyhow::Result<()> {
             let cpu_profile_name: String = match unprocessed_job.cpu_profile_resolution_data {
                 CpuProfileResolutionData::Name(name) => name,
                 CpuProfileResolutionData::None => {
-                    if let Some(nodes) = &sacct_result.nodes && !nodes.is_empty() {
+                    if let Some(nodes) = &sacct_result.nodes
+                        && !nodes.is_empty()
+                    {
                         guilt_dir_manager
-                        .get_profile_resolution_policy()?
-                        .resolve_cpu_profile(
-                            sacct_result.partition.clone(),
-                            nodes
-                                .iter()
-                                .map(|node_name| get_node_by_name(node_name))
-                                .collect::<Result<Vec<_>, _>>()?
-                        )?
-                    } else { break; }
+                            .get_profile_resolution_policy()?
+                            .resolve_cpu_profile(
+                                sacct_result.partition.clone(),
+                                nodes
+                                    .iter()
+                                    .map(|node_name| get_node_by_name(node_name))
+                                    .collect::<Result<Vec<_>, _>>()?,
+                            )?
+                    } else {
+                        break;
+                    }
                 }
             };
 

@@ -17,7 +17,7 @@ pub fn run() -> anyhow::Result<()> {
             EndTime::Finished(_) => {
                 let unprocessed_job = UnprocessedJob {
                     job_id: job.job_id,
-                    cpu_profile_resolution_data: CpuProfileResolutionData::None
+                    cpu_profile_resolution_data: CpuProfileResolutionData::None,
                 };
 
                 guilt_dir_manager.upsert_unprocessed_job(unprocessed_job)?;

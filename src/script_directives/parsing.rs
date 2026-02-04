@@ -47,7 +47,9 @@ impl GuiltScriptDirectives {
 
         let cpu_profile = match directives.get("cpu-profile") {
             Some(StringOrPresent::Str(s)) => Some(s.clone()),
-            Some(StringOrPresent::Present) => Err(GuiltScriptDirectivesParsingError::MissingCpuProfile)?,
+            Some(StringOrPresent::Present) => {
+                Err(GuiltScriptDirectivesParsingError::MissingCpuProfile)?
+            }
             _ => None,
         };
 
@@ -170,10 +172,7 @@ echo "Hello, World!"
 
         let guilt_directives = GuiltScriptDirectives::from_file_contents(script_contents).unwrap();
 
-        assert!(matches!(
-            guilt_directives.cpu_profile,
-            None
-        ));
+        assert!(matches!(guilt_directives.cpu_profile, None));
     }
 
     #[test]
@@ -194,7 +193,6 @@ echo "Hello, World!"
             Err(GuiltScriptDirectivesParsingError::MissingCpuProfile)
         ));
     }
-
 
     #[test]
     fn test_guilt_script_directives_parsing_with_flag() {
