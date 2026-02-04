@@ -65,7 +65,11 @@ fn parse_part(input: &str) -> IResult<&str, NodePart> {
 
 /// Entry point: Parses a SLURM node string and returns the expanded list
 /// e.g. "rack[1-2]_blade[1-2]"
-pub fn parse_slurm_nodes(input: &str) -> Result<Vec<String>, String> {
+pub fn parse_slurm_nodes(input: &str) -> Result<Option<Vec<String>>, String> {
+    if input == "None assigned" {
+        return Ok(None);
+    }
+
     // Parse the input into a list of Parts
     let (remainder, parts) = many1(parse_part).parse(input)
         .map_err(|e| format!("Parsing error: {}", e))?;
@@ -99,7 +103,7 @@ pub fn parse_slurm_nodes(input: &str) -> Result<Vec<String>, String> {
         results = new_results;
     }
 
-    Ok(results)
+    Ok(Some(results))
 }
 
 #[cfg(test)]
@@ -110,14 +114,14 @@ mod tests {
     fn test_simple_literal() {
         let input = "node01";
         let expected = vec!["node01"];
-        assert_eq!(parse_slurm_nodes(input).unwrap(), expected);
+        assert_eq!(parse_slurm_nodes(input).unwrap().unwrap(), expected);
     }
 
     #[test]
     fn test_basic_range() {
         let input = "node[01-03]";
         let expected = vec!["node01", "node02", "node03"];
-        assert_eq!(parse_slurm_nodes(input).unwrap(), expected);
+        assert_eq!(parse_slurm_nodes(input).unwrap().unwrap(), expected);
     }
 
     #[test]
@@ -126,7 +130,7 @@ mod tests {
         // Note: Slurm usually sorts numeric output, but our parser preserves input order
         // unless you explicitly sort it. The parser logic provided creates:
         let expected = vec!["node1", "node3", "node4", "node5", "node10"];
-        assert_eq!(parse_slurm_nodes(input).unwrap(), expected);
+        assert_eq!(parse_slurm_nodes(input).unwrap().unwrap(), expected);
     }
 
     #[test]
@@ -137,7 +141,7 @@ mod tests {
             "rack1_blade01", "rack1_blade02",
             "rack2_blade01", "rack2_blade02"
         ];
-        assert_eq!(parse_slurm_nodes(input).unwrap(), expected);
+        assert_eq!(parse_slurm_nodes(input).unwrap().unwrap(), expected);
     }
 
     #[test]
@@ -145,14 +149,14 @@ mod tests {
         // Ensures 001 stays 001 and doesn't become 1
         let input = "cluster-[001-003]";
         let expected = vec!["cluster-001", "cluster-002", "cluster-003"];
-        assert_eq!(parse_slurm_nodes(input).unwrap(), expected);
+        assert_eq!(parse_slurm_nodes(input).unwrap().unwrap(), expected);
     }
 
     #[test]
     fn test_complex_alphanumeric_prefix() {
         let input = "gpu-node-v1-[01-02]";
         let expected = vec!["gpu-node-v1-01", "gpu-node-v1-02"];
-        assert_eq!(parse_slurm_nodes(input).unwrap(), expected);
+        assert_eq!(parse_slurm_nodes(input).unwrap().unwrap(), expected);
     }
 
     #[test]
@@ -160,5 +164,11 @@ mod tests {
         // Test malformed input to ensure we get an Error, not a panic
         let input = "node[01-"; // Unclosed bracket
         assert!(parse_slurm_nodes(input).is_err());
+    }
+
+    #[test]
+    fn test_none_assigned() {
+        let input = "None assigned";
+        assert_eq!(parse_slurm_nodes(input).unwrap(), None);
     }
 }
