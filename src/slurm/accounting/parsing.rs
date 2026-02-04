@@ -262,7 +262,9 @@ mod tests {
                     "allocated": [
                         { "type": "cpu", "count": cpu_count }
                     ]
-                }
+                },
+                "partition": "test_partition",
+                "nodes": "node1"
             });
 
             let obj = json.as_object().unwrap();
@@ -279,6 +281,13 @@ mod tests {
             );
 
             assert_eq!(result.resources.cpu, Some(cpu_count as f64));
+
+            assert_eq!(result.partition, "test_partition".to_string());
+
+            assert!(matches!(
+                result.nodes,
+                Some(nodes) if nodes == vec!["node1".to_string()]
+            ))
         }
 
         #[test]
@@ -293,7 +302,9 @@ mod tests {
                 },
                 "tres": {
                     "allocated": []
-                }
+                },
+                "partition": "test_partition",
+                "nodes": "None assigned"
             });
 
             let obj = json.as_object().unwrap();
@@ -306,6 +317,10 @@ mod tests {
             assert!(matches!(result.end_time, EndTime::NotFinished));
 
             assert_eq!(result.resources.cpu, None);
+
+            assert_eq!(result.partition, "test_partition".to_string());
+
+            assert_eq!(result.nodes, None);
         }
     }
 }

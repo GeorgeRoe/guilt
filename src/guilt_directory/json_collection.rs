@@ -54,7 +54,9 @@ where
 #[cfg(test)]
 mod tests {
   use super::*;
+  use serde::Deserialize;
 
+  #[derive(Serialize, Deserialize, Clone)]
   struct ExampleStruct {
     value: String
   }
