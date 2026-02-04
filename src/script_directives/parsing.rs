@@ -172,7 +172,7 @@ echo "Hello, World!"
 
         let guilt_directives = GuiltScriptDirectives::from_file_contents(script_contents).unwrap();
 
-        assert!(matches!(guilt_directives.cpu_profile, None));
+        assert!(guilt_directives.cpu_profile.is_none());
     }
 
     #[test]
