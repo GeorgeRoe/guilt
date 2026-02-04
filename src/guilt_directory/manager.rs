@@ -3,6 +3,7 @@ use super::paths;
 use super::last_written_version::{LastWrittenVersion, LastWrittenVersionReadError};
 use crate::json_io::JsonFileOperationError;
 use crate::models::{CpuProfile, ProcessedJob, UnprocessedJob};
+use crate::profile_resolution::{ProfileResolutionPolicy, ProfileResolutionPolicyFromFileError};
 use crate::users::User;
 use crate::version::Version;
 use std::path::{Path, PathBuf};
@@ -247,5 +248,15 @@ impl GuiltDirectoryManager {
     pub fn remove_processed_job(&mut self, job_id: &str) -> Result<(), JsonFileOperationError> {
         self.get_processed_jobs()?.remove(job_id);
         Ok(())
+    }
+
+    // profile resolution policy related methods
+
+    fn get_profile_resolution_policy_path(&self) -> PathBuf {
+        self.path.join(paths::PROFILE_RESOLUTION_POLICY_FILE)
+    }
+
+    pub fn get_profile_resolution_policy(&self) -> Result<ProfileResolutionPolicy, ProfileResolutionPolicyFromFileError> {
+        ProfileResolutionPolicy::from_file(&self.get_profile_resolution_policy_path())
     }
 }
