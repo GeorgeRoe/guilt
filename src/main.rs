@@ -9,13 +9,13 @@ pub mod ip_info;
 pub mod json_io;
 pub mod models;
 pub mod plotting;
+pub mod profile_resolution;
 pub mod safe_command;
 pub mod script_directives;
 pub mod slurm;
 pub mod structured_json;
 pub mod users;
 pub mod version;
-pub mod profile_resolution;
 
 mod parse_duration_string;
 pub use parse_duration_string::parse_duration_string;

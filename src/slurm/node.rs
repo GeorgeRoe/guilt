@@ -1,30 +1,30 @@
-use std::process::Command;
-use serde::{Deserialize, Serialize};
-use thiserror::Error;
 use crate::safe_command::{SafeCommandError, safe_get_stdout};
+use serde::{Deserialize, Serialize};
+use std::process::Command;
+use thiserror::Error;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct Node {
-	pub architecture: String,
+    pub architecture: String,
 
-	pub cores: i32,
+    pub cores: i32,
 
-	pub cpus: i32,
+    pub cpus: i32,
 
-	pub features: Vec<String>,
+    pub features: Vec<String>,
 
-	pub name: String,
+    pub name: String,
 
-	pub operating_system: String,
+    pub operating_system: String,
 
-	pub partitions: Vec<String>,
+    pub partitions: Vec<String>,
 
-	#[serde(rename = "real_memory")]
-	pub memory: u64,
+    #[serde(rename = "real_memory")]
+    pub memory: u64,
 
-	pub sockets: i32,
+    pub sockets: i32,
 
-	pub threads: i32,
+    pub threads: i32,
 }
 
 #[derive(Debug, Error)]
@@ -35,24 +35,26 @@ pub enum SlurmControlShowNodeCommandError {
     #[error("Failed to parse Slurm accounting JSON output: {0}")]
     Json(#[from] serde_json::Error),
 
-		#[error("Node '{0}' not found.")]
-		NodeNotFound(String),
+    #[error("Node '{0}' not found.")]
+    NodeNotFound(String),
 }
 
 pub fn get_node_by_name(name: &str) -> Result<Node, SlurmControlShowNodeCommandError> {
-	let output = Command::new("scontrol")
-		.arg("show")
-		.arg("node")
-		.arg(name)
-		.arg("--json")
-		.output();
-	
-	let stdout = safe_get_stdout(output)?;
+    let output = Command::new("scontrol")
+        .arg("show")
+        .arg("node")
+        .arg(name)
+        .arg("--json")
+        .output();
 
-	let nodes: Vec<Node> = serde_json::from_str(&stdout)?;
+    let stdout = safe_get_stdout(output)?;
 
-	match nodes.first() {
-		Some(node) => return Ok(node.clone()),
-		None => Err(SlurmControlShowNodeCommandError::NodeNotFound(name.to_string())),
-	}
+    let nodes: Vec<Node> = serde_json::from_str(&stdout)?;
+
+    match nodes.first() {
+        Some(node) => return Ok(node.clone()),
+        None => Err(SlurmControlShowNodeCommandError::NodeNotFound(
+            name.to_string(),
+        )),
+    }
 }

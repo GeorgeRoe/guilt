@@ -1,5 +1,5 @@
-use super::types::*;
 use super::super::node_string::parse_slurm_nodes;
+use super::types::*;
 use crate::structured_json::{JsonGetExtensions, errors::*};
 use chrono::{TimeZone, Utc};
 use serde_json::Value;
@@ -104,7 +104,10 @@ impl SlurmAccountingResult {
         // parse nodes
         let nodes_string = obj.get_required_str("nodes")?;
         let nodes = parse_slurm_nodes(&nodes_string).map_err(|e| {
-            StructuredJsonError::InvalidType("nodes".to_string(), format!("valid node string: {}", e))
+            StructuredJsonError::InvalidType(
+                "nodes".to_string(),
+                format!("valid node string: {}", e),
+            )
         })?;
 
         Ok(Self {
@@ -113,7 +116,7 @@ impl SlurmAccountingResult {
             end_time,
             resources,
             partition,
-            nodes
+            nodes,
         })
     }
 }

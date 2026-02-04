@@ -1,6 +1,6 @@
 use super::json_collection::{JsonCollection, JsonKey};
-use super::paths;
 use super::last_written_version::{LastWrittenVersion, LastWrittenVersionReadError};
+use super::paths;
 use crate::json_io::JsonFileOperationError;
 use crate::models::{CpuProfile, ProcessedJob, UnprocessedJob};
 use crate::profile_resolution::{ProfileResolutionPolicy, ProfileResolutionPolicyFromFileError};
@@ -142,7 +142,9 @@ impl GuiltDirectoryManager {
         Ok(())
     }
 
-    fn get_cpu_profiles(&mut self) -> Result<&mut JsonCollection<CpuProfile>, JsonFileOperationError> {
+    fn get_cpu_profiles(
+        &mut self,
+    ) -> Result<&mut JsonCollection<CpuProfile>, JsonFileOperationError> {
         if self.cpu_profiles.is_none() {
             self.load_cpu_profiles()?;
         }
@@ -193,7 +195,10 @@ impl GuiltDirectoryManager {
         Ok(self.unprocessed_jobs.as_mut().unwrap())
     }
 
-    pub fn get_unprocessed_job(&mut self, job_id: &str) -> Result<Option<UnprocessedJob>, GetJobError> {
+    pub fn get_unprocessed_job(
+        &mut self,
+        job_id: &str,
+    ) -> Result<Option<UnprocessedJob>, GetJobError> {
         Ok(self.get_unprocessed_jobs()?.get(job_id))
     }
 
@@ -201,7 +206,10 @@ impl GuiltDirectoryManager {
         Ok(self.get_unprocessed_jobs()?.all())
     }
 
-    pub fn upsert_unprocessed_job(&mut self, job: UnprocessedJob) -> Result<(), JsonFileOperationError> {
+    pub fn upsert_unprocessed_job(
+        &mut self,
+        job: UnprocessedJob,
+    ) -> Result<(), JsonFileOperationError> {
         self.get_unprocessed_jobs()?.upsert(job);
         Ok(())
     }
@@ -239,8 +247,11 @@ impl GuiltDirectoryManager {
     pub fn get_all_processed_jobs(&mut self) -> Result<Vec<ProcessedJob>, GetJobError> {
         Ok(self.get_processed_jobs()?.all())
     }
-    
-    pub fn upsert_processed_job(&mut self, job: ProcessedJob) -> Result<(), JsonFileOperationError> {
+
+    pub fn upsert_processed_job(
+        &mut self,
+        job: ProcessedJob,
+    ) -> Result<(), JsonFileOperationError> {
         self.get_processed_jobs()?.upsert(job);
         Ok(())
     }
@@ -256,7 +267,9 @@ impl GuiltDirectoryManager {
         self.path.join(paths::PROFILE_RESOLUTION_POLICY_FILE)
     }
 
-    pub fn get_profile_resolution_policy(&self) -> Result<ProfileResolutionPolicy, ProfileResolutionPolicyFromFileError> {
+    pub fn get_profile_resolution_policy(
+        &self,
+    ) -> Result<ProfileResolutionPolicy, ProfileResolutionPolicyFromFileError> {
         ProfileResolutionPolicy::from_file(&self.get_profile_resolution_policy_path())
     }
 }

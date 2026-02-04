@@ -1,116 +1,126 @@
 use crate::json_io::*;
+use serde::{Serialize, de::DeserializeOwned};
 use std::collections::HashMap;
 use std::path::Path;
-use serde::{Serialize, de::DeserializeOwned};
 
 pub trait JsonKey {
-  fn json_key(&self) -> String;
+    fn json_key(&self) -> String;
 }
 
 pub struct JsonCollection<T>
-where T: Serialize + DeserializeOwned + Clone + JsonKey
+where
+    T: Serialize + DeserializeOwned + Clone + JsonKey,
 {
-  cache: HashMap<String, T>
+    cache: HashMap<String, T>,
 }
 
 impl<T> JsonCollection<T>
 where
-    T: Serialize + DeserializeOwned + Clone + JsonKey
+    T: Serialize + DeserializeOwned + Clone + JsonKey,
 {
-  pub fn empty() -> Self {
-    Self {
-      cache: HashMap::new(),
+    pub fn empty() -> Self {
+        Self {
+            cache: HashMap::new(),
+        }
     }
-  }
 
-  pub fn read(path: &Path) -> Result<Self, JsonFileOperationError> {
-    let items: Vec<T> = read_json_file(path)?;
-    let cache = items.into_iter().map(|i| (i.json_key(), i)).collect();
-    Ok(Self { cache })
-  }
+    pub fn read(path: &Path) -> Result<Self, JsonFileOperationError> {
+        let items: Vec<T> = read_json_file(path)?;
+        let cache = items.into_iter().map(|i| (i.json_key(), i)).collect();
+        Ok(Self { cache })
+    }
 
-  pub fn write(&self, path: &Path) -> Result<(), JsonFileOperationError> {
-    let items: Vec<&T> = self.cache.values().collect();
-    write_json_file(path, &items)
-  }
+    pub fn write(&self, path: &Path) -> Result<(), JsonFileOperationError> {
+        let items: Vec<&T> = self.cache.values().collect();
+        write_json_file(path, &items)
+    }
 
-  pub fn get(&self, key: &str) -> Option<T> {
-    self.cache.get(key).cloned()
-  }
+    pub fn get(&self, key: &str) -> Option<T> {
+        self.cache.get(key).cloned()
+    }
 
-  pub fn all(&self) -> Vec<T> {
-    self.cache.values().cloned().collect()
-  }
+    pub fn all(&self) -> Vec<T> {
+        self.cache.values().cloned().collect()
+    }
 
-  pub fn upsert(&mut self, item: T) {
-    self.cache.insert(item.json_key(), item);
-  }
+    pub fn upsert(&mut self, item: T) {
+        self.cache.insert(item.json_key(), item);
+    }
 
-  pub fn remove(&mut self, key: &str) {
-    self.cache.remove(key);
-  }
+    pub fn remove(&mut self, key: &str) {
+        self.cache.remove(key);
+    }
 }
 
 #[cfg(test)]
 mod tests {
-  use super::*;
-  use serde::Deserialize;
+    use super::*;
+    use serde::Deserialize;
 
-  #[derive(Serialize, Deserialize, Clone)]
-  struct ExampleStruct {
-    value: String
-  }
-
-  impl JsonKey for ExampleStruct {
-    fn json_key(&self) -> String {
-      self.value.clone()
+    #[derive(Serialize, Deserialize, Clone)]
+    struct ExampleStruct {
+        value: String,
     }
-  }
 
-  #[test]
-  fn test_read_json_collection() {
-    let temp_dir = tempfile::tempdir().unwrap();
-    let file_path = temp_dir.path().join("example_collection.json");
+    impl JsonKey for ExampleStruct {
+        fn json_key(&self) -> String {
+            self.value.clone()
+        }
+    }
 
-    let example_structs = vec![
-      ExampleStruct { value: "one".to_string() },
-      ExampleStruct { value: "two".to_string() },
-    ];
+    #[test]
+    fn test_read_json_collection() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let file_path = temp_dir.path().join("example_collection.json");
 
-    write_json_file(&file_path, &example_structs).unwrap();
+        let example_structs = vec![
+            ExampleStruct {
+                value: "one".to_string(),
+            },
+            ExampleStruct {
+                value: "two".to_string(),
+            },
+        ];
 
-    let collection = JsonCollection::<ExampleStruct>::read(&file_path).unwrap();
+        write_json_file(&file_path, &example_structs).unwrap();
 
-    assert_eq!(collection.get("one").unwrap().value, "one");
-    assert_eq!(collection.get("two").unwrap().value, "two");
-  }
+        let collection = JsonCollection::<ExampleStruct>::read(&file_path).unwrap();
 
-  #[test]
-  fn test_write_json_collection() {
-    let temp_dir = tempfile::tempdir().unwrap();
-    let file_path = temp_dir.path().join("example_collection.json");
+        assert_eq!(collection.get("one").unwrap().value, "one");
+        assert_eq!(collection.get("two").unwrap().value, "two");
+    }
 
-    let mut collection = JsonCollection::<ExampleStruct>::empty();
-    collection.upsert(ExampleStruct { value: "one".to_string() });
-    collection.upsert(ExampleStruct { value: "two".to_string() });
+    #[test]
+    fn test_write_json_collection() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let file_path = temp_dir.path().join("example_collection.json");
 
-    collection.write(&file_path).unwrap();
+        let mut collection = JsonCollection::<ExampleStruct>::empty();
+        collection.upsert(ExampleStruct {
+            value: "one".to_string(),
+        });
+        collection.upsert(ExampleStruct {
+            value: "two".to_string(),
+        });
 
-    let read_collection = JsonCollection::<ExampleStruct>::read(&file_path).unwrap();
+        collection.write(&file_path).unwrap();
 
-    assert_eq!(read_collection.get("one").unwrap().value, "one");
-    assert_eq!(read_collection.get("two").unwrap().value, "two");
-  }
+        let read_collection = JsonCollection::<ExampleStruct>::read(&file_path).unwrap();
 
-  #[test]
-  fn test_upsert_and_remove_structs_from_json_collection() {
-    let mut collection = JsonCollection::<ExampleStruct>::empty();
+        assert_eq!(read_collection.get("one").unwrap().value, "one");
+        assert_eq!(read_collection.get("two").unwrap().value, "two");
+    }
 
-    collection.upsert(ExampleStruct { value: "one".to_string() });
-    assert!(collection.get("one").is_some());
+    #[test]
+    fn test_upsert_and_remove_structs_from_json_collection() {
+        let mut collection = JsonCollection::<ExampleStruct>::empty();
 
-    collection.remove("one");
-    assert!(collection.get("one").is_none());
+        collection.upsert(ExampleStruct {
+            value: "one".to_string(),
+        });
+        assert!(collection.get("one").is_some());
 
-  }
+        collection.remove("one");
+        assert!(collection.get("one").is_none());
+    }
 }

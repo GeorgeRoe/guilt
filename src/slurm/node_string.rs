@@ -1,11 +1,12 @@
 use nom::{
+    IResult,
+    Parser, // Import Parser trait to enable .parse()
     branch::alt,
     bytes::complete::take_while1,
     character::complete::{char, digit1},
     combinator::opt,
     multi::{many1, separated_list1},
     sequence::delimited,
-    IResult, Parser, // Import Parser trait to enable .parse()
 };
 
 #[derive(Debug, PartialEq, Clone)]
@@ -18,15 +19,15 @@ enum NodePart {
 /// Handles leading zeros (Slurm syntax: node[001-010] -> node001...node010)
 fn parse_range_item(input: &str) -> IResult<&str, Vec<String>> {
     let (input, start_str) = digit1(input)?;
-    
+
     let (input, maybe_dash) = opt(char('-')).parse(input)?;
 
     if maybe_dash.is_some() {
         let (input, end_str) = digit1(input)?;
-        
+
         let start = start_str.parse::<u32>().unwrap_or(0);
         let end = end_str.parse::<u32>().unwrap_or(0);
-        
+
         // Capture the width of the start string to preserve leading zeros
         let width = start_str.len();
 
@@ -42,9 +43,8 @@ fn parse_range_item(input: &str) -> IResult<&str, Vec<String>> {
 /// Parses the contents inside brackets: "01-05,10,12-14"
 fn parse_bracket_contents(input: &str) -> IResult<&str, Vec<String>> {
     // separated_list1 returns a Vec<Vec<String>>, so we flatten it
-    let (input, lists) = separated_list1(char(','), parse_range_item)
-        .parse(input)?;
-    
+    let (input, lists) = separated_list1(char(','), parse_range_item).parse(input)?;
+
     Ok((input, lists.into_iter().flatten().collect()))
 }
 
@@ -52,9 +52,7 @@ fn parse_bracket_contents(input: &str) -> IResult<&str, Vec<String>> {
 fn parse_part(input: &str) -> IResult<&str, NodePart> {
     alt((
         // Case 1: Bracketed Range -> [01-05]
-        delimited(char('['), parse_bracket_contents, char(']'))
-            .map(NodePart::Range),
-            
+        delimited(char('['), parse_bracket_contents, char(']')).map(NodePart::Range),
         // Case 2: Literal String -> node, rack, _blade, etc.
         // We accept alphanumeric, dashes, and underscores outside of brackets
         take_while1(|c: char| c.is_alphanumeric() || c == '-' || c == '_')
@@ -71,7 +69,8 @@ pub fn parse_slurm_nodes(input: &str) -> Result<Option<Vec<String>>, String> {
     }
 
     // Parse the input into a list of Parts
-    let (remainder, parts) = many1(parse_part).parse(input)
+    let (remainder, parts) = many1(parse_part)
+        .parse(input)
         .map_err(|e| format!("Parsing error: {}", e))?;
 
     if !remainder.is_empty() {
@@ -138,8 +137,10 @@ mod tests {
         // This tests logic like rack[1-2] combined with blade[01-02]
         let input = "rack[1-2]_blade[01-02]";
         let expected = vec![
-            "rack1_blade01", "rack1_blade02",
-            "rack2_blade01", "rack2_blade02"
+            "rack1_blade01",
+            "rack1_blade02",
+            "rack2_blade01",
+            "rack2_blade02",
         ];
         assert_eq!(parse_slurm_nodes(input).unwrap().unwrap(), expected);
     }

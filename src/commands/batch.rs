@@ -54,7 +54,9 @@ pub async fn run(job: &str) -> anyhow::Result<()> {
 
             let nodes = parse_slurm_nodes(&test_job.nodes)
                 .map_err(|message| anyhow::anyhow!(message))?
-                .ok_or(anyhow::anyhow!("Could not determine nodes to be allocated for the job"))?
+                .ok_or(anyhow::anyhow!(
+                    "Could not determine nodes to be allocated for the job"
+                ))?
                 .iter()
                 .map(|node_name| get_node_by_name(node_name))
                 .collect::<Result<Vec<_>, _>>()?;
