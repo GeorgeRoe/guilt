@@ -179,7 +179,7 @@ echo "Hello, World!"
     #[test]
     fn test_guilt_script_directives_parsing_missing_value() {
         let script_contents = r#"#!/bin/bash
-#GUILT --cpu-profile=
+#GUILT --cpu-profile
 #SBATCH --time=01:30:00
 #SBATCH --nodes=2
 #SBATCH --tasks-per-node=4
