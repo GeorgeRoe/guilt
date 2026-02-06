@@ -27,8 +27,8 @@ impl Migration for MigrateToRepoMigrations {
         Ok(())
     }
 
-    fn detect_applicable(&self, user: &User) -> bool {
-        user.home_dir.join(".guilt/user_data").exists()
+    fn detect_applicable(&self, user: &User) -> anyhow::Result<bool> {
+        Ok(user.home_dir.join(".guilt/user_data").exists())
     }
 }
 
@@ -54,23 +54,19 @@ mod tests {
     }
 
     #[test]
-    fn detect_applicable_when_user_data_exists() -> anyhow::Result<()> {
-        let testing_user = setup_testing_user_with_previous_structure()?;
+    fn detect_applicable_when_user_data_exists() {
+        let testing_user = setup_testing_user_with_previous_structure().unwrap();
 
-        let migration = MigrateToRepoMigrations;
+        let result = MigrateToRepoMigrations.detect_applicable(&testing_user.user);
 
-        assert!(migration.detect_applicable(&testing_user.user));
-
-        Ok(())
+        assert!(matches!(result, Result::Ok(value) if value));
     }
 
     #[test]
-    fn migrate_moves_files_and_removes_user_data_dir() -> anyhow::Result<()> {
-        let testing_user = setup_testing_user_with_previous_structure()?;
+    fn migrate_moves_files_and_removes_user_data_dir() {
+        let testing_user = setup_testing_user_with_previous_structure().unwrap();
 
-        let migration = MigrateToRepoMigrations;
-
-        migration.migrate(&testing_user.user)?;
+        MigrateToRepoMigrations.migrate(&testing_user.user).unwrap();
 
         let guilt_dir = testing_user.user.home_dir.join(".guilt");
 
@@ -79,7 +75,5 @@ mod tests {
         assert!(guilt_dir.join("unprocessed_jobs.json").exists());
         assert!(guilt_dir.join("last_written_version").exists());
         assert!(!guilt_dir.join("user_data").exists());
-
-        Ok(())
     }
 }
