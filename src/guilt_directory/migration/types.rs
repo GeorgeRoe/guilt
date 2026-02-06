@@ -3,7 +3,7 @@ use thiserror::Error;
 
 pub trait Migration {
     fn migrate(&self, user: &User) -> anyhow::Result<()>;
-    fn detect_applicable(&self, user: &User) -> bool;
+    fn detect_applicable(&self, user: &User) -> anyhow::Result<bool>;
 }
 
 #[derive(Error, Debug)]
