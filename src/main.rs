@@ -25,17 +25,6 @@ use cli::{Cli, Commands};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    json_io::write_json_file("./temp.json", &vec![
-        models::UnprocessedJob {
-            job_id: "temp".to_string(),
-            cpu_profile_resolution_data: models::CpuProfileResolutionData::Name("Test".to_string())
-        },
-        models::UnprocessedJob {
-            job_id: "temp".to_string(),
-            cpu_profile_resolution_data: models::CpuProfileResolutionData::None,
-        }
-    ])?;
-
     let cli = Cli::parse();
 
     match &cli.command {
