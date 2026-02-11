@@ -1,9 +1,10 @@
 use crate::safe_command::{SafeCommandError, safe_get_stdout};
+use rhai::{CustomType, TypeBuilder};
 use serde::{Deserialize, Serialize};
 use std::process::Command;
 use thiserror::Error;
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, CustomType)]
 pub struct Node {
     pub architecture: String,
 
