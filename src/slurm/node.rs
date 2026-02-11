@@ -27,12 +27,17 @@ pub struct Node {
     pub threads: i32,
 }
 
+#[derive(Serialize, Deserialize)]
+pub struct ScontrolShowNodeResponse {
+    nodes: Vec<Node>
+}
+
 #[derive(Debug, Error)]
 pub enum SlurmControlShowNodeCommandError {
-    #[error("Failed to execute Slurm accounting command: {0}")]
+    #[error("Failed to execute Slurm control command: {0}")]
     SafeCommand(#[from] SafeCommandError),
 
-    #[error("Failed to parse Slurm accounting JSON output: {0}")]
+    #[error("Failed to parse Slurm control JSON output: {0}")]
     Json(#[from] serde_json::Error),
 
     #[error("Node '{0}' not found.")]
@@ -49,9 +54,9 @@ pub fn get_node_by_name(name: &str) -> Result<Node, SlurmControlShowNodeCommandE
 
     let stdout = safe_get_stdout(output)?;
 
-    let nodes: Vec<Node> = serde_json::from_str(&stdout)?;
+    let response: ScontrolShowNodeResponse = serde_json::from_str(&stdout)?;
 
-    match nodes.first() {
+    match response.nodes.first() {
         Some(node) => Ok(node.clone()),
         None => Err(SlurmControlShowNodeCommandError::NodeNotFound(
             name.to_string(),
