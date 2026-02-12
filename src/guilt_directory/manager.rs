@@ -109,7 +109,7 @@ impl GuiltDirectoryManager {
             self.update_last_written_version()?;
         }
         if let Some(script) = &self.profile_resolution_policy_script {
-            fs::write(&self.get_profile_resolution_policy_path(), script)?;
+            fs::write(self.get_profile_resolution_policy_path(), script)?;
         }
 
         Ok(())
@@ -280,7 +280,7 @@ impl GuiltDirectoryManager {
         ProfileResolutionPolicy::from_file(&self.get_profile_resolution_policy_path())
     }
 
-    pub fn set_profile_resolution_policy_script(&mut self, script: String) -> () {
+    pub fn set_profile_resolution_policy_script(&mut self, script: String) {
         self.profile_resolution_policy_script = Some(script);
     }
 }
