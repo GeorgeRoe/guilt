@@ -50,7 +50,7 @@ pub struct ProfileResolutionPolicy {
 }
 
 impl ProfileResolutionPolicy {
-    pub fn from_str(script: &str) -> Result<Self, ProfileResolutionPolicyFromStringError> {
+    pub fn from_script(script: &str) -> Result<Self, ProfileResolutionPolicyFromStringError> {
         let engine = Engine::new();
 
         let ast = engine.compile(script)?;
@@ -136,19 +136,19 @@ mod tests {
         }
     }
 
-    mod test_profile_resolution_policy_from_string {
+    mod test_profile_resolution_policy_from_script {
         use super::*;
 
         #[test]
         fn invalid_code_fails() {
-            let result = ProfileResolutionPolicy::from_str("as2830jlkdf a-1=235sijodf ak1'[35#'123lsd f12[3#51aj3ie");
+            let result = ProfileResolutionPolicy::from_script("as2830jlkdf a-1=235sijodf ak1'[35#'123lsd f12[3#51aj3ie");
 
             assert!(result.is_err())
         }
 
         #[test]
         fn correct_code_compiles() {
-            let result = ProfileResolutionPolicy::from_str("fn identify_cpu(partition, nodes) {}");
+            let result = ProfileResolutionPolicy::from_script("fn identify_cpu(partition, nodes) {}");
 
             assert!(result.is_ok())
         }
@@ -198,7 +198,7 @@ mod tests {
     fn successfully_resolves_a_cpu_profile() {
         let cpu_profile_name = "test";
 
-        let profile_resolution_policy = ProfileResolutionPolicy::from_str(&format!("fn identify_cpu(partition, nodes) {{ \"{}\" }}", cpu_profile_name)).unwrap();
+        let profile_resolution_policy = ProfileResolutionPolicy::from_script(&format!("fn identify_cpu(partition, nodes) {{ \"{}\" }}", cpu_profile_name)).unwrap();
 
         assert_eq!(profile_resolution_policy.resolve_cpu_profile("".to_string(), vec![]).unwrap(), cpu_profile_name)
     }
@@ -247,7 +247,7 @@ mod tests {
         ];
 
         tests.iter().for_each(|(getter, expected_value)| {
-            let profile_resolution_policy = ProfileResolutionPolicy::from_str(&format!("fn identify_cpu(partition, nodes) {{ let n = nodes[0]; n.{} }}", getter)).unwrap();
+            let profile_resolution_policy = ProfileResolutionPolicy::from_script(&format!("fn identify_cpu(partition, nodes) {{ let n = nodes[0]; n.{} }}", getter)).unwrap();
 
             let result = profile_resolution_policy.resolve_cpu_profile("".to_string(), nodes.clone()).unwrap();
 
@@ -259,7 +259,7 @@ mod tests {
     fn successfully_takes_partition() {
         let expected_value = "TestPartition";
 
-        let profile_resolution_policy = ProfileResolutionPolicy::from_str("fn identify_cpu(partition, nodes) { partition }").unwrap();
+        let profile_resolution_policy = ProfileResolutionPolicy::from_script("fn identify_cpu(partition, nodes) { partition }").unwrap();
 
         let result = profile_resolution_policy.resolve_cpu_profile(expected_value.to_string(), vec![]).unwrap();
 
