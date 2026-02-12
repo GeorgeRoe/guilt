@@ -8,6 +8,7 @@ use crate::users::User;
 use crate::version::Version;
 use std::path::{Path, PathBuf};
 use thiserror::Error;
+use std::fs;
 
 #[derive(Debug, Error)]
 pub enum GuiltDirectorySetupError {
@@ -48,6 +49,7 @@ pub struct GuiltDirectoryManager {
     cpu_profiles: Option<JsonCollection<CpuProfile>>,
     processed_jobs: Option<JsonCollection<ProcessedJob>>,
     unprocessed_jobs: Option<JsonCollection<UnprocessedJob>>,
+    profile_resolution_policy_script: Option<String>
 }
 
 impl GuiltDirectoryManager {
@@ -57,6 +59,7 @@ impl GuiltDirectoryManager {
             cpu_profiles: None,
             processed_jobs: None,
             unprocessed_jobs: None,
+            profile_resolution_policy_script: None
         }
     }
 
@@ -71,6 +74,7 @@ impl GuiltDirectoryManager {
             cpu_profiles: JsonCollection::empty().into(),
             processed_jobs: JsonCollection::empty().into(),
             unprocessed_jobs: JsonCollection::empty().into(),
+            profile_resolution_policy_script: None
         }
     }
 
@@ -103,6 +107,9 @@ impl GuiltDirectoryManager {
         if let Some(processed_jobs) = &self.processed_jobs {
             processed_jobs.write(&self.processed_jobs_path())?;
             self.update_last_written_version()?;
+        }
+        if let Some(script) = &self.profile_resolution_policy_script {
+            fs::write(&self.get_profile_resolution_policy_path(), script)?;
         }
 
         Ok(())
@@ -271,5 +278,9 @@ impl GuiltDirectoryManager {
         &self,
     ) -> Result<ProfileResolutionPolicy, ProfileResolutionPolicyFromFileError> {
         ProfileResolutionPolicy::from_file(&self.get_profile_resolution_policy_path())
+    }
+
+    pub fn set_profile_resolution_policy_script(&mut self, script: String) -> () {
+        self.profile_resolution_policy_script = Some(script);
     }
 }
