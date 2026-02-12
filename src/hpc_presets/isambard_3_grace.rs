@@ -27,4 +27,8 @@ impl HpcPreset for Isambard3GracePreset {
     fn get_cpu_profiles(&self) -> Vec<CpuProfile> {
         [CpuProfile::nvidia_grace_cpu_superchip_processor()].to_vec()
     }
+
+    fn get_profile_resolution_policy_script(&self) -> Option<String> {
+        None
+    }
 }

@@ -43,4 +43,8 @@ impl HpcPreset for Isambard3MacsPreset {
         ]
         .to_vec()
     }
+
+    fn get_profile_resolution_policy_script(&self) -> Option<String> {
+        None
+    }
 }
