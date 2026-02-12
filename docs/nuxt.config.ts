@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   modules: [
@@ -23,7 +25,10 @@ export default defineNuxtConfig({
         remarkPlugins: { 'remark-math': {} },
         rehypePlugins: { 'rehype-katex': { output: 'html' }},
         highlight: {
-          theme: 'red'
+          theme: 'red',
+          langs: [
+            JSON.parse(readFileSync('./grammars/rhai.tmLanguage.json', 'utf-8'))
+          ]
         },
         toc: {
           searchDepth: 1
