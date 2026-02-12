@@ -15,4 +15,8 @@ impl HpcPreset for IsambardAiPhase1Preset {
     fn get_cpu_profiles(&self) -> Vec<CpuProfile> {
         [CpuProfile::nvidia_gh200_grace_hopper_superchip_processor()].to_vec()
     }
+
+    fn get_profile_resolution_policy_script(&self) -> Option<String> {
+        None
+    }
 }

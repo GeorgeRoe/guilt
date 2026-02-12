@@ -15,4 +15,8 @@ impl HpcPreset for Archer2Preset {
     fn get_cpu_profiles(&self) -> Vec<CpuProfile> {
         [CpuProfile::amd_epyc_7742()].to_vec()
     }
+
+    fn get_profile_resolution_policy_script(&self) -> Option<String> {
+        None
+    }
 }
