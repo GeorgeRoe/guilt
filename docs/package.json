@@ -1,0 +1,36 @@
+{
+  "name": "docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "eslint .",
+    "typecheck": "nuxt typecheck"
+  },
+  "dependencies": {
+    "@iconify-json/lucide": "^1.2.82",
+    "@iconify-json/simple-icons": "^1.2.63",
+    "@iconify-json/vscode-icons": "^1.2.37",
+    "@nuxt/content": "^3.9.0",
+    "@nuxt/image": "^2.0.0",
+    "@nuxt/ui": "^4.3.0",
+    "better-sqlite3": "^12.5.0",
+    "katex": "^0.16.27",
+    "mermaid": "^11.12.2",
+    "nuxt": "^4.2.2",
+    "nuxt-og-image": "^5.1.13",
+    "zod": "^4.2.1"
+  },
+  "devDependencies": {
+    "@nuxt/eslint": "^1.12.1",
+    "eslint": "^9.39.2",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0",
+    "typescript": "^5.9.3",
+    "vue-tsc": "^3.2.1"
+  },
+  "packageManager": "pnpm@10.26.1"
+}
