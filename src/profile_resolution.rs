@@ -1,5 +1,5 @@
 use crate::slurm::node::Node;
-use rhai::{AST, Dynamic, Engine, EvalAltResult, ParseError, Scope, Array};
+use rhai::{AST, Dynamic, Engine, EvalAltResult, ParseError, Scope, serde::to_dynamic};
 use std::path::Path;
 use thiserror::Error;
 
@@ -44,19 +44,6 @@ fn validate_ast(ast: AST) -> Result<AST, InvalidProfileResolutionPolicyScriptErr
     }
 }
 
-fn new_engine() -> Engine {
-    let mut engine = Engine::new();
-
-    engine.build_type::<Node>();
-
-    engine.register_type_with_name::<Vec<String>>("StringArray");
-    engine.register_indexer_get(|v: &mut Vec<String>, i: i64| {
-        v.get(i as usize).cloned().unwrap_or_default()
-    });
-
-    engine
-}
-
 pub struct ProfileResolutionPolicy {
     ast: AST,
     engine: Engine
@@ -64,7 +51,7 @@ pub struct ProfileResolutionPolicy {
 
 impl ProfileResolutionPolicy {
     pub fn from_str(script: &str) -> Result<Self, ProfileResolutionPolicyFromStringError> {
-        let engine = new_engine();
+        let engine = Engine::new();
 
         let ast = engine.compile(script)?;
 
@@ -72,7 +59,7 @@ impl ProfileResolutionPolicy {
     }
 
     pub fn from_file(path: &Path) -> Result<Self, ProfileResolutionPolicyFromFileError> {
-        let engine = new_engine();
+        let engine = Engine::new();
 
         let ast = engine.compile_file(path.to_path_buf()).map_err(|e| ProfileResolutionPolicyFromFileError::Compilation(*e))?;
 
@@ -84,15 +71,12 @@ impl ProfileResolutionPolicy {
         partition: String,
         nodes: Vec<Node>,
     ) -> Result<String, EvalAltResult> {
-        let nodes_array: Array = nodes
-            .into_iter()
-            .map(Dynamic::from)
-            .collect();
+        let nodes_dynamic = to_dynamic(&nodes).map_err(|e| *e)?;
 
         let mut scope = Scope::new();
 
         let result: Dynamic = self.engine
-            .call_fn(&mut scope, &self.ast, "identify_cpu", (partition, nodes_array))
+            .call_fn(&mut scope, &self.ast, "identify_cpu", (partition, nodes_dynamic))
             .map_err(|e| *e)?;
 
         Ok(result.to_string())

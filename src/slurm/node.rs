@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::process::Command;
 use thiserror::Error;
 
-#[derive(Debug, Serialize, Deserialize, Clone, CustomType)]
+#[derive(Debug, Deserialize, Serialize, Clone, CustomType)]
 pub struct Node {
     pub architecture: String,
 
@@ -20,7 +20,7 @@ pub struct Node {
 
     pub partitions: Vec<String>,
 
-    #[serde(rename = "real_memory")]
+    #[serde(rename(deserialize = "real_memory", serialize = "memory"))]
     pub memory: u64,
 
     pub sockets: i32,
@@ -28,7 +28,7 @@ pub struct Node {
     pub threads: i32,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Deserialize)]
 pub struct ScontrolShowNodeResponse {
     nodes: Vec<Node>
 }
