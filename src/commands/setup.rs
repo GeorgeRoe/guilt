@@ -84,6 +84,20 @@ Y88b  d88P Y88b. .d88P   888   888          888
             println!("{}", profile.name);
             guilt_dir_manager.upsert_cpu_profile(profile)?;
         }
+
+        if let Some(script) = preset.get_profile_resolution_policy_script() {
+            guilt_dir_manager.set_profile_resolution_policy_script(script);
+            println!(
+                "{}",
+                "Using preset profile resolution policy script.".green()
+            )
+        } else {
+            println!(
+                "{}",
+                "There is no profile resolution policy set up for this HPC preset, you must write it yourself. See the docs for more information.".red()
+            )
+        }
+
         guilt_dir_manager.write()?;
     }
 
