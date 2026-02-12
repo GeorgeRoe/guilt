@@ -6,9 +6,9 @@ use crate::models::{CpuProfile, ProcessedJob, UnprocessedJob};
 use crate::profile_resolution::{ProfileResolutionPolicy, ProfileResolutionPolicyFromFileError};
 use crate::users::User;
 use crate::version::Version;
+use std::fs;
 use std::path::{Path, PathBuf};
 use thiserror::Error;
-use std::fs;
 
 #[derive(Debug, Error)]
 pub enum GuiltDirectorySetupError {
@@ -49,7 +49,7 @@ pub struct GuiltDirectoryManager {
     cpu_profiles: Option<JsonCollection<CpuProfile>>,
     processed_jobs: Option<JsonCollection<ProcessedJob>>,
     unprocessed_jobs: Option<JsonCollection<UnprocessedJob>>,
-    profile_resolution_policy_script: Option<String>
+    profile_resolution_policy_script: Option<String>,
 }
 
 impl GuiltDirectoryManager {
@@ -59,7 +59,7 @@ impl GuiltDirectoryManager {
             cpu_profiles: None,
             processed_jobs: None,
             unprocessed_jobs: None,
-            profile_resolution_policy_script: None
+            profile_resolution_policy_script: None,
         }
     }
 
@@ -74,7 +74,7 @@ impl GuiltDirectoryManager {
             cpu_profiles: JsonCollection::empty().into(),
             processed_jobs: JsonCollection::empty().into(),
             unprocessed_jobs: JsonCollection::empty().into(),
-            profile_resolution_policy_script: None
+            profile_resolution_policy_script: None,
         }
     }
 
