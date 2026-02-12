@@ -18,7 +18,7 @@ pub enum ProfileResolutionPolicyFromFileError {
     Compilation(#[from] EvalAltResult),
 
     #[error("Profile resolution policy script is invalid: {0}")]
-    InvalidScript(#[from] InvalidProfileResolutionPolicyScriptError)
+    InvalidScript(#[from] InvalidProfileResolutionPolicyScriptError),
 }
 
 #[derive(Debug, Error)]
@@ -27,26 +27,30 @@ pub enum ProfileResolutionPolicyFromStringError {
     Compilation(#[from] ParseError),
 
     #[error("Profile resolution policy script is invalid: {0}")]
-    InvalidScript(#[from] InvalidProfileResolutionPolicyScriptError)
+    InvalidScript(#[from] InvalidProfileResolutionPolicyScriptError),
 }
 
 fn validate_ast(ast: AST) -> Result<AST, InvalidProfileResolutionPolicyScriptError> {
-    let identify_cpu_fn = ast.iter_functions()
+    let identify_cpu_fn = ast
+        .iter_functions()
         .find(|f| f.name == "identify_cpu")
         .ok_or(InvalidProfileResolutionPolicyScriptError::NoIdentifyCpuFunction)?;
-
 
     let identify_cpu_num_params = identify_cpu_fn.params.len();
     if identify_cpu_num_params == 2 {
         Ok(ast)
     } else {
-        Err(InvalidProfileResolutionPolicyScriptError::InvalidIdentifyCpuFunctionNumParams(identify_cpu_num_params))
+        Err(
+            InvalidProfileResolutionPolicyScriptError::InvalidIdentifyCpuFunctionNumParams(
+                identify_cpu_num_params,
+            ),
+        )
     }
 }
 
 pub struct ProfileResolutionPolicy {
     ast: AST,
-    engine: Engine
+    engine: Engine,
 }
 
 impl ProfileResolutionPolicy {
@@ -55,15 +59,23 @@ impl ProfileResolutionPolicy {
 
         let ast = engine.compile(script)?;
 
-        Ok(Self { ast: validate_ast(ast)?, engine })
+        Ok(Self {
+            ast: validate_ast(ast)?,
+            engine,
+        })
     }
 
     pub fn from_file(path: &Path) -> Result<Self, ProfileResolutionPolicyFromFileError> {
         let engine = Engine::new();
 
-        let ast = engine.compile_file(path.to_path_buf()).map_err(|e| ProfileResolutionPolicyFromFileError::Compilation(*e))?;
+        let ast = engine
+            .compile_file(path.to_path_buf())
+            .map_err(|e| ProfileResolutionPolicyFromFileError::Compilation(*e))?;
 
-        Ok(Self { ast: validate_ast(ast)?, engine })
+        Ok(Self {
+            ast: validate_ast(ast)?,
+            engine,
+        })
     }
 
     pub fn resolve_cpu_profile(
@@ -75,8 +87,14 @@ impl ProfileResolutionPolicy {
 
         let mut scope = Scope::new();
 
-        let result: Dynamic = self.engine
-            .call_fn(&mut scope, &self.ast, "identify_cpu", (partition, nodes_dynamic))
+        let result: Dynamic = self
+            .engine
+            .call_fn(
+                &mut scope,
+                &self.ast,
+                "identify_cpu",
+                (partition, nodes_dynamic),
+            )
             .map_err(|e| *e)?;
 
         Ok(result.to_string())
@@ -130,7 +148,9 @@ mod tests {
         fn with_valid_identify_cpu_fn_succeeds() {
             let engine = Engine::new();
 
-            let ast = engine.compile("fn identify_cpu(partition, nodes) {}").unwrap();
+            let ast = engine
+                .compile("fn identify_cpu(partition, nodes) {}")
+                .unwrap();
 
             validate_ast(ast).unwrap();
         }
@@ -141,14 +161,17 @@ mod tests {
 
         #[test]
         fn invalid_code_fails() {
-            let result = ProfileResolutionPolicy::from_script("as2830jlkdf a-1=235sijodf ak1'[35#'123lsd f12[3#51aj3ie");
+            let result = ProfileResolutionPolicy::from_script(
+                "as2830jlkdf a-1=235sijodf ak1'[35#'123lsd f12[3#51aj3ie",
+            );
 
             assert!(result.is_err())
         }
 
         #[test]
         fn correct_code_compiles() {
-            let result = ProfileResolutionPolicy::from_script("fn identify_cpu(partition, nodes) {}");
+            let result =
+                ProfileResolutionPolicy::from_script("fn identify_cpu(partition, nodes) {}");
 
             assert!(result.is_ok())
         }
@@ -156,8 +179,8 @@ mod tests {
 
     mod test_profile_resolution_policy_from_file {
         use super::*;
-        use tempfile::tempdir;
         use std::fs::write;
+        use tempfile::tempdir;
 
         #[test]
         fn non_existent_file_fails() {
@@ -165,7 +188,7 @@ mod tests {
             let file_path = temp_dir.path().join("this_doesnt_exist.rhai");
 
             let result = ProfileResolutionPolicy::from_file(&file_path);
-            
+
             assert!(result.is_err())
         }
 
@@ -198,9 +221,18 @@ mod tests {
     fn successfully_resolves_a_cpu_profile() {
         let cpu_profile_name = "test";
 
-        let profile_resolution_policy = ProfileResolutionPolicy::from_script(&format!("fn identify_cpu(partition, nodes) {{ \"{}\" }}", cpu_profile_name)).unwrap();
+        let profile_resolution_policy = ProfileResolutionPolicy::from_script(&format!(
+            "fn identify_cpu(partition, nodes) {{ \"{}\" }}",
+            cpu_profile_name
+        ))
+        .unwrap();
 
-        assert_eq!(profile_resolution_policy.resolve_cpu_profile("".to_string(), vec![]).unwrap(), cpu_profile_name)
+        assert_eq!(
+            profile_resolution_policy
+                .resolve_cpu_profile("".to_string(), vec![])
+                .unwrap(),
+            cpu_profile_name
+        )
     }
 
     #[test]
@@ -216,20 +248,18 @@ mod tests {
         let sockets = 2;
         let threads = 2;
 
-        let nodes = vec![
-            Node {
-                architecture: architecture.to_string(),
-                cores,
-                cpus,
-                features: features.clone(),
-                name: name.to_string(),
-                operating_system: operating_system.to_string(),
-                partitions: partitions.clone(),
-                memory,
-                sockets,
-                threads,
-            }
-        ];
+        let nodes = vec![Node {
+            architecture: architecture.to_string(),
+            cores,
+            cpus,
+            features: features.clone(),
+            name: name.to_string(),
+            operating_system: operating_system.to_string(),
+            partitions: partitions.clone(),
+            memory,
+            sockets,
+            threads,
+        }];
 
         let tests = vec![
             ("name".to_string(), name.to_string()),
@@ -243,13 +273,19 @@ mod tests {
             ("partitions[1]".to_string(), partitions[1].clone()),
             ("memory".to_string(), memory.to_string()),
             ("sockets".to_string(), sockets.to_string()),
-            ("threads".to_string(), threads.to_string())
+            ("threads".to_string(), threads.to_string()),
         ];
 
         tests.iter().for_each(|(getter, expected_value)| {
-            let profile_resolution_policy = ProfileResolutionPolicy::from_script(&format!("fn identify_cpu(partition, nodes) {{ let n = nodes[0]; n.{} }}", getter)).unwrap();
+            let profile_resolution_policy = ProfileResolutionPolicy::from_script(&format!(
+                "fn identify_cpu(partition, nodes) {{ let n = nodes[0]; n.{} }}",
+                getter
+            ))
+            .unwrap();
 
-            let result = profile_resolution_policy.resolve_cpu_profile("".to_string(), nodes.clone()).unwrap();
+            let result = profile_resolution_policy
+                .resolve_cpu_profile("".to_string(), nodes.clone())
+                .unwrap();
 
             assert_eq!(result, expected_value.to_string());
         });
@@ -259,9 +295,13 @@ mod tests {
     fn successfully_takes_partition() {
         let expected_value = "TestPartition";
 
-        let profile_resolution_policy = ProfileResolutionPolicy::from_script("fn identify_cpu(partition, nodes) { partition }").unwrap();
+        let profile_resolution_policy =
+            ProfileResolutionPolicy::from_script("fn identify_cpu(partition, nodes) { partition }")
+                .unwrap();
 
-        let result = profile_resolution_policy.resolve_cpu_profile(expected_value.to_string(), vec![]).unwrap();
+        let result = profile_resolution_policy
+            .resolve_cpu_profile(expected_value.to_string(), vec![])
+            .unwrap();
 
         assert_eq!(result, expected_value);
     }

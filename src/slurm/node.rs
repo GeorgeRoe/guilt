@@ -30,7 +30,7 @@ pub struct Node {
 
 #[derive(Deserialize)]
 pub struct ScontrolShowNodeResponse {
-    nodes: Vec<Node>
+    nodes: Vec<Node>,
 }
 
 #[derive(Debug, Error)]
