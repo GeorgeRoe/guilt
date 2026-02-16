@@ -2,8 +2,10 @@ name: Release
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
+    paths:
+      - 'Cargo.*'
+      - 'src/**'
   workflow_dispatch:
 
 permissions:
