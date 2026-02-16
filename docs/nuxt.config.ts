@@ -10,6 +10,10 @@ export default defineNuxtConfig({
     'nuxt-og-image',
   ],
 
+  app: {
+    baseURL: '/guilt/'
+  },
+
   devtools: {
     enabled: true
   },
