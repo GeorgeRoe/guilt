@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 set -e
 
-REPO="GeorgeRoe/guilt"
+REPO="SCD-Energy-Efficiency-Team/guilt"
 INSTALL_DIR="$HOME/.local/bin"
 BIN_NAME="guilt"
 
