@@ -78,7 +78,7 @@ pub fn run(renderer_type: &DocumentRendererType) -> anyhow::Result<()> {
         Element::Paragraph("2. Resource Allocation: Allocate resources based on job requirements to avoid over-provisioning.".to_string()),
         Element::Paragraph("3. Monitor and Adjust: Regularly monitor your jobs and adjust configurations to improve efficiency.".to_string()),
         Element::Heading(HeadingLevel::H2, "References".to_string()),
-        Element::Paragraph("1. GUILT - https://www.github.com/GeorgeRoe/guilt".to_string()),
+        Element::Paragraph("1. GUILT - https://www.github.com/SCD-Energy-Efficiency-Team/guilt".to_string()),
         Element::Paragraph("2. Carbon Intensity API - https://carbonintensity.org.uk/".to_string()),
         Element::Paragraph("3. Ip Info - https://ipinfo.io/".to_string()),
         Element::Paragraph("4. Inspired by the CATS project - https://github.com/GreenScheduler/cats".to_string())
