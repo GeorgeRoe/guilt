@@ -26,7 +26,7 @@ export default defineAppConfig({
     colorMode: false,
     links: [{
       'icon': 'i-simple-icons-github',
-      'to': 'https://github.com/GeorgeRoe/guilt',
+      'to': 'https://github.com/SCD-Energy-Efficiency-Team/guilt',
       'target': '_blank',
       'aria-label': 'GitHub'
     }]
@@ -36,7 +36,7 @@ export default defineAppConfig({
     colorMode: false,
     links: [{
       'icon': 'i-simple-icons-github',
-      'to': 'https://github.com/GeorgeRoe/guilt',
+      'to': 'https://github.com/SCD-Energy-Efficiency-Team/guilt',
       'target': '_blank',
       'aria-label': 'Nuxt UI on GitHub'
     }]
